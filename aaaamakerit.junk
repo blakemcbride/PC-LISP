@@ -1,0 +1,6 @@
+PATH c:\Borland\bcc55\bin;%PATH%
+path
+bcc32
+bcc32 -Ic:\Borland\bcc55\include -g0 -Lc:\Borland\bcc55\lib *.c -eaaa > aaa.log
+pause compile done
+pause
