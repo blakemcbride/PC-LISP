@@ -860,6 +860,7 @@ extern struct conscell   * putprop();
 extern struct conscell   * pairlis();
 extern struct hunkcell   * ListToHunk();
 extern struct conscell   * assoc();
+extern struct conscell   * buREPsopen();
 
   /*** VOID OR SIMPLE FUNCTIONS ***/
 

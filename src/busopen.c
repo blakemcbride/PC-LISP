@@ -174,7 +174,7 @@ static FILE *sopen(addr, port, wait, caddr)
        server.sin_addr.s_addr = addr;                                          /* at the following ethernet address N.N.N.N */
        if (setsockopt(s1,SOL_SOCKET,SO_REUSEADDR,&on,sizeof(on)) < 0) goto er; /* want reuse of the address */
        if (wait != 0) {                                                        /* if timout not 0 seconds we are a passive connection */
-          if ( bind(s1, &server, sizeof(server)) < 0) goto er;                 /* bind the address to the socket */
+	       if ( bind(s1, (struct sockaddr *)&server, sizeof(server)) < 0) goto er;  /* bind the address to the socket */
           if ( listen(s1, 5) < 0 ) goto er;                                    /* say we want to listen for connection */
           if ((wait > 0) || (wait == -1)) {                                    /* if we are to wait 'wait' secs or infinite then... */
               for(;;) {                                                        /* repeat while getting EINTR's */
