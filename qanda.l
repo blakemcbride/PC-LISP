@@ -1186,7 +1186,7 @@
                          (exit)
                 ) fp )                                             t            )
         (  (close fp)                                              t            )
-        (  (zerop (exec "csh -c 'unsetenv CAD_PORT ; cbdslisp go.l' &"))    t   )
+        (  (zerop (exec "bash -c 'unsetenv CAD_PORT ; cbdslisp go.l' &"))    t   )
         (  (portp (setq skt (SOCKETOPEN "*" 31270 60)))            t            )
         (  (and (portp skt) (close skt))                           t            )
         (  (sleep 5)                                               t            )
@@ -1442,8 +1442,8 @@
             (Q&A List#9_Symtabs where tracing)
        	    (cQ&A List#10_BinaryIO where tracing)
        	    (Q&A List#10_BinaryIO where tracing)
-       	    (cQ&A List#11_SocketIO where tracing)
-       	    (Q&A List#11_SocketIO where tracing)
+;       	    (cQ&A List#11_SocketIO where tracing)
+;       	    (Q&A List#11_SocketIO where tracing)
 
             (runArrayTest 127 20)
             (runArrayTest 200 20)
@@ -1476,6 +1476,7 @@
 (patom (memstat)) (terpri)
 (printf "error_count = %d\n" error_count)
 (setq $ldprint nil)
-(exit error_count)
+;(exit error_count)
+(exit)
 
 
