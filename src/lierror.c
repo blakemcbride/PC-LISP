@@ -27,10 +27,10 @@
  ** interpreter to trap errors that occur under its control and to let the **
  ** application take care of the rest.                                     **
  ****************************************************************************/
-static int (*old_sigsegv)() = NULL;
-static int (*old_sigint)()  = NULL;
-static int (*old_sigfpe)()  = NULL;
-static int (*errh)()        = NULL;
+static void (*old_sigsegv)() = NULL;
+static void (*old_sigint)()  = NULL;
+static void (*old_sigfpe)()  = NULL;
+static int  (*errh)()        = NULL;
 
 /****************************************************************************
  ** The general error message function. We throw the error to see if any   **
@@ -73,11 +73,17 @@ static int (*errh)()        = NULL;
  ioerror(p)
  FILE *p;
  {    char buffer[256],*msg;
+#if 0 
       extern int sys_nerr,errno;        /* standard UNIX error message stuff */
       extern char *sys_errlist[];
       if (p == NULL) gerror("I-O after close");
       clearerr(p);
       msg = ((errno > 0)&&(errno <= sys_nerr)) ? sys_errlist[errno] : "";
+#else
+      if (p == NULL) gerror("I-O after close");
+      clearerr(p);
+      msg = strerror(errno);
+#endif
       sprintf(buffer,"I-O error on [%d] %s", fileno(p), msg);
       gerror(buffer);
  }
@@ -170,7 +176,7 @@ static int (*errh)()        = NULL;
  ** mark stack to a reasonable size, you can drop MSSIZE until they are   **
  ** both nearly full at same time.                                        **
  ***************************************************************************/
-int stkovfl(cause)
+void stkovfl(cause)
     int cause;
 {   extern int marking;
 #   if DEBUG
@@ -216,7 +222,7 @@ int stkovfl(cause)
  ** machine/compiler allows trapping this. Only MSC4.0 allows it under    **
  ** MSDOS, most unix'es allow this though.                                **
  ***************************************************************************/
-int fperr(n)
+static void fperr(n)
 int n;
 {   signal(SIGFPE,fperr);
     gerror("floating point exception");
@@ -235,13 +241,18 @@ int n;
  ** and dispatch the non returning function gerror().                     **
  ***************************************************************************/
 int syserror()
-{   char buffer[256];
+{   char buffer[256], *msg;
+#if 0 
     extern int sys_nerr,errno;        /* standard UNIX error message stuff */
     extern char *sys_errlist[];
     if ((errno > sys_nerr)||(errno < 1))
         sprintf(buffer,"apply: system error #%d ?",errno);
     else
         sprintf(buffer,"apply: %s",sys_errlist[errno]);
+#else
+     msg = strerror(errno);
+     sprintf(buffer,"apply: %s",msg);
+#endif
     errno = 0;
     gerror(buffer);
 }
@@ -290,9 +301,9 @@ char *s;
  */
 static struct jb_s {
               jmp_buf env;                /* copy of jump buffer to be restored */
-              int (*segv)();              /* previous segmentation violation handler */
-              int (*fpe)();               /* previous floating point handler */
-              int (*intr)();              /* previous INTERRUPT handler */
+              void (*segv)();             /* previous segmentation violation handler */
+              void (*fpe)();              /* previous floating point handler */
+              void (*intr)();             /* previous INTERRUPT handler */
               struct jb_s *next;          /* pointer to next thing in the stack */
        } *jb_tos = NULL;
 
@@ -378,7 +389,7 @@ static int want_sigfpe   = 1;
     extern int bkhitcount;              /* else it is declared in extra.asm */
 #endif
 
-int brktrap()                                     /* target of SIGINT interrupt */
+static void brktrap()                                     /* target of SIGINT interrupt */
 {
     if (want_sigint)                              /* if currently monitoring them */
        bkhitcount += 1;                           /* increment for later testing*/

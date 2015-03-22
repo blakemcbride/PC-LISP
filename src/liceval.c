@@ -15,6 +15,9 @@
 #include <stdio.h>
 #include "lisp.h"
 
+static bcierror();
+
+
 /*
  | The byte coded interpreters stack/mark stack, we put a guard word at the end
  | and if ever this value changes we know that the stack has been corrupted. We

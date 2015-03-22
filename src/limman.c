@@ -102,7 +102,7 @@
  *************************************************************************/
 initmem()
 {   register int i,bc; register char *m;
-    extern char *calloc(); int diff;
+    int diff;
 
    /*
     | Figure out what are reasonable sizes for the cons,string etc mem

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/../errno.h>   /* trick PLS */
 #include "lisp.h"
 
 /*************************************************************************

@@ -139,8 +139,6 @@ static struct conscell *do_scanf(f, arg1, spec)
        return(nreverse(r));
 }
 
-extern int fscanf();
-
 /*
  |  (val val ..) <- (scanf spec)
  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

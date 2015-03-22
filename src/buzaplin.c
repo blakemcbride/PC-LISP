@@ -13,7 +13,7 @@
  ** done. zapee is set to the port being read. Then when (zapline) is   **
  ** called it can figure out the target port.                           **
  *************************************************************************/
-FILE *zapee = stdin;
+FILE *zapee;
 
 /*************************************************************************
  ** (zapline) will read all characters up to and including a '\n' on the**

@@ -247,7 +247,7 @@ struct hunkcell *busymtadd(form)
 		       pair = new(CONSCELL);               /* allocate () empty list */
 		       pair->carp = k;                     /* make (k) */
 		       pair->cdrp = e;                     /* make it (k.e) */
-		       if (st_add(h,pair) == NULL)         /* add (k.e) to H, if ok ret H else NULL */
+		       if (st_add(h,pair) == 0)            /* add (k.e) to H, if ok ret H else NULL */
 			   h = NULL;
 		       fret(h,1);
 		   }

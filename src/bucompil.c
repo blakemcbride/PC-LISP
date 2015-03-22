@@ -68,6 +68,19 @@
  <16>     ZPUSH    <lit>          | inverse of above, used for unwinding shallow bindings during throw.
 */
 
+static long bu_litref();
+static bu_compile_list();
+static bu_compile_func_args();
+static bu_compile_literal();
+static bu_compile_arg_list();
+static bu_compile_func_list();
+static bu_compile_lambda_body();
+static bu_compile_nlambda_body();
+static bu_compile_lexpr_body();
+static bu_compile_cadr();
+static (*bu_lookup_compile_func())();
+
+
 /*
  | Number of timese user has pressed CONTROL-C (SIGINT) while we are compiling. If
  | ever this goes positive the compiler skips compiling expressions, and just before it
@@ -892,7 +905,6 @@ static bu_compile_func_args(func, args, linenum, funcargs)
        int linenum;
        struct conscell *funcargs;
 {
-       int (*bu_lookup_compile_func())();
        int (*fa)() = bu_lookup_compile_func(func->atom);
        char *call = "CALL";
        if (fa != NULL)

@@ -487,7 +487,7 @@ char *d,*s;
  ******************************************************************************/
  int isalphatoken(s)
  char *s;
- {    int state = 0, token = -1, c, n = 0, strlen();
+ {    int state = 0, token = -1, c, n = 0;
       struct action *actptr;
       char ch, *t = s;
       ch = *t++;

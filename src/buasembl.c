@@ -41,8 +41,7 @@
  | The assembler uses symbol tables to track the location of labels so that jump
  | displacements can be computed.
  */
-extern struct conscell *busymtcreate(), *busymtmember();
-
+extern struct conscell *busymtcreate(), *busymtmember(), *busymtadd();
 /*
  | The table is the instruction table it gives foreach instruction the number
  | of 16 bit arguments that it takes hence the size of any entry is 1+nargs*2

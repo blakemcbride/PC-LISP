@@ -27,9 +27,15 @@ struct conscell *form;
            strcat(buff," ");
            form = form->cdrp;
        }
+#if 1
        mask = sigblock(sigmask(SIGCHLD));
        r = newintop(((long)system(buff)));
        sigsetmask(mask);
+#else   /*  need to update this but not sure how right now.  */
+       mask = sigprocmask(SIG_BLOCK, sigmask(SIGCHLD));
+       r = newintop(((long)system(buff)));
+       sigprocmask(SIG_SETMASK, mask);
+#endif
        return(r);
 }
 

@@ -41,6 +41,11 @@
 #include <stdio.h>
 #include "lisp.h"
 
+static UnZpush();
+static UnProgBody();
+static UnEval();
+static UnwindShallowBindings();
+
 /**************************************************************************
  ** Push an expression on the stack of bindings associated with special  **
  ** atom 'stack'. These expressions are of the form:                     **

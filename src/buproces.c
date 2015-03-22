@@ -11,6 +11,11 @@
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/ioctl.h>
+#ifdef __linux__
+#include <termios.h>
+#include <unistd.h>
+#endif
 #include "lisp.h"
 
 /*************************************************************************
@@ -39,7 +44,9 @@ struct conscell *form;
        char fname[MAXATOMSIZE + 50]; int i, tty, tty2, pid;
        int want_pr = 0, want_pw = 0; char ttybuf[16], ptybuf[16];
        static int first_process = 1;
+#ifndef __linux__
        struct sgttyb sgttyb;
+#endif
 
       /*
        | If no args provided just "exec" the command. Otherwise get the command 'str'
@@ -84,11 +91,13 @@ found:
        | and get their inputs multiplexed. Finally we want to make sure the input/output queues are empty
        | since the last user of the PTY sometimes leaves garbage. (I think this is a bug?).
        */
-#      if ! defined(RS6000)
+#      if ! defined(RS6000)  &&  ! defined(__linux__)
             i = 1; ioctl(tty, TIOCREMOTE, &i);
 #      endif
        i = 1; ioctl(tty, TIOCEXCL,  &i);
+#ifndef __linux__
        i = 0; ioctl(tty, TIOCFLUSH, &i);
+#endif
 
       /*
        | If never called before make sure there is at lease a sigchld handler installed to avoid <defunct>
@@ -108,15 +117,22 @@ found:
        | desired then the stdin comes from /dev/null.
        */
        if ((pid = vfork()) == 0) {
+#ifdef __linux__
+           struct termios ts;
+           tcgetattr(tty2, &ts);
+           ts.c_lflag &= ~ECHO;
+           tcsetattr(tty2, TCSANOW, &ts);
+#else
            ioctl(tty2, TIOCGETP, &sgttyb);
            sgttyb.sg_flags &= ~ECHO;
            sgttyb.sg_flags &= ~CRMOD;
            ioctl(tty2, TIOCSETP, &sgttyb);
+#endif
            dup2(tty2, 0); dup2(tty2, 1); dup2(tty2, 2);
-           if (!want_pw) { dup(open("/dev/null", O_RDWR), 0); }
-           if (!want_pr) { dup(open("/dev/null", O_RDWR), 1); dup(1,2); }
+           if (!want_pw) { dup2(open("/dev/null", O_RDWR), 0); }
+           if (!want_pr) { dup2(open("/dev/null", O_RDWR), 1); dup2(1,2); }
            for(i = getdtablesize(); i > 3; close(--i));
-           execl("/bin/sh", "/bin/sh", "-c", str, 0);
+           execl("/bin/sh", "/bin/sh", "-c", str, NULL);
       cer: perror("*process/child");
            _exit(-4);
        }

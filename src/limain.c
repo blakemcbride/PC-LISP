@@ -809,7 +809,7 @@ mark()
                      if (h && (h->celltype == FIXFIXATOM)) {
                          char *liuffnam(), *s;
                          s = liuffnam(h);
-                         printf("(%s -???-)", s ? s : "?");
+                         printf("(%s -\?\?\?-)", s ? s : "?");
                      } else
                          printlist(stdout,h,DELIM_ON,temp,NULL);
                      temp = h;
@@ -1273,7 +1273,7 @@ int  how; int *counter;
                  break;
             case CLISPCELL:
                  if (counter == NULL)
-                     fprintf(p,"%%L(%x),C(%x)%%",CLISP(l)->literal,CLISP(l)->code);
+			 fprintf(p,"%%L(%lx),C(%lx)%%",(long)CLISP(l)->literal,(long)CLISP(l)->code);
                  else
                      *counter += 20;
                  break;
@@ -1785,7 +1785,8 @@ int liargs(argc, argv)
     main(argc,argv)
     int argc; char *argv[];
     {
-        printf("PC-LISP V5.03 Copyright (C) Peter J.Ashwood-Smith, 1989-1992\n");
+	printf("%s%s%s", "PC-LISP V", VERSION, " Copyright (C) Peter J.Ashwood-Smith, 1989-2015\n");
+        zapee = stdin;
         liargs(argc, argv);
         InitMarkStack();
         initmem();
@@ -1945,7 +1946,7 @@ int liargs(argc, argv)
     */
     void limacro(fn1,fn2)
     char *fn1,*fn2;
-    {   printf("\nPC-LISP V5.03 Copyright (C) Peter J.Ashwood-Smith, 1989-1992\n");
+    {   printf("%s%s%s", "\nPC-LISP V" , VERSION, " Copyright (C) Peter J.Ashwood-Smith, 1989-1992\n");
         printf("Press CONTROL-D to return to PC-LISP application.\n");
         if (fn1 != NULL) {
            if ( reboot_ok() ) {

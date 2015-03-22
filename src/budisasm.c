@@ -51,10 +51,10 @@ char *bu_disassemble_1_inst(fp, ip, literal)
        int kind, n, *cntr, lit, lit2, op = *ip; char *name;
 
        if (!bu_byop_lookup_instruction(op, &name, &n, &kind, &cntr)) {
-           fprintf(fp, "%07d  %-7.7s %-10.10s %03d\n", ip, " ", "***???***", op);
+           fprintf(fp, "%s  %-7.7s %-10.10s %03d\n", ip, " ", "***???***", op);
            return(ip + 1);
        }
-       fprintf(fp, "%07d  %-7.7s %-10.10s  %03d ", ip, " ", name, op);
+       fprintf(fp, "%s  %-7.7s %-10.10s  %03d ", ip, " ", name, op);
        ip += 1;
        if (n > 0) {
            lit = XSHORT(ip);                                             /* they may be relative addresses or literal refs */
@@ -68,7 +68,7 @@ char *bu_disassemble_1_inst(fp, ip, literal)
        }
        switch(kind) {
               case OPK_BRANCH:                                           /* if we know it is a branch compute the target addr */
-                   fprintf(fp,"        ; ADR => %d", ip + lit);          /* and print as a comment */
+                   fprintf(fp,"        ; ADR => %s", ip + lit);          /* and print as a comment */
                    break;
               case OPK_LIT2:
                    if (flatsize(literal[lit2], 200) < 200) {
@@ -154,7 +154,7 @@ struct conscell *budisassemble(form)
            TEST_BREAK();
            ip = bu_disassemble_1_inst(fp, ip, clisp->literal);
        }
-       fprintf(fp, "%07d  %-7.7s %-10.10s  %03d\n\n", ip, label, "RETURN", *ip);
+       fprintf(fp, "%s  %-7.7s %-10.10s  %03d\n\n", ip, label, "RETURN", *ip);
 
       /*
        | Now dump the literal array associated with the above byte code.

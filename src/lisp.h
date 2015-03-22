@@ -1,6 +1,8 @@
 /* EDITION AE07, APFUN PAS.797 (92/03/18 09:49:42) -- CLOSED */                 
 /*  */
 
+#define VERSION  "6.00"
+
 /******************************************************************************
  **                PC-LISP V2.13 (C) 1986 Peter Ashwood-Smith.               **
  **==========================================================================**
@@ -44,7 +46,7 @@
 #      define  IBM_RT_AIX         1
 #   else
 #      undef    BERKELEY_UNIX
-#      define   BERKELEY_UNIX     1
+//#      define   BERKELEY_UNIX     1
 #   endif
 #endif
 
@@ -166,6 +168,39 @@
 #define   HASTCP                  1             /* do we have TCP/IP sockets? */
 #endif
 
+
+#ifdef    __linux__   
+#define   LONGMEMORY              0
+#define   DATALIMITEDTO64K        0             /* stack+data < 64K ? no */
+#define   MARKCHECK               1
+#define   SIGSEGVWORKS            1
+#define   SIGINTWORKS             1
+#define   SIGFPEWORKS             1
+#define   HASFCLOSEALL            1             /* has fcloseall() in stdio */
+#define   HASMATHERRFUNCTION      1
+#define   WANTERRNOTESTING        1             /* check errno after calls */
+#define   GRAPHICSAVAILABLE       0
+#define   NEEDNLAFTERBREAKEXIT    1
+#define   JMP_BUFISARRAY          1             /* typedef jmp_buf is array */
+#define   DIRSEPSTRING           "/"
+#define   DIRSEPCHAR             '/'
+#define   MAXNEGINT             -2147483647L    /* samllest 'int' value */
+
+#ifndef   MAXINT
+#define   MAXINT                 2147483647L    /* largest 'int' value */
+#endif
+
+#define   MAXRANDVALUE           MAXINT         /* largest rand() value */
+
+#ifndef   MAXLONG
+#define   MAXLONG                2147483647L    /* biggest 'long' value */
+#endif
+
+#define   MINLONG               -2147483647L    /* smallest 'long' value */
+#define   RE_COMP                 1             /* RE_COMP vs REGCMP selection */
+#define   HASTCP                  0             /* do we have TCP/IP sockets? Although Linux does, the TCP code is outdated.  Disable for now. */
+#endif
+
 /************************************************************************
  ** University of California Berkeley UNIX. (All versions ?) No idea of**
  ** memory models. The Mark stack is checked for overflow because we   **
@@ -244,6 +279,9 @@
 
 /* -------------------- END OF MACHINE CONFIGURATIONS ------------------------*/
 
+#include  <string.h>
+#include  <stdlib.h>
+#include  <errno.h>
 #include  <setjmp.h>                              /* longjmp is used to escape*/
 
 #if       LONGMEMORY                              /* if long memory model we  */
@@ -255,6 +293,8 @@
 #define   max(a,b)      (((a)>(b))?(a):(b))       /* always define max and */
 #define   min(a,b)      (((a)<(b))?(a):(b))       /* min. */
 #endif
+
+void stkovfl();
 
 /*
  | These are the mark stack and memory manager block sizes. We must be
@@ -815,6 +855,10 @@ extern struct conscell   * reverse();               /* top level reverse     */
 extern struct conscell   * ReadExpression();        /* read S expr from port */
 extern struct conscell   * takenewlist();           /* used by 'input'       */
 extern struct conscell   * topcopy();               /* make top level copy   */
+extern struct conscell   * putprop();
+extern struct conscell   * pairlis();
+extern struct hunkcell   * ListToHunk();
+extern struct conscell   * assoc();
 
   /*** VOID OR SIMPLE FUNCTIONS ***/
 
@@ -828,14 +872,14 @@ extern         ierror();
 extern         initeval(),initmem();
 extern         mark();
 extern void *  malloc();
-extern int     memorystatus();
+extern long int     memorystatus();
 extern         printlist();
 extern         ResetTrace();
 extern         SetOption();
 extern int     scan();
 extern         serror();
 extern int     strcmp();
-extern         strcpy();
+extern char *  strcpy();
 extern int     liargc;
 extern char  **liargv;
 extern int     lillev;                    /* lexical level for (go..) validation */

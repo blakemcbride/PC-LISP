@@ -46,6 +46,9 @@ struct conscell *form;
            if (port->celltype == FILECELL) {                        /* if argument is a port */
                fp = port->atom;                                     /* extract FILE * from atom */
                if (fp == NULL) ioerror(fp);                         /* a null 'atom' indicates file closed */
+#ifdef __linux__  /* _cnt & _flag are no longer available; this code will have to be updated  */
+	       return(LIST(port));
+#else
                if ((fp->_cnt > 0) && (fp->_flag & _IOREAD))         /* a read only port with data pending causes an immediate return */
                     return(LIST(port));                             /* of that port */
                if (fp->_flag & (_IOREAD | _IORW))                   /* if a read or read/write port add to set to check for read */
@@ -53,6 +56,7 @@ struct conscell *form;
                if (fp->_flag & _IOWRT)                              /* if a pure write only port */
                     FD_SET(fileno(fp), &wfdset);                    /* add the file # of this FILE * to set to check for write */
                if (fileno(fp) > maxfd) maxfd = fileno(fp);          /* also track largest file # seen so far for select call */
+#endif
            } else {
                double timeout; long secs;                           /* argument not a port, must be the optional timeout */
                if (!GetFloat(port, &timeout)) goto er;              /* try to get a float from this argument */

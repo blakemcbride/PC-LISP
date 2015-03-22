@@ -20,6 +20,10 @@
 #   define ntohl(x) x
 #endif
 
+static r_bwrite();
+static struct conscell *r_bread();
+
+
 /*
  | libio.c - LISP binary input and output routines
  | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -163,7 +167,7 @@ typedef struct sink_s {
 #define          REARMC  256     /* rearm timer every 256 calls to r_bread or r_bwrite */
 
 #if defined(SIGALRM)
-    static int s_alarm(op, sink)
+    static void s_alarm(op, sink)
          int op; SINK *sink;
     {
          static SINK *s_sink;
@@ -345,11 +349,14 @@ er:  longjmp(sink->erh, 1);
  */
 static struct conscell *getport(sink)
      SINK *sink;
-{    FILE *fd; char *fname = tmpnam(NULL);
+{    FILE *fd;
+     char fname[20];
      long size = getlong(sink);
+     strcpy(fname, "tmpXXXXXX");
+     int fn = mkstemp(fname);
      errno = 0;                                          /* tmpname leaves errno non zero */
-     if ((size < 0)||(fname == NULL)) goto er;
-     fd = fopen(fname,"w+");
+     if (size < 0) goto er;
+     fd = fdopen(fn,"w+");
      if (fd == NULL) goto er;
      while(--size >= 0) {
         if (((size % REARMC) == 0)&&(sink->timeout > 0)) /* rearm timer periodically as long as we */

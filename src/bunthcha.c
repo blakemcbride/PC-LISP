@@ -15,7 +15,7 @@
  *************************************************************************/
 struct conscell *bunthchar(form)
 struct conscell *form;
-{      char *atparm; long int ixparm; char temp[2]; extern int strlen();
+{      char *atparm; long int ixparm; char temp[2];
        if ((form != NULL)&&(GetString(form->carp,&atparm)))
        {  form = form->cdrp;
           if (form != NULL)
