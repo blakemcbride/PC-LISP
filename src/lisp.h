@@ -169,7 +169,8 @@
 #endif
 
 
-#ifdef    __linux__   
+#ifdef    __linux__
+#include <limits.h>
 #define   LONGMEMORY              0
 #define   DATALIMITEDTO64K        0             /* stack+data < 64K ? no */
 #define   MARKCHECK               1
@@ -184,19 +185,19 @@
 #define   JMP_BUFISARRAY          1             /* typedef jmp_buf is array */
 #define   DIRSEPSTRING           "/"
 #define   DIRSEPCHAR             '/'
-#define   MAXNEGINT             -2147483647L    /* samllest 'int' value */
+#define   MAXNEGINT             (long)INT_MIN    /* samllest 'int' value */
 
 #ifndef   MAXINT
-#define   MAXINT                 2147483647L    /* largest 'int' value */
+#define   MAXINT                 (long)INT_MAX    /* largest 'int' value */
 #endif
 
 #define   MAXRANDVALUE           MAXINT         /* largest rand() value */
 
 #ifndef   MAXLONG
-#define   MAXLONG                2147483647L    /* biggest 'long' value */
+#define   MAXLONG                LONG_MAX    /* biggest 'long' value */
 #endif
 
-#define   MINLONG               -2147483647L    /* smallest 'long' value */
+#define   MINLONG                LONG_MIN    /* smallest 'long' value */
 #define   RE_COMP                 1             /* RE_COMP vs REGCMP selection */
 #define   HASTCP                  0             /* do we have TCP/IP sockets? Although Linux does, the TCP code is outdated.  Disable for now. */
 #endif
