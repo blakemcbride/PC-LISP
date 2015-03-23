@@ -529,6 +529,6 @@ ret:   form = new(CONSCELL);
 
     void busopen()     { printf("TCP/IP not supported on this platform\n"); exit(-1); }
     void busopenP()    { busopen(); }
-    void buREPsopen()  { busopen(); }
+    struct conscell *buREPsopen() { return NULL; }
 
 #endif
