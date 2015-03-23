@@ -1,4 +1,3 @@
-/* EDITION AE07, APFUN PAS.797 (92/03/18 09:49:42) -- CLOSED */                 
 /*  */
 
 #define VERSION  "6.00"

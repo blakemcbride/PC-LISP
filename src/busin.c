@@ -1,5 +1,4 @@
-/* EDITION AB01, APFUN MR.68 (90/04/18 09:24:00) -- CLOSED */                   
-/* --- */
+
 
 /*
  | PC-LISP (C) 1984-1989 Peter J.Ashwood-Smith

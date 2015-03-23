@@ -1,5 +1,4 @@
-/* EDITION AB05, APFUN PAS.820 (92/04/16 16:14:28) -- CLOSED */                 
-/* --- */
+
 
 /*************************************************************************
  ** (socketopen ...) -> port will open a socket and return it as a port **

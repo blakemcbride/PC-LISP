@@ -1,4 +1,3 @@
-/* EDITION AB01, APFUN PAS.765 (91/12/10 16:57:44) -- CLOSED */                 
 /* */
 #define _NO_PROTO
 #include <stdio.h>

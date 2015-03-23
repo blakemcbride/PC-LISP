@@ -1,4 +1,3 @@
-/* EDITION AC01, APFUN MARC.1 (92/08/26 15:15:52) -- CLOSED */                  
 /* */
 /*
  | PC-LISP (C) 1984-1990 Peter J.Ashwood-Smith

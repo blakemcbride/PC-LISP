@@ -1,4 +1,3 @@
-/* EDITION AB01, APFUN MR.68 (90/04/18 09:23:28) -- CLOSED */                   
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -1,4 +1,3 @@
-/* EDITION AB01, APFUN PAS.765 (91/12/10 16:57:46) -- CLOSED */                 
 
 /*
  | PC-LISP

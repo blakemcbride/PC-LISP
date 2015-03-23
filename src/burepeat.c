@@ -1,4 +1,3 @@
-/* EDITION AC02, APFUN PAS.821 (92/04/23 15:06:42) -- CLOSED */                 
 #include        <stdio.h>
 #include        <ctype.h>
 #include        "lisp.h"

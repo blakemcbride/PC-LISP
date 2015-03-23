@@ -1,4 +1,3 @@
-; EDITION AD16, APFUN PAS.832 (92/05/15 14:29:56) -- CLOSED                     
 ;;
 ;;(C) Copyright Peter J.Ashwood-Smith 1981, 1991
 ;; Q&A.L - quality assurance tests

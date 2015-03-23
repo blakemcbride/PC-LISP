@@ -1,4 +1,3 @@
-/* EDITION AE04, APFUN PAS.821 (92/04/23 15:06:44) -- CLOSED */                 
 /* */
 #include <stdio.h>
 #include <signal.h>

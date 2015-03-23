@@ -1,4 +1,3 @@
-/* EDITION AA02, APFUN PAS.633 (90/05/14 07:37:02) -- CLOSED */                 
 /* */
 /*
  | PC-LISP

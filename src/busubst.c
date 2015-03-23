@@ -1,4 +1,3 @@
-/* EDITION AB01, APFUN MR.68 (90/04/18 09:24:04) -- CLOSED */                   
 #include        <stdio.h>
 #include        <ctype.h>
 #include        "lisp.h"

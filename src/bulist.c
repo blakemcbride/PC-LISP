@@ -1,5 +1,4 @@
-/* EDITION AB02, APFUN PAS.665 (90/11/23 09:34:20) -- CLOSED */                 
-/* --- */
+
 
 /*
  | PC-LISP (C) 1984-1989 Peter J.Ashwood-Smith

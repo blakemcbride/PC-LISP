@@ -1,4 +1,3 @@
-/* EDITION AA01, APFUN PAS.805 (92/03/31 17:04:34) -- CLOSED */                 
 /* -- */
 
 /*

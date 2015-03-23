@@ -1,4 +1,3 @@
-/* EDITION AB01, APFUN MR.68 (90/04/18 09:23:54) -- CLOSED */                   
 #include        <stdio.h>
 #include        <math.h>
 #if RTPC
