@@ -19,7 +19,7 @@
 #   define ntohl(x) x
 #endif
 
-static r_bwrite();
+static void r_bwrite();
 static struct conscell *r_bread();
 
 
@@ -227,7 +227,7 @@ typedef struct sink_s {
  | were before doing the copy. We rearm the timout value (if it applies to
  | this sink) every 512 bytes.
  */
-static putport(fp, sink)
+static void putport(fp, sink)
      FILE *fp; SINK *sink;
 {    long opos, size;
      if (fp == NULL) goto er;                             /* if closed goto error */
@@ -419,7 +419,7 @@ er:  if (code) free(code);                                                 /* er
  | Recursively output the expression 'e' in binary format to the port or
  | socket fp, this is the exact inverse of the r_bread routine below.
  */
-static r_bwrite(e, sink)
+static void r_bwrite(e, sink)
      struct conscell *e;
      SINK *sink;
 {

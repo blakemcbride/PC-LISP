@@ -40,10 +40,10 @@
 #include <stdio.h>
 #include "lisp.h"
 
-static UnZpush();
-static UnProgBody();
-static UnEval();
-static UnwindShallowBindings();
+static void UnZpush();
+static void UnProgBody();
+static void UnEval();
+static void UnwindShallowBindings();
 
 /**************************************************************************
  ** Push an expression on the stack of bindings associated with special  **
@@ -290,7 +290,7 @@ struct conscell *form;
  ** set this value to NULL or not accordingly to indicate if it wants the**
  ** error to be printed or not.                                          **
  **************************************************************************/
-ThrowError(s)
+void ThrowError(s)
 char *s;
 {      struct conscell *elem;
        jmp_buf *receiver;
@@ -344,7 +344,7 @@ char *s;
  ** evaled before they are called. However, macro,nlambda and progs are  **
  ** still unevaled because they do not eval their args before binding.   **
  **************************************************************************/
-static UnwindShallowBindings(f,t)
+static void UnwindShallowBindings(f,t)
 int f,t;
 {   int i,IsArg;
     struct conscell *last,*curr,*temp;
@@ -406,7 +406,7 @@ er: fatalerror("UnwindShallowBindings");
  ** following of the binding chain may continue infinitely if something  **
  ** is wrong. To allow for this case a TEST_BREAK is placed in the loop. **
  **************************************************************************/
-static UnEval(l,IsArg)
+static void UnEval(l,IsArg)
 struct conscell *l; int IsArg;
 {    struct conscell *car,*cdr;
      car = l->carp;
@@ -471,7 +471,7 @@ ERR: fatalerror("UnEval");
  ** so we unbind the symbol. If an element is not an ALPHAATOM it is an  **
  ** expression that was evaluated so we skip it.                         **
  **************************************************************************/
-static UnProgBody(l)
+static void UnProgBody(l)
 struct conscell *l;
 {   while(l != NULL) {
          if ((l->carp != NULL)&&(l->carp->celltype == ALPHAATOM))
@@ -489,7 +489,7 @@ struct conscell *l;
  ** decode forwards until we find something that is not a SPUSH* instr.  **
  ** each time we pop the SPUSH'ed <literal>'s atom's shallow stack by 1. **
  **************************************************************************/
-static UnZpush(literal_p, literal)
+static void UnZpush(literal_p, literal)
 struct conscell **literal_p; struct fixfixcell *literal;
 {
        register char *ip; register int tmp;

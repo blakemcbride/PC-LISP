@@ -63,6 +63,8 @@
  static int cellthresh = 25;                          /* percentage free cells */
  static int atomthresh = 25;                          /* percentage free atoms */
 
+static void CompactHeapBlock();
+
 /*************************************************************************
  ** figure out size of cell and size of block. The size of the cell is  **
  ** the size of the largest of the cons,real,fix,string and file cells. **
@@ -99,7 +101,7 @@
  ** necessary when garbage collection fails to reclaim enough storage.  **
  ** Once allocated we loop through setting up the free lists.           **
  *************************************************************************/
-initmem()
+void initmem()
 {   register int i,bc; register char *m;
     int diff;
 
@@ -815,7 +817,7 @@ gotit:  CurrentBlock = i;
  ** pointer to it that it is being relocated backward by 'z-y' bytes. The **
  ** only place where pointers to the heap occur is in the atom fields.    **
  ***************************************************************************/
- CompactHeapBlock(b)
+static void CompactHeapBlock(b)
  struct HeapControl *b;
  {      register char *x,*y,*z,*end;
         hccount += 1;
@@ -879,7 +881,7 @@ unmark()
  ** we allocate another block right away in anticipation. This speeds up  **
  ** things a great deal.                                                  **
  ***************************************************************************/
-gather(cgot,agot)
+int gather(cgot,agot)
       long int *cgot,*agot;
 {     register char *r,*memend; register int i;
       register int gotcount;

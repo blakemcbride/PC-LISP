@@ -19,6 +19,8 @@
 #include <math.h>
 #include "lisp.h"
 
+extern void ThrowError();
+
 /****************************************************************************
  ** These are the old signal handlers. When initerrors is called we store  **
  ** the old settings here and when deiniterros is called we restore them.  **
@@ -53,7 +55,7 @@ static int  (*errh)()        = NULL;
  ** ierror(s) : interpreter error while evaluating function whose name is  **
  ** stored in 's'. format the message and call the general error routine.  **
  ****************************************************************************/
- ierror(s)
+ void ierror(s)
  char *s;
  {    char buffer[256];
       sprintf(buffer,"error evaluating built in function [%s]",s);
@@ -69,7 +71,7 @@ static int  (*errh)()        = NULL;
  ** the file number in with it. If the errno is non zero and legal, we put **
  ** this message after the generic message. It may help the user.          **
  ****************************************************************************/
- ioerror(p)
+ void ioerror(p)
  FILE *p;
  {    char buffer[256],*msg;
 #if 0 
@@ -130,7 +132,7 @@ static int  (*errh)()        = NULL;
  ** to see if anyone will catch it, if not the ThrowError returns and we   **
  ** continue processing the error.                                         **
  ****************************************************************************/
- serror(l,s1,s2,num2)
+ void serror(l,s1,s2,num2)
  struct conscell *l; char *s1,*s2; int num2;
 {    char buffer[MAXATOMSIZE + 256]; char anum[32];
      HoldStackOperation(COPY_STACK);

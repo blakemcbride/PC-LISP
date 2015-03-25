@@ -68,15 +68,15 @@
 */
 
 static long bu_litref();
-static bu_compile_list();
-static bu_compile_func_args();
-static bu_compile_literal();
-static bu_compile_arg_list();
-static bu_compile_func_list();
-static bu_compile_lambda_body();
-static bu_compile_nlambda_body();
-static bu_compile_lexpr_body();
-static bu_compile_cadr();
+static void bu_compile_list();
+static void bu_compile_func_args();
+static void bu_compile_literal();
+static int  bu_compile_arg_list();
+static void bu_compile_func_list();
+static void bu_compile_lambda_body();
+static void bu_compile_nlambda_body();
+static void bu_compile_lexpr_body();
+static void bu_compile_cadr();
 static (*bu_lookup_compile_func())();
 
 
@@ -361,7 +361,7 @@ static int return_called()
  | If no args are provided we must return NIL from expression being compiled
  | otherwise the argument has already been compiled.
  */
-static bu_compile_return(args)
+static void bu_compile_return(args)
        struct conscell *args;
 {      int *top; int label;
        if (return_stack_free >= MAX_RETURN_STACK) goto er;
@@ -540,7 +540,7 @@ static struct conscell *bu_declare(symbol, type, linenum)
        struct conscell *symbol, *type; int linenum;
 {
        struct conscell *typel;
-       if ((symbol == NULL)||(symbol->celltype != ALPHAATOM)) return;
+       if ((symbol == NULL)||(symbol->celltype != ALPHAATOM)) return NULL;
        xpush(symbol);
        xpush(type);
        typel = bu_declare_symbol(symbol, linenum);
@@ -735,7 +735,7 @@ static struct conscell *bu_fold_constant_expr(l)
  | a sub function, for fixnums and flonums we generate code to push the fixnum
  | or flonum on the stack respectively.
  */
-static bu_compile_expr(l)
+static void bu_compile_expr(l)
        struct conscell *l;
 {
        struct conscell cc;
@@ -837,7 +837,7 @@ cleanup:
  | the special case of a macro by first expanding the macro and then compiling
  | the resulting expression.
  */
-static bu_compile_list(l)
+static void bu_compile_list(l)
        struct conscell *l;
 {
        struct conscell *func;
@@ -898,7 +898,7 @@ er2:   cerror("(t ..): t is not a function", l);
  | of arguments. When a call is made to type nlambda the arguments become one
  | big literal which is pushed and a call is made with one argument.
  */
-static bu_compile_func_args(func, args, linenum, funcargs)
+static void bu_compile_func_args(func, args, linenum, funcargs)
        struct alphacell *func;
        struct conscell *args;
        int linenum;
@@ -963,7 +963,7 @@ er1:   cerror("dotted pair not allowed as arg to nlambda", args);
  | a literal on the stack. Each unique literal is referenced by a number so we
  | generate PUSHL <n> where <n> is the literals reference.
  */
-static bu_compile_literal(lit)
+static void bu_compile_literal(lit)
        struct conscell *lit;
 {
        long litref;
@@ -988,7 +988,7 @@ er:    cerror("literal: a literal is required but not found", lit);
  | with N arguments pushed on it. This function will return the number of
  | arguments on the stack so that the caller can use it for reference.
  */
-static bu_compile_arg_list(l)
+static int bu_compile_arg_list(l)
        struct conscell *l;
 {
        int n = 0;
@@ -1017,7 +1017,7 @@ static bu_compile_arg_list(l)
  | are not processed in the bodies and when a simple atom will compile to a
  | push of its value.
  */
-static bu_compile_bodies(l)
+static void bu_compile_bodies(l)
        struct conscell *l;
 {
        if (l == NULL) { EMIT1ATM("PUSHNIL"); EMITEND(); }
@@ -1051,7 +1051,7 @@ er:    cerror("list of statements: may not contain a dotted pair", l);
  | scope level or the go is not allowed, ie we do not allow (go)'s outside or
  | into another list of bodies.
  */
-static bu_compile_prog_bodies(bods)
+static void bu_compile_prog_bodies(bods)
        struct conscell *bods;
 {
        struct conscell *e,*l,*scope; long label;
@@ -1115,7 +1115,7 @@ er:    cerror("prog: bodies may not contain dotted pair", bods);
  |                                                POP
  |                                                ...
  */
-static bu_compile_cond(args)
+static void bu_compile_cond(args)
        struct conscell *args;
 {
        int special, elt_exit, cond_exit = NEWLABEL()
@@ -1166,7 +1166,7 @@ er3:   cerror("(cond ... ?? ...): non list case not permitted", args);
  |                                                SPOP y
  |
  */
-static bu_compile_disembodied_lambda(func, args)
+static void bu_compile_disembodied_lambda(func, args)
        struct conscell *func, *args;
 {
        int nfargs, naargs;
@@ -1224,7 +1224,7 @@ er3:   cerror("( (lambda(nil/t/etc.) ) arg1 arg2 ..): invalid formal argument", 
  |                                                ZPOP
  |                                                SPOP <l>
  */
-static bu_compile_disembodied_nlambda(func, args)
+static void bu_compile_disembodied_nlambda(func, args)
        struct conscell *func, *args;
 {
        int naargs = 0;
@@ -1286,7 +1286,7 @@ er3:   cerror("( (nlambda(nil/t/etc.) ) arg1 arg2 ..): invalid formal argument",
  | unusual form into an (apply <clisp> (arg1 ... argN)) and simply call the bucompile
  | function recursively to produce the <clisp> literal for the lexpr form.
  */
-static bu_compile_disembodied_lexpr(func, args)
+static void bu_compile_disembodied_lexpr(func, args)
        struct conscell *func, *args;
 {
        int naargs; struct conscell c1, *clisp;
@@ -1311,7 +1311,7 @@ er1:   cerror("( (lexpr) arg1 arg2 ..): badly formed lexpr being applied", func)
  | i.e. ( (lambda (x y) (+ x y))  10 20)
  |      ( (nlambda(l) ...) )
  */
-static bu_compile_func_list(func, args)
+static void bu_compile_func_list(func, args)
        struct conscell *func, *args;
 {
        struct alphacell *at = ALPHA(func->carp);
@@ -1341,7 +1341,7 @@ er:    cerror("not a valid disembodied function type", func);
  |                                                SPOP <lit>
  |                                                SPOP <lit>
  */
-static bu_compile_lambda_body(args)
+static void bu_compile_lambda_body(args)
        struct conscell *args;
 {
        struct conscell *l = args;
@@ -1379,7 +1379,7 @@ er2:   cerror("(lambda()..): t cannot be rebound by using as formal argument", l
  | )                                              .. body ..
  |                                                SPOP <lit>
  */
-static bu_compile_nlambda_body(args)
+static void bu_compile_nlambda_body(args)
        struct conscell *args;
 {
        struct conscell *l = args;
@@ -1418,7 +1418,7 @@ er2:   cerror("(nlambda()..): t cannot be rebound by using as formal argument", 
  |                                                SPOP      _N_    ; pop the binding of _N_ and return top of stack
  |  )
  */
-static bu_compile_lexpr_body(args)
+static void bu_compile_lexpr_body(args)
        struct conscell *args;
 {
        struct conscell *l = args;
@@ -1457,7 +1457,7 @@ er2:   cerror("(lexpr()..): t cannot be rebound by using as formal argument", l)
  |                                                PUSHFIX 20
  |                                                SETQ b
  */
-static bu_compile_setq(args)
+static void bu_compile_setq(args)
        struct conscell *args;
 {
        struct conscell *var;
@@ -1508,7 +1508,7 @@ er4:   cerror("setq: nil may not be rebound", args);
  |                   L2:      POP               ; pop the null list on stack
  |                            SPOP a            ; unwind scope of a and exit with return value
  */
-static bu_compile_foreach(args)
+static void bu_compile_foreach(args)
        struct conscell *args;
 {
        struct conscell *lvar;
@@ -1576,7 +1576,7 @@ er5:   cerror("foreach: badly structured, requires a 2nd argument", args);
  |                   L2:
  |
  */
-static bu_compile_while(args)
+static void bu_compile_while(args)
        struct conscell *args;
 {
        int elt_top  = NEWLABEL()
@@ -1615,7 +1615,7 @@ er:    cerror("while: wrong # of args", args);
  |                                                SPOP b
  |
  */
-static bu_compile_prog(args)
+static void bu_compile_prog(args)
        struct conscell *args;
 {
        int elt_retn = NEWLABEL()
@@ -1668,7 +1668,7 @@ er5:   cerror("prog: second argument must be a list of atoms", s);
  | in a file and is only there so that the error handling mechanisms
  | of liszt.l can figure out which file the source came from.
  */
-static bu_compile_file_prog(args)
+static void bu_compile_file_prog(args)
        struct conscell *args;
 {
        if (args == NULL) goto er1;
@@ -1694,7 +1694,7 @@ er1:   cerror("$file-prog$: wrong # of args", args);
  |                   L3:      STORR -2          ; return target if called
  |                   L2:      POP               ; pop the loop count exposing return value
  */
-static bu_compile_repeat(args)
+static void bu_compile_repeat(args)
        struct conscell *args;
 {
        int elt_top  = NEWLABEL()
@@ -1733,7 +1733,7 @@ er1:   cerror("repeat: wrong # of args", args);
  |                                  PUSHFIX 20
  |                                  PUSHFIX 10
  */
-static bu_compile_parsetq_values(args)
+static void bu_compile_parsetq_values(args)
        struct conscell *args;
 {
        if (args == NULL) return;
@@ -1754,7 +1754,7 @@ static bu_compile_parsetq_values(args)
  |                                  POP
  |                                  SETQ c
  */
-static bu_compile_parsetq(args)
+static void bu_compile_parsetq(args)
        struct conscell *args;
 {
        struct conscell *var;
@@ -1811,7 +1811,7 @@ er4:   cerror("PAR-setq/do: t may not be rebound", args);
  |                              L1: PUSHNIL
  |                              L2:
  */
-static bu_compile_and(args)
+static void bu_compile_and(args)
        struct conscell *args;
 {
        struct conscell *cdrp;
@@ -1854,7 +1854,7 @@ static bu_compile_and(args)
  |                                  JNNIL l1:
  |                              L1:
  */
-static bu_compile_or(args)
+static void bu_compile_or(args)
        struct conscell *args;
 {
        struct conscell *cdrp;
@@ -1907,7 +1907,7 @@ static bu_compile_or(args)
  | NOTE: a special case occurs when there is no (t <body>) default case. When this occurs
  | we generate a default case of (t nil).
  */
-static bu_compile_caseq(aargs)
+static void bu_compile_caseq(aargs)
        struct conscell *aargs;
 {
        int i, has_t_case, nbod, origLabel;
@@ -1984,7 +1984,7 @@ er5:   cerror("caseq: dotted pair not allowed in tag list", lits);
  |                                  CDR
  |                                  CAR
  */
-static bu_compile_cadr(name, args)
+static void bu_compile_cadr(name, args)
        char *name;
        struct conscell *args;
 {      char *s; char msg[50];
@@ -2013,7 +2013,7 @@ er:    if (n + 20 >= sizeof(msg)) name = "c{a|d}+r";
  | corresponds to the user label. See the compile_prog_bodies code for more
  | details.
  */
-static bu_compile_go(args)
+static void bu_compile_go(args)
        struct conscell *args;
 {
        struct alphacell *label; long scope;
@@ -2037,7 +2037,7 @@ er3:   cerror("go: target out of scope of closest enclosing prog, while, foreach
  | Compile (car <expr>)
  | ~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_car(args)
+static void bu_compile_car(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2051,7 +2051,7 @@ er:    cerror("car: wrong # of args", args);
  | Compile (cdr <expr>)
  | ~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_cdr(args)
+static void bu_compile_cdr(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2065,7 +2065,7 @@ er:    cerror("cdr: wrong # of args", args);
  | Compile (cons <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_cons(args)
+static void bu_compile_cons(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2079,7 +2079,7 @@ er:    cerror("cons: wrong # of args", args);
  | Compile (eq <expr> <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_eq(args)
+static void bu_compile_eq(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2093,7 +2093,7 @@ er:    cerror("eq: wrong # of args", args);
  | Compile (zerop <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_zerop(args)
+static void bu_compile_zerop(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2107,7 +2107,7 @@ er:    cerror("zerop: wrong # of args", args);
  | Compile (1+ <expr>)
  | ~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_inc(args)
+static void bu_compile_inc(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2121,7 +2121,7 @@ er:    cerror("1+: wrong # of args", args);
  | Compile (length <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_length(args)
+static void bu_compile_length(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2135,7 +2135,7 @@ er:    cerror("length: wrong # of args", args);
  | Compile (1- <expr>)
  | ~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_dec(args)
+static void bu_compile_dec(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2149,7 +2149,7 @@ er:    cerror("1-: wrong # of args", args);
  | Compile (null <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_null(args)
+static void bu_compile_null(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2163,7 +2163,7 @@ er:    cerror("null: wrong # of args", args);
  | Compile (not <expr>)
  | ~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_not(args)
+static void bu_compile_not(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2177,7 +2177,7 @@ er:    cerror("not: wrong # of args", args);
  | Compile (listp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_listp(args)
+static void bu_compile_listp(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2191,7 +2191,7 @@ er:    cerror("listp: wrong # of args", args);
  | Compile (fixp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_fixp(args)
+static void bu_compile_fixp(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2205,7 +2205,7 @@ er:    cerror("fixp: wrong # of args", args);
  | Compile (hunkp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_hunkp(args)
+static void bu_compile_hunkp(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2219,7 +2219,7 @@ er:    cerror("hunkp: wrong # of args", args);
  | Compile (atom <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_atomp(args)
+static void bu_compile_atomp(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2233,7 +2233,7 @@ er:    cerror("atom: wrong # of args", args);
  | Compile (numbp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_numbp(args)
+static void bu_compile_numbp(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2247,7 +2247,7 @@ er:    cerror("numbp: wrong # of args", args);
  | Compile (floatp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_floatp(args)
+static void bu_compile_floatp(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2261,7 +2261,7 @@ er:    cerror("floatp: wrong # of args", args);
  | Compile (stringp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_stringp(args)
+static void bu_compile_stringp(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2275,7 +2275,7 @@ er:    cerror("stringp: wrong # of args", args);
  | Compile (arg <expr>)
  | ~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_arg(args)
+static void bu_compile_arg(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2289,7 +2289,7 @@ er:    cerror("arg: wrong # of args", args);
  | Compile (arg? <expr> <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_argQ(args)
+static void bu_compile_argQ(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2303,7 +2303,7 @@ er:    cerror("arg?: wrong # of args", args);
  | Compile (listify <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_listify(args)
+static void bu_compile_listify(args)
        struct conscell *args;
 {
        int n = bu_compile_arg_list(args);
@@ -2317,7 +2317,7 @@ er:    cerror("listify: wrong # of args", args);
  | Compile (quote <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static bu_compile_quote(args)
+static void bu_compile_quote(args)
        struct conscell *args;
 {
        if (!args || args->cdrp) goto er;
@@ -2338,7 +2338,7 @@ er:    cerror("quote: wrong # of args", args);
  |     <expr2>                                CALL 1, <errset>|<catch>
  |     CALL 2, <errset>|<catch>
  */
-static bu_compile_errset_or_catch(args, self)
+static void bu_compile_errset_or_catch(args, self)
        struct conscell  *args;
        struct alphacell *self;
 {
@@ -2379,7 +2379,7 @@ er:    cerror("errset/catch: wrong # of args", args);
  |     PUSHL <compiled_expr_literal>
  |     CALL 1, <time-eval>
  */
-static bu_compile_time_eval(args, self)
+static void bu_compile_time_eval(args, self)
        struct conscell  *args;
        struct alphacell *self;
 {
@@ -2408,7 +2408,7 @@ er:    cerror("time-eval: wrong # of args", args);
  | an error will generate the appropriate errors. If a nocompile call then we call
  | the declare_nocompile to set the appropriate flags in the symbol table.
  */
-static bu_compile_declare(args, self)
+static void bu_compile_declare(args, self)
        struct conscell  *args;
        struct alphacell *self;
 {      struct conscell  *arg, *type, *symbol;
@@ -2445,7 +2445,7 @@ er3:   cerror("declare: expecting an atom found", symbol);
  | atom. We must save the original body first though so that we can
  | restore it later.
  */
-static bu_compile_defun(args, self)
+static void bu_compile_defun(args, self)
        struct conscell *args, *self;
 {
        struct conscell c1, c2, *form, *func_hold;
@@ -2531,7 +2531,7 @@ er2:   cerror("defun: first argument must be an atom", args);
  | time but at the same time we interpret it now so that the macro is
  | properly defined for compile time expansion.
  */
-static bu_compile_defmacro(args, self)
+static void bu_compile_defmacro(args, self)
        struct conscell *args, *self;
 {
        struct alphacell *atm;

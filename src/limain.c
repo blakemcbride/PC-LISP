@@ -432,7 +432,7 @@ struct hunkcell *h; int i;
  ** construction of an array and a possible GC during the construction,  **
  ** we must therefore test this or we very occasionally get a crash.     **
  **************************************************************************/
-markhunk(h)
+static void markhunk(h)
 struct hunkcell *h;
 {      register int basesize,i;
        if (h == NULL) return;
@@ -482,7 +482,7 @@ struct conscell **l;
  ** reaches a non set travbit it jumps to the 'right' code to handle the    **
  ** unvisited right subtree. etc. etc. etc.                                 **
  *****************************************************************************/
-marklist(pres)
+void marklist(pres)
 struct conscell *pres;
 {      register struct conscell *prev,*next;
        if (pres == NULL) return;
@@ -547,7 +547,7 @@ up:    if (prev == NULL) return;               /* backup up the tree using */
  ** require marking. Atoms with property must also not be lost and the   **
  ** property and values of such atoms should not be lost either.         **
  **************************************************************************/
-mark()
+void mark()
 {      int i; struct conscell *l; struct alphacell *c;
        markstack();
        markclisp();
@@ -588,7 +588,7 @@ mark()
  ** bound to nil. If &aux is found the following variables are not passed  **
  ** parameters but local variables which are to be bound to nil.           **
  ****************************************************************************/
- pushvariables(vars,vals)
+ void pushvariables(vars,vals)
  struct conscell *vars,*vals;
  {      struct alphacell *at; struct conscell *temp;
         while((vars != NULL)&&(vals != NULL))
@@ -618,7 +618,7 @@ mark()
  ** passed in 'atom'. This saves us looking up something that we already   **
  ** have direct access to.                                                 **
  ****************************************************************************/
- funcinstall(type,body,name,at)
+ void funcinstall(type,body,name,at)
  int type; struct conscell *(*body)(); char *name; struct alphacell *at;
  {      if (at == NULL)
         {  at = CreateInternedAtom(name);
@@ -745,7 +745,7 @@ mark()
  ** set the value of a variable that is not present it is an error, or if **
  ** that variable has no system binding that is also an error.            **
  ***************************************************************************/
- SetLongVar(s,val)
+ void SetLongVar(s,val)
  char *s; long int val;
  {    struct alphacell *a; struct conscell *l;
       if ((a=lookupatom(s,INTERNED))==NULL) goto ERR;   /* atom present ? */
@@ -1199,7 +1199,7 @@ int    lnflag;
  ** we are computing the counter length of the hunk we exit if this    **
  ** count ever goes positive.                                          **
  ************************************************************************/
-printhunk(p,h,how,counter)
+static void printhunk(p,h,how,counter)
 FILE *p;
 struct hunkcell *h;
 int  how; int *counter;
@@ -1238,7 +1238,7 @@ int  how; int *counter;
  ** Note that tbuff must be 2*256 to allow for doubling due to \ insert**
  ** ion by the ExpandEscapes function.                                 **
  ************************************************************************/
-printatom(p,l,how,counter)
+void printatom(p,l,how,counter)
 FILE *p;
 struct alphacell *l;
 int  how; int *counter;
@@ -1362,7 +1362,7 @@ int  how; int *counter;
  ** is used by the functions (flatc) and (flatsize). Note that if the count **
  ** ever goes positive we stop because the callers limit has been reached.  **
  *****************************************************************************/
-printlist(p,l,how,squash,counter)
+void printlist(p,l,how,squash,counter)
 FILE  *p;
 struct conscell *l,*squash;
 int    how; int *counter;
@@ -1471,7 +1471,7 @@ int limit;
  ** This pretty printer algorithm was taken of USENET  a while ago. It is **
  ** not perfect but it gets the job done.                                 **
  ***************************************************************************/
-prettyprint(expression,indent_level,indent_so_far,sink)
+void prettyprint(expression,indent_level,indent_so_far,sink)
 struct conscell *expression;
 int    indent_level;
 int    indent_so_far;

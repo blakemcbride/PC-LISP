@@ -11,7 +11,7 @@
  | and add to the given counters. This is an approximate calculation and does not count hunk or
  | array objects because they do not usually occur as clisp literals.
  */
-static compute_memusage(l, cons_bytes, alpha_bytes, heap_bytes)
+static void compute_memusage(l, cons_bytes, alpha_bytes, heap_bytes)
        struct conscell *l; long *cons_bytes, *alpha_bytes, *heap_bytes;
 {
        if (l == NULL) return;

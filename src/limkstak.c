@@ -23,7 +23,7 @@ struct conscell ***mystack;                        /* stack space array  */
 int mytop,emytop;                                  /* lower and upper tops */
 
 markstack()
-{       int i; extern marklist();
+{       int i; 
         for(i=0; i < mytop; i++)                   /* mark lower stack */
             marklist(*mystack[i]);
         for(i=emytop+1; i < MSSIZE; i++)           /* mark upper stack */

@@ -7,6 +7,8 @@
 #include <math.h>
 #include "lisp.h"
 
+extern void SetLongVar();
+
 /*************************************************************************
  ** bugc: Asks for garbage collection to occur right now please. Unlike **
  ** The mman it does not trigger allocation of new blocks if the percent**

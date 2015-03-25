@@ -12,7 +12,7 @@ static int trindent = 0;
  ** ResetTrace() - reset the tracing indent to 0. This is used by the   **
  ** next two functions to control the increasing indent with depth.     **
  *************************************************************************/
-ResetTrace()
+void ResetTrace()
 {      trindent = 0;
 }
 

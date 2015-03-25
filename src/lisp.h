@@ -201,6 +201,41 @@
 #define   HASTCP                  0             /* do we have TCP/IP sockets? Although Linux does, the TCP code is outdated.  Disable for now. */
 #endif
 
+
+#ifdef    __APPLE__
+#include <limits.h>
+#define   LONGMEMORY              0
+#define   DATALIMITEDTO64K        0             /* stack+data < 64K ? no */
+#define   MARKCHECK               1
+#define   SIGSEGVWORKS            1
+#define   SIGINTWORKS             1
+#define   SIGFPEWORKS             1
+#define   HASFCLOSEALL            1             /* has fcloseall() in stdio */
+#define   HASMATHERRFUNCTION      1
+#define   WANTERRNOTESTING        1             /* check errno after calls */
+#define   GRAPHICSAVAILABLE       0
+#define   NEEDNLAFTERBREAKEXIT    1
+#define   JMP_BUFISARRAY          1             /* typedef jmp_buf is array */
+#define   DIRSEPSTRING           "/"
+#define   DIRSEPCHAR             '/'
+#define   MAXNEGINT             (long)INT_MIN    /* samllest 'int' value */
+
+#ifndef   MAXINT
+#define   MAXINT                 (long)INT_MAX    /* largest 'int' value */
+#endif
+
+#define   MAXRANDVALUE           MAXINT         /* largest rand() value */
+
+#ifndef   MAXLONG
+#define   MAXLONG                LONG_MAX    /* biggest 'long' value */
+#endif
+
+#define   MINLONG                LONG_MIN    /* smallest 'long' value */
+#define   RE_COMP                 0             /* RE_COMP vs REGCMP selection */
+#define   HASTCP                  0             /* do we have TCP/IP sockets? Although Linux does, the TCP code is outdated.  Disable for now. */
+#endif
+
+
 /************************************************************************
  ** University of California Berkeley UNIX. (All versions ?) No idea of**
  ** memory models. The Mark stack is checked for overflow because we   **
@@ -446,7 +481,7 @@ void stkovfl();
  ** put loop, and in the eval() function which is the core of all activity**
  ***************************************************************************/
 extern    int bkhitcount;
-extern    brkhit();
+extern    int brkhit();
 #define   TEST_BREAK()  if (bkhitcount) brkhit()
 #define   BREAK_RESET() bkhitcount = 0
 
@@ -860,27 +895,31 @@ extern struct conscell   * pairlis();
 extern struct hunkcell   * ListToHunk();
 extern struct conscell   * assoc();
 extern struct conscell   * buREPsopen();
+extern void printatom();
+extern void marklist();
+extern void ioerror();
 
   /*** VOID OR SIMPLE FUNCTIONS ***/
 
-extern         funcinstall();
+extern void    funcinstall();
 extern char ** FindReferent();            /* need for relocation */
-extern         gather();
+extern int     gather();
+extern void    prettyprint();
+extern void    pushvariables();
 extern char *  getenv();
 extern int     GetOption();
 extern char *  heapget();
-extern         ierror();
-extern         initeval(),initmem();
-extern         mark();
+extern void    ierror();
+extern void    initmem();
+extern void    mark();
 extern void *  malloc();
 extern long int     memorystatus();
-extern         printlist();
-extern         ResetTrace();
-extern         SetOption();
+extern void    printlist();
+extern void    ResetTrace();
+extern void    SetOption();
 extern int     scan();
-extern         serror();
+extern void    serror();
 extern int     strcmp();
-extern char *  strcpy();
 extern int     liargc;
 extern char  **liargv;
 extern int     lillev;                    /* lexical level for (go..) validation */

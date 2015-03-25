@@ -836,7 +836,7 @@ int o;
     };
 }
                                                            /**/
-SetOption(o,v)
+void SetOption(o,v)
 int o,v;
 {   switch (o)
     {  case SMARTSLASH : SmartSlashOption = v; break;
