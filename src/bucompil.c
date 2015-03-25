@@ -67,6 +67,9 @@
  <16>     ZPUSH    <lit>          | inverse of above, used for unwinding shallow bindings during throw.
 */
 
+typedef void (*fptr)();
+
+
 static long bu_litref();
 static void bu_compile_list();
 static void bu_compile_func_args();
@@ -77,7 +80,7 @@ static void bu_compile_lambda_body();
 static void bu_compile_nlambda_body();
 static void bu_compile_lexpr_body();
 static void bu_compile_cadr();
-static (*bu_lookup_compile_func())();
+static fptr bu_lookup_compile_func();
 
 
 /*
@@ -904,7 +907,7 @@ static void bu_compile_func_args(func, args, linenum, funcargs)
        int linenum;
        struct conscell *funcargs;
 {
-       int (*fa)() = bu_lookup_compile_func(func->atom);
+       fptr fa = bu_lookup_compile_func(func->atom);
        char *call = "CALL";
        if (fa != NULL)
            (*fa)(args, func);
@@ -2562,7 +2565,8 @@ er2:   cerror("defmacro: first argument must be an atom", args);
  | name of a function to the C function that compiles it. It is sorted so that
  | a binary search can be applied to it.
  */
-static struct { char *name; int (*func)(); } bu_ftable[] = {
+
+static struct { char *name; fptr func; } bu_ftable[] = {
        {"$file-prog$", bu_compile_file_prog},
        {"1+"         , bu_compile_inc},
        {"1-"         , bu_compile_dec},
@@ -2610,7 +2614,7 @@ static struct { char *name; int (*func)(); } bu_ftable[] = {
  | This function is just the standard binary search on the table above which
  | returns the address of the function associated with the given name.
  */
-static (*bu_lookup_compile_func(name))()
+static fptr bu_lookup_compile_func(name)
        char *name;
 {      register int mid, r;
        register int lo = 0, hi = (sizeof(bu_ftable)/sizeof(bu_ftable[0])) - 1;
