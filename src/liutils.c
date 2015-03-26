@@ -853,7 +853,7 @@ int o,v;
  | This function is a useful debugging aid, it allows us to dump an expression from
  | the debugger.
  */
-liudump(e)
+extern struct conscell   *liudump(e)
        struct conscell *e;
 {      struct conscell f;
        printf("DUMPING ...\n");

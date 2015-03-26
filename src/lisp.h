@@ -897,7 +897,8 @@ extern struct conscell   * assoc();
 extern struct conscell   * buREPsopen();
 extern struct conscell   * budefun();
 extern struct conscell   * buppform();
-
+extern struct conscell   * liudump();
+	
   /*** VOID OR SIMPLE FUNCTIONS ***/
 
 extern void    funcinstall();
