@@ -18,5 +18,6 @@ struct conscell *form;
        {    if (form->carp->celltype == HUNKATOM)
                 return(newintop((long)HUNK(form->carp)->size ));
        };
-       ierror("hunksize");
+       ierror("hunksize");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

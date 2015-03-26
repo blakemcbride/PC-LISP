@@ -20,7 +20,7 @@ void ResetTrace()
  ** EnterTrace(fn,largs) - print a trace message that we are entering   **
  ** function fn with arguments largs.                                   **
  *************************************************************************/
-EnterTrace(fn,largs)
+void EnterTrace(fn,largs)
 struct conscell *fn,*largs;
 {      int i;
        for(i=0;i<trindent;i++) putchar(' ');
@@ -37,7 +37,7 @@ struct conscell *fn,*largs;
  ** ExitTrace(fn,result) - print a trace message that we are leaving    **
  ** function fn with result list 'result'.                              **
  *************************************************************************/
-ExitTrace(fn,result)
+void ExitTrace(fn,result)
 struct conscell *fn,*result;
 {      int i;
        trindent--;

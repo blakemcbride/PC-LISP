@@ -962,6 +962,9 @@ extern int     CopyCellIfPossible();
 extern int     syserror();
 extern int     isalphatoken();
 extern void    ScanSetSynClassMacro();
+extern void    EnterTrace();
+extern void    ExitTrace();
+
 extern int     liargc;
 extern char  **liargv;
 extern int     lillev;                    /* lexical level for (go..) validation */
