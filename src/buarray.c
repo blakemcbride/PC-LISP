@@ -30,7 +30,7 @@ struct conscell *form;
        struct alphacell *name;
        struct conscell  *t;
        struct arraycell *ar;
-       struct hunkcell  *ba,*ArrayAllocTree();
+       struct hunkcell  *ArrayAllocTree();
        xpush(form); push(t); push(ar);
        if ((form!=NULL)&&(form->carp != NULL))
        {   name = ALPHA(form->carp);
@@ -67,6 +67,7 @@ struct conscell *form;
                };
            };
        }
-ERR:   ierror("array");
+ERR:   ierror("array");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

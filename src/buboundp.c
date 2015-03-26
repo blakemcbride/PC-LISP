@@ -27,5 +27,6 @@ struct conscell *form;
                return(t);
            };
        };
-       ierror("boundp");
+       ierror("boundp");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

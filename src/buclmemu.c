@@ -110,5 +110,6 @@ struct conscell *buclmemusage(form)
       /*
        | Throw usual error.
        */
-er:    ierror("clisp-memusage");
+er:    ierror("clisp-memusage");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

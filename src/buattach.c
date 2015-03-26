@@ -40,6 +40,7 @@ struct conscell *form;
        l->cdrp = n;
        return(l);
 
-er:    ierror("attach");
+er:    ierror("attach");  /* doesn't return  */
+       return NULL;
 }
 

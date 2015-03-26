@@ -119,7 +119,7 @@ static struct asciitypes chartype[129] =
  ** after it has been read. This allows the TakeSexpression function in   **
  ** main.c to envoke a read or spliced read macro when necessary.         **
  ***************************************************************************/
-ScanSetSynClassMacro(c,kind)
+void ScanSetSynClassMacro(c,kind)
 int c,kind;
 {   if ((c < 1)||(c > 127))
         fatalerror("ScanSetSynClassMacro");
@@ -410,7 +410,7 @@ int ScanSetLineNum(n) { int old = liScanLineNum; liScanLineNum = n; return(old);
  ** Since this expansion is non FRANZ, we only do it if option SMARTSLASH is **
  ** set otherwise we do the normal FRANZ thing.                              **
  ******************************************************************************/
-ExpandEscapesInto(d,s)
+void ExpandEscapesInto(d,s)
 char *d,*s;
 {    register char c;
      register int ss = GetOption(SMARTSLASH);

@@ -56,6 +56,9 @@
 #define         ECHO         1                  /* processfile() flags */
 #define         NOECHO       0                  /* parameter */
 
+static int CanStoreInLong();
+static void WriteHunkBase();
+
 static  int curtok;                       /* we make call curtok=scan(buff)  */
 static  char buff[MAXATOMSIZE+4];         /* this is where tok string goes   */
 static  struct conscell *inlist;          /* list currently being parsed.    */
@@ -267,7 +270,7 @@ char *s;
  ** an atom from the atom table after its print name heap space has been  **
  ** freed. The removestring function does exactly the same with a strcell **
  ***************************************************************************/
- removeatom(a)
+ void removeatom(a)
  struct alphacell *a;
  {    struct conscell *l,**root;
       l = *(root = &atomtable[hash(a->atom,strlen(a->atom)+1)]);
@@ -286,7 +289,7 @@ char *s;
  ** The strings heap space will have been freed prior to this call by the **
  ** memory manager function gather().                                     **
  ***************************************************************************/
- removestring(a)
+ void removestring(a)
  struct stringcell *a;
  {    struct conscell *l,**root;
       l = *(root = &atomtable[hash(a->atom,strlen(a->atom)+1)]);
@@ -360,7 +363,7 @@ char *s;
  ** a hunk  from the atom table after its base ptr   heap space has been  **
  ** freed. This is eactly like removestring and removeatom.               **
  ***************************************************************************/
- removehunk(a)
+ void removehunk(a)
  struct hunkcell *a;
  {    struct conscell *l,**root; register int n;
       n = CEILING_DIV_2(a->size) * sizeof(char *);
@@ -380,7 +383,7 @@ char *s;
  ** We also use it to set the base to NULL pointers. Should be totally   **
  ** portable to any of the cyber/prime etc. Machines with strange ptrs.  **
  **************************************************************************/
- WriteHunkBase(hunk,index,ptr)
+ static void WriteHunkBase(hunk,index,ptr)
  struct hunkcell *hunk; int index; char *ptr;
  {      register char *s,*d;  register int n;
         n = sizeof(char *);
@@ -633,7 +636,7 @@ void mark()
  ** of the variables in the list of atoms 'vars'. This is the end scope op.**
  ** It also frees up the shallow stack cons cells.                         **
  ****************************************************************************/
- popvariables(vars)
+ void popvariables(vars)
  struct conscell *vars;
  {      struct alphacell *at;
         register struct conscell *f;
@@ -652,7 +655,7 @@ void mark()
  ** bindvar and unbindvar: These are like the pushvariables and pop vars   **
  ** above but the operate on only one variable.                            **
  ****************************************************************************/
- bindvar(var,val)
+ void bindvar(var,val)
  struct alphacell *var;
  struct conscell *val;
  {      struct conscell *temp;
@@ -681,7 +684,7 @@ void mark()
  ** unbindvar(var): Pop one value from the value stack for atom 'var' and  **
  ** free up the shallow stack cons cell.                                   **
  ****************************************************************************/
- unbindvar(var)
+ void unbindvar(var)
  struct alphacell *var;
  {      register struct conscell *f = var->valstack;
 	var->valstack = f->cdrp;                      /* pop the valstack once */
@@ -787,7 +790,7 @@ void mark()
  ** function because we will be called recursively and asked to mark the  **
  ** holdstack. Hence holdtop must be correct when new is called.          **
  ***************************************************************************/
- HoldStackOperation(flag)
+ void HoldStackOperation(flag)
  int flag;
  {      struct conscell *temp, *h; register int ix;
         static struct conscell *hold[HSSIZE];
@@ -1011,7 +1014,7 @@ struct alphacell *at;
  ** this range then we check to see if it is whole or not. If non whole    **
  ** it cannot be stored in a long without loosing the fraction.            **
  ****************************************************************************/
-int CanStoreInLong(d)
+static int CanStoreInLong(d)
 double d;
 {   long l;
     if ((d > MAXLONG)||(d < MINLONG)) return(0);

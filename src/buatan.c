@@ -23,5 +23,6 @@ struct conscell *form;
                };
            };
        };
-       ierror("atan");
+       ierror("atan");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

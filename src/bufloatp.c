@@ -20,5 +20,6 @@ struct conscell *form;
            else
                return(NULL);
        }
-       ierror("floatp");
+       ierror("floatp");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

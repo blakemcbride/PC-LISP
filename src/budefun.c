@@ -66,6 +66,7 @@ struct conscell *form;
                };
            };
         };
-        ierror("defun");
+        ierror("defun");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

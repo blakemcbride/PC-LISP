@@ -18,7 +18,7 @@
  ***************************************************************************/
 struct conscell *buconcat(form)
 struct conscell *form;
-{      char work[MAXATOMSIZE],num[MAXATOMSIZE],*d,*s; int len = 0;
+{      char work[MAXATOMSIZE],*d,*s; int len = 0;
        if (form == NULL) return(NULL);
        for(d = work; form != NULL; form = form->cdrp)
        {   if (!GetNumberOrString(form->carp,&s)) goto ERR;
@@ -28,5 +28,6 @@ struct conscell *form;
        };
        *(d+1) = '\0';
        return(LIST(CreateInternedAtom(work)));
-ERR:   ierror("concat");
+ERR:   ierror("concat");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

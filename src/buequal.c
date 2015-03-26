@@ -27,5 +27,6 @@ struct conscell *form;
                };
            };
        };
-       ierror("equal");
+       ierror("equal");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

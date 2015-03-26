@@ -33,5 +33,6 @@ struct conscell *form;
                };
            };
        };
-       ierror("copysymbol");
+       ierror("copysymbol");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

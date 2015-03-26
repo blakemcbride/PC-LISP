@@ -44,6 +44,7 @@ static void UnZpush();
 static void UnProgBody();
 static void UnEval();
 static void UnwindShallowBindings();
+static void PutErrString();
 
 /**************************************************************************
  ** Push an expression on the stack of bindings associated with special  **
@@ -135,7 +136,8 @@ struct conscell *form;
            }
            catcherror(tag == NULL ? "nil" : ALPHA(tag)->atom);
        }
-ERR:   ierror("throw");
+ERR:   ierror("throw");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /**************************************************************************
@@ -199,7 +201,8 @@ struct conscell *form;
            xpop(2);
            return(flung);
        };
-ERR:   ierror("catch");
+ERR:   ierror("catch");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /**************************************************************************
@@ -252,7 +255,8 @@ struct conscell *form;
            xpop(2);
            return(flung);
        };
-ERR:   ierror("errset");
+ERR:   ierror("errset");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /**************************************************************************
@@ -277,7 +281,8 @@ struct conscell *form;
             UnwindShallowBindings(emytop,oldtop);
             longjmp(*receiver,1);
        }
-       ierror("err");
+       ierror("err");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /**************************************************************************
@@ -524,7 +529,7 @@ struct conscell **literal_p; struct fixfixcell *literal;
  ** is used to keep from putting too many blanks on the screen. This is  **
  ** just a question of personal taste.                                   **
  **************************************************************************/
-PutErrString(s)
+static void PutErrString(s)
 char *s;
 {    if (strcmp(s,INTERRUPT)==0) putchar('\n');
      printf("--- %s ---\n",s);

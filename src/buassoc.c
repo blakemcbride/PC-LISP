@@ -27,5 +27,6 @@ struct conscell *form;
                      xret(assoc(var,alist),1);
             };
        };
-       ierror("assoc");
+       ierror("assoc");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -22,5 +22,6 @@ struct conscell *form;
            fflush(PORT(car)->atom);
        };
        return(LIST(thold));
-  ERR: ierror("drain");
+  ERR: ierror("drain");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

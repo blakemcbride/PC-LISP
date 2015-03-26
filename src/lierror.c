@@ -20,6 +20,7 @@
 #include "lisp.h"
 
 extern void ThrowError();
+static void jumptodebug();
 
 /****************************************************************************
  ** These are the old signal handlers. When initerrors is called we store  **
@@ -39,7 +40,7 @@ static int  (*errh)()        = NULL;
  ** string. We then copy the hold stack, reset the mark stacks and tracing **
  ** flush the input buffer and longjump to the break level handler in main.**
  ****************************************************************************/
- gerror(s)
+ void gerror(s)
  char *s;
  {   if (errh) (*errh)(s,NULL);         /* (compile) uses override errhandler */
      HoldStackOperation(COPY_STACK);
@@ -94,7 +95,7 @@ static int  (*errh)()        = NULL;
  ** call gerror to do the work. Note that we do not force an exit, rather  **
  ** we return to the break level and request the user exit.                **
  ****************************************************************************/
- fatalerror(s)
+ void fatalerror(s)
  char *s;
  {   char buffer[256];
      sprintf(buffer,"INTERNAL ERROR: in %s() (I suggest you quit)",s);
@@ -106,7 +107,7 @@ static int  (*errh)()        = NULL;
  ** is that a throw has been issued with a tag that has no catcher so we   **
  ** come off the top and issue the error.                                  **
  ****************************************************************************/
- catcherror(s)
+ void catcherror(s)
  char *s;
  {   char buffer[300];
      sprintf(buffer,"no catch for this tag [%s]",s);
@@ -117,7 +118,7 @@ static int  (*errh)()        = NULL;
  ** bindingerror called by eval(). The atom with print name pointed to by  **
  ** s is unbound, generate the appropriate error message.                  **
  ****************************************************************************/
- bindingerror(s)
+ void bindingerror(s)
  char *s;
  {   char buffer[300];
      sprintf(buffer,"unbound atom [%s]",s);
@@ -288,7 +289,7 @@ struct exception *x;
  ** UpError(s) : Death on initialization because of reason 's'. Must back **
  ** up to overwrite the 'wait..' on the console. Emit \010 backspace.     **
  ***************************************************************************/
-UpError(s)
+void UpError(s)
 char *s;
 {   printf("\010\010\010\010\010\010Abort: %s\n",s);
     exit(0);
@@ -418,7 +419,7 @@ int brkhit()                                      /* this routine actually proce
  | recursive call to lidomac and lidomaca to work. This is necessary so that C
  | can call LISP can call C etc ....
  */
-initerrors()
+void initerrors()
 {
     bkhitcount = 0;
 #   if SIGINTWORKS
@@ -439,7 +440,7 @@ initerrors()
 /*
  | remove code to trap CTRL-BREAK and CTRL-C interrupts.
  */
-deiniterrors()
+void deiniterrors()
 {
     pop_env();                                 /* restore the previous jump buffer environment */
 #   if SIGINTWORKS                             /* properly implement SIGINT */
@@ -464,7 +465,7 @@ deiniterrors()
  | we can only handle one break level at the moment hence we MUST jump to the top
  | level debugger.
  */
-jumptodebug()
+static void jumptodebug()
 {   assert(jb_tos);
     lillev = 0;                                /* reset lexical (go) level */
     while(jb_tos->next != NULL) pop_env();     /* pop all but the top level environment */
@@ -474,7 +475,7 @@ jumptodebug()
 /*
  | This code will allow a specific error trap to be disabled.
  */
-disableerrors(er, enable)
+void disableerrors(er, enable)
     int er, enable;
 {
     if (er == 0) want_sigint  = enable;
@@ -487,7 +488,7 @@ disableerrors(er, enable)
  | This function is used ONLY by the compiler and an abort MUST follow the error
  | since the shallow stacks are not rewound!
  */
-lierrh(func)
+void lierrh(func)
     int (*func)();
 {
     errh = func;

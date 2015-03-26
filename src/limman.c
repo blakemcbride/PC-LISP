@@ -28,7 +28,9 @@
 #include        <assert.h>
 #include        "lisp.h"
 
-        struct conscell  *lifreecons;                    /* head of avail lists */
+ static void AdjustCurrentHeap();
+
+ struct conscell  *lifreecons;                        /* head of avail lists */
  static struct alphacell *freealpha;                  /* for cell and alpha */
 
  static int    cellsize;                              /* size of bigger cell */
@@ -603,7 +605,7 @@ int  n;
  ** which is responsible for this block. We the increment the free field  **
  ** for this Heap block by the size of the freed block. We are now done.  **
  ***************************************************************************/
-freeheapblock(b)
+static void freeheapblock(b)
 unsigned char *b;
 {    register int siz,blk;
      b -= 2;                                        /* backup to BLOCK field */
@@ -697,7 +699,7 @@ char *f,*t; int s;
  ** if possible so we always start at CurrentBlock+1. This will have the  **
  ** most free space in it since it was least recently the CurrentBlock.   **
  ***************************************************************************/
-AdjustCurrentHeap(n)
+static void AdjustCurrentHeap(n)
 int n;
 {       register int i;
         register char *m;
@@ -989,7 +991,7 @@ int n;
  ** heap that appears to be in use, and the number of gc's so far. This is**
  ** an expensive call as it counts the number of free cells of each kind! **
  ***************************************************************************/
-printstats()
+void printstats()
 {    printf("\n--- #gc=%ld, #hc=%ld, cons=%ld%% of %ld, alpha=%ld%% of %ld, heap=%ld%% of %ld---\n",
             gccount, hccount,
             memorystatus(0), memorystatus(3),

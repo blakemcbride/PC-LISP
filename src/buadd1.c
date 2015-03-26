@@ -21,5 +21,6 @@ struct conscell *form;
                 return(newrealop(REAL(temp)->atom + 1.0));
           };
        };
-       ierror("add1");
+       ierror("add1");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

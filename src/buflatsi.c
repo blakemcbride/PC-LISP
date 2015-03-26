@@ -25,5 +25,6 @@ struct  conscell *form;
             printlist(NULL,expr,DELIM_ON,NULL,&counter);
             return(newintop((long)(counter - limit)));
         };
-ERR:    ierror("flatsize");
+ERR:    ierror("flatsize");  /*  doesn't return  */
+        return NULL;   /*  keep compiler happy  */
 }

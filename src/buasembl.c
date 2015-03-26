@@ -361,5 +361,6 @@ er29:  ierror("assemble:29");
 er30:  ierror("assemble:30");
 er31:  ierror("assemble:31");
 er32:  ierror("assemble:32");
-er33:  ierror("assemble:33");
+er33:  ierror("assemble:33");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

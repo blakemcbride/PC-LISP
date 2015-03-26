@@ -23,5 +23,6 @@ struct conscell *form;
                };
            };
        };
-       ierror("ascii");
+       ierror("ascii");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

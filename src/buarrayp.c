@@ -18,5 +18,6 @@ struct conscell *form;
               return(LIST(thold));
            return(NULL);
        };
-       ierror("arrayp");
+       ierror("arrayp");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

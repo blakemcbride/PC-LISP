@@ -311,7 +311,7 @@ extern struct conscell  *buscrline();
  ** bind the piport, poport, and errport to their correct stdin,stdout and  **
  ** stderr values.                                                          **
  *****************************************************************************/
-InstallSpecialAtoms()
+void InstallSpecialAtoms()
 {      struct alphacell *temp;
        thold        = insertatom("t",PERM);             /* holds are in PERM */
        nilhold      = insertatom("nil",PERM);           /* space so not GC'D */

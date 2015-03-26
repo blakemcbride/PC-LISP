@@ -49,6 +49,7 @@ struct conscell *form;
                 fret(h,1);
           }
        }
-       ierror("filestat");
+       ierror("filestat");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

@@ -24,5 +24,6 @@ struct conscell *form;
           };
           return(LIST(thold));
        };
-       ierror("atom");
+       ierror("atom");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

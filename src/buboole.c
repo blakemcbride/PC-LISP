@@ -57,7 +57,8 @@ struct conscell *form;
        }
 
        return(newintop( result ));
- er:   ierror("boole");
+ er:   ierror("boole");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 

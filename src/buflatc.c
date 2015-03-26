@@ -30,5 +30,6 @@ struct  conscell *form;
             printlist(NULL,expr,DELIM_OFF,NULL,&counter);
             return(newintop((long)(counter - limit)));
         };
-ERR:    ierror("flatc");
+ERR:    ierror("flatc");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

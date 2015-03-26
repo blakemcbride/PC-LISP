@@ -22,7 +22,7 @@
 struct conscell ***mystack;                        /* stack space array  */
 int mytop,emytop;                                  /* lower and upper tops */
 
-markstack()
+void markstack()
 {       int i; 
         for(i=0; i < mytop; i++)                   /* mark lower stack */
             marklist(*mystack[i]);
@@ -36,7 +36,7 @@ markstack()
  ** not the space is included in the executable file which increases it by **
  ** MSSIZE * sizeof(char *) or nearly 32K bytes. ie costs space/load time. **
  ****************************************************************************/
-InitMarkStack()
+void InitMarkStack()
 {       int siz; /* extern char *calloc(); */
         siz = (MSSIZE * sizeof(struct conscell **));
         if ((mystack = (struct conscell ***)calloc(siz,1)) == NULL)

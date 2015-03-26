@@ -197,5 +197,6 @@ struct conscell *budisassemble(form)
            }
        }
        return(LIST(thold));
-er:    ierror("disassemble");
+er:    ierror("disassemble");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

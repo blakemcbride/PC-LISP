@@ -39,5 +39,6 @@ struct conscell *form;
        */
        return(NULL);
 
-  er:  ierror("expand-memory");
+  er:  ierror("expand-memory");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

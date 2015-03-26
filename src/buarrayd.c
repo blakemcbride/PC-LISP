@@ -21,5 +21,6 @@ struct conscell *form;
               return(n);
            };
        };
-       ierror("arraydims");
+       ierror("arraydims");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

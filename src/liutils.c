@@ -115,7 +115,8 @@ struct conscell *dcl; int kind,varnum;
                         return(NULL);
           default : goto ERR;
        };
- ERR:  ierror("defun|def");
+ ERR:  ierror("defun|def");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /****************************************************************************
@@ -233,7 +234,8 @@ struct conscell *form;
        temp2->cdrp = ConstructLetActuals(auxpos);
        xpop(2);
        return(hold);
-ERR:   ierror("defun|def");
+ERR:   ierror("defun|def");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*******************************************************************

@@ -24,5 +24,6 @@ struct conscell *form;
            if (GetOption(CHAINATOM))
                return(NULL);
        };
-       ierror("car");
+       ierror("car");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

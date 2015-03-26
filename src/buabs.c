@@ -17,5 +17,6 @@ struct conscell *form;
        if ((form != NULL)&&(form->cdrp == NULL))
             if (GetFloat(form->carp,&f))
                 return(newrealop(fabs(f)));
-       ierror("abs");
+       ierror("abs");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

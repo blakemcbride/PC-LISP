@@ -45,5 +45,6 @@ struct conscell *form;
                };
            };
        };
-  ERR: ierror("character-index");
+  ERR: ierror("character-index");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

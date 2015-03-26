@@ -50,5 +50,6 @@ struct conscell *form;
               }
            }
        }
-       ierror("expt");
+       ierror("expt");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

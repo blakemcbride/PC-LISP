@@ -48,7 +48,7 @@ void putclisptos(ntos)
 /*
  | Mark the contents of the byte coded interpreters stack.
  */
-markclisp()
+void markclisp()
 {    register struct conscell **s = &clisp.stack[0];
      if (clisp.guard != 1) bcierror("clisp stack overflow", NULL, 0);
      while (s <= tos)

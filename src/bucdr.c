@@ -25,5 +25,6 @@ struct conscell *form;
            if (GetOption(CHAINATOM))
                return(NULL);
        };
-       ierror("cdr");
+       ierror("cdr");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

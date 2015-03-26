@@ -221,7 +221,7 @@ static struct conscell *all, *eml;
 /*
  | EMIT1ATM - will add to the current output instruction the atom 'e'.
  */
-static EMIT1ATM(s)
+static void EMIT1ATM(s)
        char *s;
 {      struct conscell *t = new(CONSCELL);
        t->cdrp = eml;
@@ -232,7 +232,7 @@ static EMIT1ATM(s)
 /*
  | EMIT1FIX - will add to the current output instruction the fixnum 'e'.
  */
-static EMIT1FIX(e)
+static void EMIT1FIX(e)
        long e;
 {      struct conscell *t = new(CONSCELL);
        t->cdrp = eml;
@@ -243,7 +243,7 @@ static EMIT1FIX(e)
 /*
  | EMIT1ATM - will add to the current output instruction the compiler label 'e'
  */
-static EMIT1LAB(d)
+static void EMIT1LAB(d)
        int d;
 {
        char name[32];
@@ -254,7 +254,7 @@ static EMIT1LAB(d)
 /*
  | EMIT1ATM - will output a complete compiler label prefixed with 'l'.
  */
-static EMITLABEL(e)
+static void EMITLABEL(e)
        int e;
 {      struct conscell *t = new(CONSCELL);
        char name[32];
@@ -268,7 +268,7 @@ static EMITLABEL(e)
 /*
  | EMIT1ATM - will end the current instruction and append to list of all so far.
  */
-static EMITEND()
+static void EMITEND()
 {      struct conscell *t = new(CONSCELL);
        t->cdrp = all;
        all = t;
@@ -304,7 +304,7 @@ static int nextLit = 0;
  | offset into the code. Since we do not know the offset it must be populated by the
  | assembler later. The code is ZPUSH <lit> where lit is FIXFIX(lit#, 0).
  */
-static emitZPUSH()
+static void emitZPUSH()
 {
        EMIT1ATM("ZPUSH");
        EMIT1FIX(bu_litref(newfixfixop((long)nextLit + 1L, 0L)));
@@ -326,7 +326,7 @@ static int  return_stack_free = MAX_RETURN_STACK;
  | Push label onto the return stack pushing a 0 means that in the current context
  | return is not allowed.
  */
-static return_push(label)
+static void return_push(label)
        int label;
 {      if (return_stack_free <= 0)
            cerror("return: not allowed in this context", NULL);
@@ -337,7 +337,7 @@ static return_push(label)
 /*
  | Pop label from the return stack.
  */
-static return_pop()
+static void return_pop()
 {      if (return_stack_free >= MAX_RETURN_STACK)
            cerror("return: compiler return stack limit exceeded", NULL);
        return_stack_top--;
@@ -635,7 +635,7 @@ static int bu_want_compile(symbol)
  | that is the literal reference to the atom. At the same time store the atom in the
  | literals set under the given literal number.
  */
-static bu_compile_atom(a)
+static void bu_compile_atom(a)
        struct alphacell *a;
 {
        EMIT1FIX((long)bu_litref(a));
@@ -2743,5 +2743,6 @@ struct conscell *bucompile(form)
            xpop(1);                                          /* if back to top level pop the typeset mark entry */
        }
        fret(tmp,10);
-er:    ierror("compile");
+er:    ierror("compile");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
