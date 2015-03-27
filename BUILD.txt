@@ -1,0 +1,37 @@
+
+PC-LISP is meant to run on 32 & 64 bit Linux, Mac, & Windows.
+
+Currently, the system has been tested on:
+
+	64 bit Linux
+	Mac (tested on Yosemite)
+
+It should run fine on 32 bit Linux.  A Windows port is underway.
+
+To build on either of the above platforms:
+
+	cd src
+	make
+
+You will end up with a file name "pc-lisp".  That is the system.
+
+Upon execution of pc-lisp, it will attempt to load a file named
+"pclisprc.l" in the current directory if it exists.  Any desired
+initial state of the machine cna be placed there.  You may want to
+copy the file "pc-lisp.l" to "pclisprc.l" as a good starting point.
+
+The manual is located in the file pc-lisp.doc
+
+To exit the system use:  (exit)
+
+You can compile a function as follows:
+
+(defun fun (a b) (+ a b))
+
+(setq cfun (assemble (car (ph-optimize (compile fun)))))
+
+Now fun & cfun both add their arguments.
+
+The "official" Franz Lisp manual is located in the file
+"Franz_Lisp_July_1983.pdf".
+
