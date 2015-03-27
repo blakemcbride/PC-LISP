@@ -4,6 +4,9 @@
  */
 #include <stdio.h>
 #include "lisp.h"
+#ifdef __APPLE__
+#include <regex.h>
+#endif
 
 /*
  |  The regular expression utility. We use either the SYSTEMV 'regcmp' stuff
@@ -11,6 +14,10 @@
  |  because SYSV only handles a static pattern of its own hence we must be
  |  compatible with the minimum system.
  */
+#ifdef __APPLE__
+static regex_t pattern;
+static int reUsed = 0;
+#else
 #if RE_COMP
     extern char *re_comp();
     extern int   re_exec();
@@ -19,7 +26,8 @@
     extern char *regex();
     static char *pattern = NULL;
 #endif
-
+#endif
+ 
 /*
  |  t <- (strsetpat string [nil]))
  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,15 +69,22 @@ struct conscell *bustrsetpat(form)
              *p++ = '$'; *p = '\0';              /* match end of string '$' */
          } else
              strcpy(expr, s);
+#ifdef __APPLE__
+	 if (reUsed)
+             regfree(&pattern);
+	 if (!regcomp(&pattern, expr, 0))  return(LIST(thold));
+#else
 #        if RE_COMP
             if (re_comp(expr) == NULL) return(LIST(thold));
 #        else
             if (pattern) free(pattern);
             if ((pattern = regcmp(expr, NULL)) != NULL) return(LIST(thold));
 #        endif
+#endif
       }
    }
-er:ierror("strsetpat");
+er:ierror("strsetpat");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -84,6 +99,9 @@ struct conscell *bustrfndpat(form)
    char *s;
    if ((form != NULL)&&(form->cdrp == NULL)) {
       if (GetString(form->carp, &s)) {
+#ifdef __APPLE__
+	return( regexec(&pattern, s, 0, NULL, 0) ? NULL : LIST(thold) );
+#else
 #        if RE_COMP
             return( (re_exec(s) == 1) ? LIST(thold) : NULL );
 #        else
@@ -91,8 +109,10 @@ struct conscell *bustrfndpat(form)
             if (pattern)
                 return( (regex(pattern, s, junk) != NULL) ? LIST(thold) : NULL );
 #        endif
+#endif
       }
    }
-   ierror("strfndpat");
+   ierror("strfndpat");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }
 
