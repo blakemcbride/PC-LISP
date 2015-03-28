@@ -130,7 +130,7 @@ struct conscell *dcl; int kind,varnum;
  ****************************************************************************/
 struct conscell *ConstructLetActuals(alist)
 struct conscell *alist;
-{      struct conscell *nalist,*temp1,*temp2,*back;
+{      struct conscell *nalist,*temp1,*temp2,*back=NULL;  /*  back=NULL to keep compiler happy  */
        int lastkind = -1, kind = 0, varnum = 0;
        push(nalist); push(temp1);                  /* NOTE nalist = NULL now!*/
        for(;alist!=NULL;alist=alist->cdrp)
@@ -199,7 +199,7 @@ struct conscell *alist;
  ****************************************************************************/
 struct conscell *lexprify(form)
 struct conscell *form;
-{      struct conscell *auxpos,*temp,*temp2,*hold,*l;
+{      struct conscell *auxpos=NULL,*temp,*temp2,*hold,*l;  /*  auxpos=NULL to keep compiler happy  */
        int aux = 0, rest = 0, opt = 0;
        if (form == NULL) goto ERR;
        temp = form->cdrp;
@@ -709,7 +709,7 @@ struct conscell *var,*alist;
  *************************************************************************/
 struct conscell *pairlis(vars,vals,alist)
 struct conscell *vars,*vals,*alist;
-{      struct conscell *r,*t,*l,*last;
+{      struct conscell *r,*t,*l,*last=NULL;  /*  last=NULL to keep compiler happy  */
        xpush(vars); xpush(vals); xpush(alist);
        push(r);
        r = NULL;

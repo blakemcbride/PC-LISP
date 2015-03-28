@@ -13,7 +13,7 @@
  *************************************************************************/
 struct conscell *bupatom(form)
 struct conscell *form;
-{      struct conscell *l; struct filecell *p;
+{      struct conscell *l; struct filecell *p=NULL;  /*  NULL assigment to keep compiler happy  */
        if (form != NULL) {
           l = form->carp;
           form = form->cdrp;

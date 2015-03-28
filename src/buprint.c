@@ -13,7 +13,7 @@
  *************************************************************************/
 struct conscell *buprint(form)
 struct conscell *form;
-{      struct conscell *l; struct filecell *p;
+{      struct conscell *l; struct filecell *p=NULL;  /*  NULL assignment to keep compiler happy  */
        if (form != NULL) {
           l = form->carp;
           form = form->cdrp;

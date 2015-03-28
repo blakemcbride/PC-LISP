@@ -47,7 +47,7 @@
 char *bu_disassemble_1_inst(fp, ip, literal)
        FILE *fp; char *ip; struct conscell **literal;
 {
-       int kind, n, *cntr, lit, lit2, op = *ip; char *name;
+	int kind, n, *cntr, lit=0, lit2=0, op = *ip; char *name;  /* 0 assignment to keep compiler happy  */
 
        if (!bu_byop_lookup_instruction(op, &name, &n, &kind, &cntr)) {
            fprintf(fp, "%s  %-7.7s %-10.10s %03d\n", ip, " ", "***???***", op);
@@ -99,7 +99,7 @@ struct conscell *budisassemble(form)
 {
        struct clispcell *clisp;
        struct conscell  **l;
-       struct filecell  *port;
+       struct filecell  *port=NULL;  /*  NULL assignment to keep compiler happy  */
        FILE   *fp = stdout;
        char  *ip;
        int    n_lit, returninstr, n, kind;

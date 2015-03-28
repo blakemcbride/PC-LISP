@@ -17,7 +17,7 @@
 struct conscell *buprintstack(form)
 struct conscell *form;
 {      struct conscell *expr, *subexpr;
-       struct filecell *port;
+	struct filecell *port=NULL;  /*  NULL assignment to keep compiler happy  */
 
       /*
        | Extract the arguments <expr> <subexpr> and optionally [port].

@@ -62,7 +62,7 @@ struct conscell *e1, *e2, *l;
  */
 struct conscell *budsubst(form)
 struct conscell *form;
-{      struct conscell *e1, *e2, *l;
+{      struct conscell *e1=NULL, *e2=NULL, *l=NULL;    /*  all =NULL to keep compiler happy  */
        if (!getsubstparms(form, &e1, &e2, &l)) ierror("dsubst");
        dsubst(e1, e2, l);
        return(l);
@@ -76,7 +76,7 @@ struct conscell *form;
  */
 struct conscell *busubst(form)
 struct conscell *form;
-{      struct conscell *e1, *e2, *l;
+{      struct conscell *e1=NULL, *e2=NULL, *l=NULL;    /*  all =NULL to keep compiler happy  */
        if (!getsubstparms(form, &e1, &e2, &l)) ierror("subst");
        l = copy(l);
        dsubst(e1, e2, l);

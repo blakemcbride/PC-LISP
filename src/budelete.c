@@ -102,7 +102,7 @@ done:
  */
 struct conscell *budelete(form)
 struct conscell *form;
-{      struct conscell *e, *l;
+{      struct conscell *e=NULL, *l=NULL;  /*  NULL assignment to keep compiler happy  */
        long int n; extern int equal();
        if (!getdelparms(form, &e, &l, &n)) ierror("delete");
        return(deletexp(l, e, (int) n, equal));
@@ -116,7 +116,7 @@ struct conscell *form;
  */
 struct conscell *budelq(form)
 struct conscell *form;
-{      struct conscell *e, *l;
+{      struct conscell *e=NULL, *l=NULL;  /*  NULL assignment to keep compiler happy  */
        long int n; extern int eq();
        if (!getdelparms(form, &e, &l, &n)) ierror("delq");
        return(deletexp(l, e, (int) n, eq));
@@ -130,7 +130,7 @@ struct conscell *form;
  */
 struct conscell *buremove(form)
 struct conscell *form;
-{      struct conscell *e, *l;
+{      struct conscell *e=NULL, *l=NULL;  /*  NULL assignment to keep compiler happy  */
        long int n; extern int equal();
        if (!getdelparms(form, &e, &l, &n)) ierror("remove");
        return(deletexp(topcopy(l), e, (int) n, equal));
@@ -144,7 +144,7 @@ struct conscell *form;
  */
 struct conscell *buremq(form)
 struct conscell *form;
-{      struct conscell *e, *l;
+{      struct conscell *e=NULL, *l=NULL;  /*  NULL assignment to keep compiler happy  */
        long int n; extern int eq();
        if (!getdelparms(form, &e, &l, &n)) ierror("remq");
        return(deletexp(topcopy(l), e, (int) n, eq));

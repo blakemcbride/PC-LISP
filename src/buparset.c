@@ -20,7 +20,7 @@
  *************************************************************************/
 struct conscell *buparsetq(form)
 struct conscell *form;
-{      struct conscell *save,*retval,*temp,*vlist,*last;
+{      struct conscell *save,*retval,*temp,*vlist,*last=NULL;  /*  NULL assignment to keep compiler happy  */
        push(vlist); push(temp);
        save = form; retval = NULL;
        while(form != NULL)
