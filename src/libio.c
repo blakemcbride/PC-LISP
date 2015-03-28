@@ -414,7 +414,7 @@ static struct clispcell *getclisp(sink)
 er:  if (code) free(code);                                                 /* error so free up any malloced space we */
      if (l) free(l);                                                       /* cannot use */
      if (clisp) {                                                          /* if we created a new CLISP cell then we */
-         clisp->celltype == CONSCELL;                                      /* must turn it into a CONSCEL so that the */
+         clisp->celltype = CONSCELL;                                      /* must turn it into a CONSCELL so that the */
          LIST(clisp)->carp = LIST(clisp)->cdrp = NULL;                     /* GC will later pick it up without problems */
      }                                                                     /* this is because GC gather would free lit & code */
      longjmp(sink->erh, 1);                                                /* error so jump to the sink's handler */
