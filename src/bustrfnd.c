@@ -40,6 +40,7 @@ static int reUsed = 0;
 struct conscell *bustrsetpat(form)
    struct conscell *form;
 {
+#ifndef _MSC_VER
    char *s,*p; char expr[MAXATOMSIZE + 4];
    int modify;
 
@@ -83,6 +84,7 @@ struct conscell *bustrsetpat(form)
 #endif
       }
    }
+#endif
 er:ierror("strsetpat");  /*  doesn't return  */
    return NULL;   /*  keep compiler happy  */
 }
@@ -96,6 +98,7 @@ er:ierror("strsetpat");  /*  doesn't return  */
 struct conscell *bustrfndpat(form)
    struct conscell *form;
 {
+#ifndef _MSC_VER
    char *s;
    if ((form != NULL)&&(form->cdrp == NULL)) {
       if (GetString(form->carp, &s)) {
@@ -112,6 +115,7 @@ struct conscell *bustrfndpat(form)
 #endif
       }
    }
+#endif
    ierror("strfndpat");  /*  doesn't return  */
    return NULL;   /*  keep compiler happy  */
 }

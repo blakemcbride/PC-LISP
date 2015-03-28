@@ -8,11 +8,6 @@
 
 #include        <stdio.h>
 #include        <math.h>
-#if RTPC
-#  include        "/usr/include/time.h"
-#else
-#  include        <sys/time.h>
-#endif
 #include        "lisp.h"
 
 /*************************************************************************

@@ -2,4 +2,6 @@
 src/*.o
 src/pc-lisp
 **/*~
+*.obj
+*.exe
 

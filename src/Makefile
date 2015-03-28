@@ -31,7 +31,7 @@ buuntrac.c buwhile.c buzaplin.c buzerop.c liarrays.c libio.c liceval.c \
 lierror.c lieval.c liinst.c limain.c limkstak.c limman.c liscan.c \
 lithrow.c litrace.c liutils.c
 
-#CFLAGS = -Wall -Wno-parentheses
+CFLAGS = -Wall -Wno-parentheses -O3
 
 OBJ = $(SRC:.c=.o)
 
@@ -42,7 +42,7 @@ pc-lisp : $(OBJ)
 $(OBJ) : lisp.h
 
 clean:
-	rm -f *.o *.bak *~
+	rm -f *.o *.bak *~ *.obj
 
 realclean: clean
-	rm -f pc-lisp
+	rm -f pc-lisp pc-lisp.exe

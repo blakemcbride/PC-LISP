@@ -4,6 +4,7 @@
  | PC-LISP (C) 1989-1992 Peter J.Ashwood-Smith
  */
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <errno.h>
 #include <math.h>
 #include <sys/types.h>
@@ -15,6 +16,7 @@
 #if !defined(FD_SET)
 #   include <sys/select.h>
 #endif
+#endif  /*  _MSC_VER  */
 
 /*
  | The normal LISP include files.
@@ -30,6 +32,7 @@
 struct conscell *buselect(form)
 struct conscell *form;
 {
+#ifndef _MSC_VER
        fd_set rfdset, wfdset;
        struct filecell *port; FILE *fp;
        struct timeval tv_s, *tv = NULL;
@@ -110,6 +113,7 @@ struct conscell *form;
       /*
        | Something wrong with the arguments.
        */
+#endif  /*  _MSC_VER  */
   er:  ierror("*select");  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */
 }

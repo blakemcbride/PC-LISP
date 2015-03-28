@@ -356,7 +356,11 @@ static struct conscell *getport(sink)
      char fname[20];
      long size = getlong(sink);
      strcpy(fname, "tmpXXXXXX");
+#ifdef _MSC_VER
+     int fn = _mktemp_s(fname, sizeof(fname)-1);
+#else
      int fn = mkstemp(fname);
+#endif
      errno = 0;                                          /* tmpname leaves errno non zero */
      if (size < 0) goto er;
      fd = fdopen(fn,"w+");

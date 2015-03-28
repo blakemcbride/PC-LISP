@@ -26,6 +26,9 @@ struct conscell *form;
            strcat(buff," ");
            form = form->cdrp;
        }
+#ifdef _MSC_VER
+       r = newintop(((long)system(buff)));
+#else
 #if 1
        mask = sigblock(sigmask(SIGCHLD));
        r = newintop(((long)system(buff)));
@@ -37,6 +40,7 @@ struct conscell *form;
            r = newintop(((long)system(buff)));
            sigprocmask(SIG_SETMASK, &omask, null);
        }
+#endif
 #endif
        return(r);
 }

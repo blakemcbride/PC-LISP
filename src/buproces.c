@@ -6,12 +6,12 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <signal.h>
+#ifndef _MSC_VER
 #include <sgtty.h>
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/ioctl.h>
-#ifdef __linux__
 #include <termios.h>
 #include <unistd.h>
 #endif
@@ -21,11 +21,13 @@
  ** first_process if TRUE causes any of these *process commands to add  **
  ** a sigchld handler if there is not one so as to avoid <defunc> pid's **
  *************************************************************************/
+#ifndef _MSC_VER
 static void sigchld_handler()
 {      int status; struct rusage rusage;
        signal(SIGCHLD,sigchld_handler);
        wait3(&status, WNOHANG, &rusage);
 }
+#endif
 
 /*************************************************************************
  ** (*process command [t|nil] [t|nil]).                                 **
@@ -38,12 +40,14 @@ static void sigchld_handler()
  *************************************************************************/
 struct conscell *buprocess(form)
 struct conscell *form;
-{      char *str, *s, *t; FILE *fd_pr = NULL, *fd_pw = NULL;
+{
+#ifndef _MSC_VER
+       char *str, *s, *t; FILE *fd_pr = NULL, *fd_pw = NULL;
        struct conscell *h, *n, *buexec();
        char fname[MAXATOMSIZE + 50]; int i, tty, tty2, pid;
        int want_pr = 0, want_pw = 0; char ttybuf[16], ptybuf[16];
        static int first_process = 1;
-#ifndef __linux__
+#if !defined(__linux__)
        struct sgttyb sgttyb;
 #endif
 
@@ -195,13 +199,7 @@ found:
        */
        xpop(1);
        return(h);
+#endif /*  _MSC_VER  */
 er:    ierror("*process");  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */
 }
-
-
-
-
-
-
-

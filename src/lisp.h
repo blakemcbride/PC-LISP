@@ -127,6 +127,41 @@
 #define   HASTCP                  0             /* do we have TCP/IP sockets? */
 #endif
 
+
+/*  Recent version of Microsoft Visual Studio  */
+#ifdef    _MSC_VER
+#include <limits.h>
+#define   LONGMEMORY              0
+#define   DATALIMITEDTO64K        0             /* stack+data < 64K ? no */
+#define   MARKCHECK               1
+#define   SIGSEGVWORKS            0
+#define   SIGINTWORKS             0
+#define   SIGFPEWORKS             0
+#define   HASFCLOSEALL            1             /* has fcloseall() in stdio */
+#define   HASMATHERRFUNCTION      0
+#define   WANTERRNOTESTING        1             /* check errno after calls */
+#define   GRAPHICSAVAILABLE       0
+#define   NEEDNLAFTERBREAKEXIT    1
+#define   JMP_BUFISARRAY          1             /* typedef jmp_buf is array */
+#define   DIRSEPSTRING           "\\"
+#define   DIRSEPCHAR             '\\'
+#define   MAXNEGINT             (long)INT_MIN    /* samllest 'int' value */
+
+#ifndef   MAXINT
+#define   MAXINT                 (long)INT_MAX    /* largest 'int' value */
+#endif
+
+#define   MAXRANDVALUE           MAXINT         /* largest rand() value */
+
+#ifndef   MAXLONG
+#define   MAXLONG                LONG_MAX    /* biggest 'long' value */
+#endif
+
+#define   MINLONG                LONG_MIN    /* smallest 'long' value */
+#define   RE_COMP                 1             /* RE_COMP vs REGCMP selection */
+#define   HASTCP                  0             /* do we have TCP/IP sockets? Although Linux does, the TCP code is outdated.  Disable for now. */
+#endif
+
 /************************************************************************
  ** Portable C compiler under AT&T SYSTEM V UNIX.S V2.10 or later. No  **
  ** memory models. The Mark stack is checked for overflow because we   **

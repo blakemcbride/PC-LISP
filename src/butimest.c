@@ -16,7 +16,7 @@
 struct conscell *butimestring(form)
 struct conscell *form;
 {
-       long int fix; int len;
+       time_t fix; int len;
        char *s, *ctime();
        fix = time(NULL);
        if (form != NULL)

@@ -5,7 +5,9 @@
  */
 #include <stdio.h>
 #include <math.h>
+#ifndef _MSC_VER
 #include <unistd.h> /* for sleep & usleep  */
+#endif
 #include "lisp.h"
 
 /*************************************************************************
@@ -17,7 +19,9 @@
  *************************************************************************/
 struct conscell *busleep(form)
 struct conscell *form;
-{      double f;
+{
+#ifndef _MSC_VER
+       double f;
        if ((form != NULL)&&(form->cdrp == NULL)) {
           if (GetFloat(form->carp, &f)) {
               if (f > 60.0) {
@@ -34,6 +38,7 @@ struct conscell *form;
               }
           }
        }
+#endif
        ierror("sleep");  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */
 }

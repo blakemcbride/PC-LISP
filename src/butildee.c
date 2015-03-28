@@ -4,8 +4,10 @@
  */
 #include <stdio.h>
 #include <ctype.h>
+#ifndef _MSC_VER
 #include <pwd.h>
 #include <unistd.h>
+#endif
 #include "lisp.h"
 
 /*
@@ -17,6 +19,7 @@
 struct conscell *butildeexpand(form)
    struct conscell *form;
 {
+#ifndef _MSC_VER
    char *s, *t, head[MAXATOMSIZE], work[MAXATOMSIZE];
    struct passwd *pwent;
 
@@ -63,6 +66,7 @@ struct conscell *butildeexpand(form)
           return(LIST(insertstring(work)));
       }
    }
+#endif
 er:ierror("tilde-expand");  /*  doesn't return  */
    return NULL;   /*  keep compiler happy  */
 }

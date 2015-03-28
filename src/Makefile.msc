@@ -31,7 +31,7 @@ buuntrac.obj buwhile.obj buzaplin.obj buzerop.obj liarrays.obj libio.obj liceval
 lierror.obj lieval.obj liinst.obj limain.obj limkstak.obj limman.obj liscan.obj \
 lithrow.obj litrace.obj liutils.obj
 
-CFLAGS = -nologo
+CFLAGS = -nologo -O2
 
 pc-lisp.exe : $(OBJ)
 	link /nologo /subsystem:console /out:$@ $(OBJ)
@@ -41,7 +41,7 @@ pc-lisp.exe : $(OBJ)
 $(OBJ) : lisp.h
 
 clean:
-	del *.obj *.bak *~
+	del *.obj *.bak *~ *.o
 
 realclean: clean
 	del pc-lisp.exe

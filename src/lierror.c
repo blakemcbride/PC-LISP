@@ -389,7 +389,7 @@ static int want_sigfpe   = 1;
 #if SIGINTWORKS                         /* if SIGINT works for all breaks */
     int bkhitcount;                     /* this var is local */
 #else
-    extern int bkhitcount;              /* else it is declared in extra.asm */
+/* extern */ int bkhitcount;              /* else it is declared in extra.asm */
 #endif
 
 static void brktrap()                                     /* target of SIGINT interrupt */
@@ -400,7 +400,7 @@ static void brktrap()                                     /* target of SIGINT in
        struct jb_s *top;
        for(top = jb_tos; top != NULL; top = top->next)      /* walk up the stack trying to find someone */
            if (top->intr && (top->intr != brktrap))         /* elses SIGINT handler which we will call */
-               return((top->intr)(SIGINT,NULL));
+               return;
     }
 }
 
@@ -426,8 +426,8 @@ void initerrors()
 #   if SIGINTWORKS
        old_sigint = signal(SIGINT,brktrap);
 #   else
-       UpVector1();                            /* MSDOS assembly language CTRL-BREAK */
-       UpVector2();                            /* and CTRL-C traps (they increment bkhitcount) */
+/*       UpVector1();                            * MSDOS assembly language CTRL-BREAK */
+/*       UpVector2();                            * and CTRL-C traps (they increment bkhitcount) */
 #   endif
 #   if SIGSEGVWORKS
        old_sigsegv = signal(SIGSEGV,stkovfl);
@@ -447,8 +447,8 @@ void deiniterrors()
 #   if SIGINTWORKS                             /* properly implement SIGINT */
        signal(SIGINT,old_sigint);              /* put back the old handler */
 #   else
-       DownVector1();                          /* take out CTRL-BREAK */
-       DownVector2();                          /* take out CTRL-C */
+/*       DownVector1();                          * take out CTRL-BREAK */
+/*       DownVector2();                          * take out CTRL-C */
 #   endif
 #   if SIGSEGVWORKS
        signal(SIGSEGV,old_sigsegv);            /* restore the old segv handler */
