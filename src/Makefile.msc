@@ -1,0 +1,47 @@
+
+OBJ = buabs.obj buacos.obj buadd1.obj bualphp.obj buand.obj buappend.obj buarg.obj buargq.obj \
+buarray.obj buarrayd.obj buarrayp.obj buascii.obj buasembl.obj buasin.obj buassoc.obj \
+buatan.obj buatom.obj buattach.obj bubaktra.obj buboole.obj buboundp.obj bucadar.obj \
+bucar.obj bucaseq.obj bucdr.obj buchix.obj buclmemu.obj bucmdlna.obj bucompil.obj \
+buconcat.obj bucond.obj bucons.obj bucopy.obj bucopysy.obj bucos.obj bucxr.obj budeclar.obj \
+budefine.obj budefun.obj budelete.obj budiff.obj budisasm.obj budivide.obj budrain.obj \
+bueq.obj buequal.obj buequals.obj buevenp.obj buexec.obj buexit.obj buexp.obj buexplod.obj \
+buexpmem.obj buexpt.obj bufact.obj bufclose.obj bufilepo.obj bufilest.obj bufillar.obj \
+bufix.obj bufixp.obj buflatc.obj buflatsi.obj buflattn.obj bufloat.obj bufloatp.obj \
+bufopen.obj buforeac.obj bugc.obj bugensym.obj buget.obj bugetdat.obj bugetd.obj \
+bugetenv.obj bugetlen.obj bugo.obj bugpname.obj bugrapic.obj bugreap.obj bugthan.obj \
+buhashst.obj buhsize.obj buhtolis.obj buhunk.obj buhunkp.obj buimplod.obj buintern.obj \
+bulast.obj buldiff.obj bulength.obj bulessp.obj bulinenu.obj bulistar.obj bulist.obj \
+bulistif.obj bulistp.obj buload.obj bulog10.obj bulog.obj bulsh.obj bulthan.obj bumacroe.obj \
+bumakhun.obj bumaknam.obj bumakunb.obj bumap.obj bumax.obj bumember.obj bumemq.obj \
+bumemsta.obj bumemusa.obj bumin.obj buminus.obj buminusp.obj bumod.obj bunconc.obj \
+bunexplo.obj bunot.obj bunth.obj bunthcdr.obj bunthcha.obj bunull.obj bunumbp.obj \
+buoblist.obj buoddp.obj buonemin.obj buoneplu.obj buor.obj bupairli.obj buparset.obj \
+bupatom.obj bupeepho.obj buplist.obj buplus.obj buplusp.obj buportp.obj buppform.obj \
+buprinc.obj buprint.obj buprintf.obj buprints.obj buproces.obj buproduc.obj buprog.obj \
+buput.obj buputd.obj buquote.obj buquotie.obj burandom.obj buread.obj bureadc.obj bureadln.obj \
+bureadst.obj buremob.obj burempro.obj burepeat.obj bureseti.obj bureturn.obj burevers.obj \
+burplaca.obj burplacd.obj burplacx.obj buscanf.obj buselect.obj busetarg.obj buset.obj \
+busetpli.obj busetq.obj busets.obj busetsyn.obj bushowst.obj busin.obj busizeof.obj \
+busleep.obj busopen.obj busort.obj busqrt.obj busstatu.obj bustrcom.obj bustrfnd.obj \
+bustring.obj bustrlen.obj bustrpad.obj bustrtrm.obj busub1.obj busubst.obj busubstr.obj \
+busum.obj busymtb.obj busystim.obj busysunl.obj butildee.obj butimeev.obj butimes.obj \
+butimest.obj butolowr.obj butouppr.obj butrace.obj butruena.obj butype.obj buuconca.obj \
+buuntrac.obj buwhile.obj buzaplin.obj buzerop.obj liarrays.obj libio.obj liceval.obj \
+lierror.obj lieval.obj liinst.obj limain.obj limkstak.obj limman.obj liscan.obj \
+lithrow.obj litrace.obj liutils.obj
+
+CFLAGS = -nologo
+
+pc-lisp.exe : $(OBJ)
+	link /nologo /subsystem:console /out:$@ $(OBJ)
+#	gcc -o $@ $^ -lm
+
+
+$(OBJ) : lisp.h
+
+clean:
+	del *.obj *.bak *~
+
+realclean: clean
+	del pc-lisp.exe
