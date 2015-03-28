@@ -31,9 +31,12 @@ struct conscell *form;
        r = newintop(((long)system(buff)));
        sigsetmask(mask);
 #else   /*  need to update this but not sure how right now.  */
-       mask = sigprocmask(SIG_BLOCK, sigmask(SIGCHLD));
-       r = newintop(((long)system(buff)));
-       sigprocmask(SIG_SETMASK, mask);
+       {
+	   sigset_t mask, omast;
+           sigprocmask(SIG_BLOCK, mask, &omask);
+           r = newintop(((long)system(buff)));
+           sigprocmask(SIG_SETMASK, &omask, null);
+       }
 #endif
        return(r);
 }
