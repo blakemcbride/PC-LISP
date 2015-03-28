@@ -102,7 +102,7 @@ struct conscell *budisassemble(form)
        struct filecell  *port;
        FILE   *fp = stdout;
        char  *ip;
-       int    n_lit, op, returninstr, n, lit, kind;
+       int    n_lit, returninstr, n, kind;
        char   label[20];
 
       /*

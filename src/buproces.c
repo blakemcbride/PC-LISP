@@ -132,7 +132,7 @@ found:
            if (!want_pr) { dup2(open("/dev/null", O_RDWR), 1); dup2(1,2); }
            for(i = getdtablesize(); i > 3; close(--i));
            execl("/bin/sh", "/bin/sh", "-c", str, NULL);
-      cer: perror("*process/child");
+           perror("*process/child");
            _exit(-4);
        }
 
@@ -195,7 +195,8 @@ found:
        */
        xpop(1);
        return(h);
-er:    ierror("*process");
+er:    ierror("*process");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 

@@ -23,5 +23,6 @@ struct conscell *form;
              };
           };
        };
-       ierror("oddp");
+       ierror("oddp");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

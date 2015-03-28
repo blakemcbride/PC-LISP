@@ -76,5 +76,6 @@ done:  unbindvar(local);                                        /* done, so pop 
        }
        lillev -= 1;                                            /* down lexical scope */
        fret(value,2);
-er:    ierror("foreach");
+er:    ierror("foreach");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

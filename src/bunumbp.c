@@ -23,5 +23,6 @@ struct conscell *form;
                 return(NULL);
            };
        };
-       ierror("numbp|numberp");
+       ierror("numbp|numberp");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -7,6 +7,8 @@
 #include <math.h>
 #include "lisp.h"
 
+extern int close();
+
 /*************************************************************************
  ** bufclose: Close file whose file pointer is my parameter note that we**
  ** make the file pointer illegal after the close this causes i/o errs  **

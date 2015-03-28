@@ -17,5 +17,6 @@ struct conscell *form;
        {    if (form->carp->celltype == HUNKATOM)
                 return(HunkToList(form->carp));
        };
-       ierror("hunk-to-list");
+       ierror("hunk-to-list");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

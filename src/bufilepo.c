@@ -28,5 +28,6 @@ struct conscell *form;
        if (fseek(port,offset,0) == 0)
            return(newintop(offset));
 IOERR: ioerror(port);
-  ERR: ierror("filepos");
+  ERR: ierror("filepos");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

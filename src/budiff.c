@@ -25,6 +25,7 @@ struct conscell *form;
        }
        if (isflt) return(newrealop( diff ));
        return(newintop( (long) diff ));
-ERR:   ierror("diff|difference");
+ERR:   ierror("diff|difference");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

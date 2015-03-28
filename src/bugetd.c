@@ -27,5 +27,6 @@ struct conscell *form;
                 return(atm->valstack->carp);
            return(NULL);
        }
-ERR:   ierror("getd");
+ERR:   ierror("getd");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -36,5 +36,6 @@ struct  conscell *form;
             fprintf(port,"\n");
             return(LIST(thold));
         }
-ERR:    ierror("pp-form");
+ERR:    ierror("pp-form");  /*  doesn't return  */
+        return NULL;   /*  keep compiler happy  */
 }

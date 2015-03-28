@@ -117,5 +117,6 @@ end:   if (has_labels) {
       /*
        | Problem with the arguments, so throw the error 'while'.
        */
-er:    ierror("repeat");
+er:    ierror("repeat");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

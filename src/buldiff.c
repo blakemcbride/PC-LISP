@@ -57,6 +57,7 @@ struct conscell *form;
             }
        }
        fret(rh,1);
-er:    ierror("ldiff");
+er:    ierror("ldiff");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

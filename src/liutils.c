@@ -199,7 +199,7 @@ struct conscell *alist;
  ****************************************************************************/
 struct conscell *lexprify(form)
 struct conscell *form;
-{      struct conscell *auxpos,*temp,*temp2,*hold,*l,*Narg;
+{      struct conscell *auxpos,*temp,*temp2,*hold,*l;
        int aux = 0, rest = 0, opt = 0;
        if (form == NULL) goto ERR;
        temp = form->cdrp;
@@ -741,7 +741,7 @@ struct conscell *vars,*vals,*alist;
  ** In order to speed things up the arg list has the length tacked onto **
  ** the front. This allows (arg) (listify) and (setarg) to run faster.  **
  *************************************************************************/
-pushlexpr(at,args)
+void pushlexpr(at,args)
 struct conscell *at, *args;
 {      register int i;
        struct conscell *temp;
@@ -760,7 +760,7 @@ struct conscell *at, *args;
  ** by simply unbinding the global (arg) function holding atom, and then**
  ** we unbind the single atom parameter to the lexpr body.              **
  *************************************************************************/
-poplexpr(at)
+void poplexpr(at)
 struct conscell *at;
 {      unbindvar(blexprhold);
        unbindvar(at);
@@ -836,6 +836,7 @@ int o;
        case IGNOREEOF  : return(IgnoreEofOption);  break;
        default         : fatalerror("GetOption");
     };
+    return 0;  /*  keep compiler happy  */
 }
                                                            /**/
 void SetOption(o,v)

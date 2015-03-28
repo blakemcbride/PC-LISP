@@ -395,7 +395,7 @@ retry: if (lifreecons != NULL) {
            r->carp = NULL;                      /* the cdrp is already NULL */
            return(r);
        }
-Gc:    marking = 1; mark(); gather(&n, NULL); marking = 0;
+       marking = 1; mark(); gather(&n, NULL); marking = 0;
 
       /*
        | Garage collection is done, we have gathered 'n' free cells, so, if
@@ -485,7 +485,7 @@ retry: if  (freealpha != NULL) {
             return(r);
        }
 
-Gc:    marking = 1; mark(); gather(NULL, &n); marking = 0;
+       marking = 1; mark(); gather(NULL, &n); marking = 0;
 
       /*
        | Garage collection is done, we have gathered 'n' free cells, so, if
@@ -651,7 +651,7 @@ unsigned char *b;
  ** he owns. The length of the block as far as FindReferent is concerned  **
  ** does not include the header info so we subtract 2 from the size field.**
  ***************************************************************************/
-InformRelocating(f,t,s)
+static void InformRelocating(f,t,s)
 char *f,*t; int s;
 {    register char **p;
      register int len;
@@ -849,7 +849,7 @@ static void CompactHeapBlock(b)
  ** occured because the mark bits would be set and would stop the recurs- **
  ** from entering the critical area.                                      **
  ***************************************************************************/
-unmark()
+void unmark()
 {   register int i; register char *m;
     for(i=0; i <= AlphaLastBlock; i++)
     {   for(m=ablock[i]; m<(ablock[i]+blocksize); m+=sizeof(struct alphacell))
@@ -983,6 +983,7 @@ int n;
         case 5 : return((long)totalheap);
        default : fatalerror("memorystatus");
      };
+     return 0L;  /*  keep compiler happy  */
 }
 
 /***************************************************************************

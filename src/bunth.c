@@ -36,5 +36,6 @@ struct conscell *form;
                 };
            };
        };
-ERR:   ierror("nth");
+ERR:   ierror("nth");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

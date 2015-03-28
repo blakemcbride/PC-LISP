@@ -215,7 +215,8 @@ struct conscell *buprintf(form)
            printf("%s", buff);
 	   return(LIST(thold));
        }
-er:    ierror("printf");
+       ierror("printf");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -238,7 +239,8 @@ struct conscell *bufprintf(form)
            fprintf(f->atom, "%s", buff);
 	   return(LIST(thold));
        }
-er:    ierror("fprintf");
+er:    ierror("fprintf");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -255,7 +257,8 @@ struct conscell *busprintf(form)
            if (strlen(buff) >= MAXATOMSIZE) goto er;     /* too big for a string */
 	   return(LIST(insertstring(buff)));
        }
-er:    ierror("sprintf");
+er:    ierror("sprintf");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 

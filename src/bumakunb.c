@@ -30,5 +30,6 @@ struct conscell *form;
                return(NULL);
            }
        }
-       ierror("makunbound");
+       ierror("makunbound");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

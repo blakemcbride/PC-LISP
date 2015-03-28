@@ -20,5 +20,6 @@ struct  conscell *form;
         {   HoldStackOperation(DUMP_STACK);
             return(LIST(thold));
         };
-        ierror("showstack");
+        ierror("showstack");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -17,5 +17,6 @@ struct conscell *form;
        {   if (ExtractArray(form->carp,&temp))
               return(temp->info->carp);
        };
-       ierror("getlength");
+       ierror("getlength");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

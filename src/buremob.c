@@ -25,5 +25,6 @@ struct conscell *form;
                return(LIST(at));
            };
        };
-       ierror("remob");
+       ierror("remob");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

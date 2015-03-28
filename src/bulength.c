@@ -22,5 +22,6 @@ struct conscell *form;
                if (form->cdrp == NULL)
                    return(newintop((long)liulength(form->carp)));
        }
-       ierror("length");
+       ierror("length");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

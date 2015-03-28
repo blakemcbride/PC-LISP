@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include "lisp.h"
 
-static bcierror();
+static void bcierror();
 
 
 /*
@@ -60,7 +60,7 @@ void markclisp()
  | then prints an error message, dumps the stack and tries to figure out which
  | function went wrong.
  */
-static bcierror(msg, code, recover)
+static void bcierror(msg, code, recover)
      char *msg; char *code;  int recover;
 {    struct conscell **s; char *nam, *liuclnam(); int i;
      printf("--- byte coded interpreter: error: %s ---\n", msg);

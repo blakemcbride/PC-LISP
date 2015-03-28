@@ -41,5 +41,6 @@ struct conscell *form;
                     return(newintop((long int) sizeof(struct fixfixcell)));
             };
        };
-       ierror("sizeof");
+       ierror("sizeof");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

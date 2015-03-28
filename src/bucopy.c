@@ -14,5 +14,6 @@ struct conscell *bucopy(form)
 struct conscell *form;
 {      if ((form != NULL)&&(form->cdrp == NULL))
           return(copy(form->carp));
-       ierror("copy");
+       ierror("copy");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

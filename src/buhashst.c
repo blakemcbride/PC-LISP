@@ -18,4 +18,6 @@ struct conscell *form;
 {      if (form == NULL)                        /* check zero parameters */
            return(HashStatus());
        ierror("hashtabstat");                   /* more than zero parms  */
+         /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

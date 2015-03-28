@@ -53,5 +53,6 @@ struct conscell *form;
                 }
            }
        }
-ERR:   ierror("putd");
+ERR:   ierror("putd");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

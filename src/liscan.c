@@ -183,7 +183,7 @@ struct action
        unsigned flag   : 1  ;           /* read ahead or don't read ahead  */
 };
 
-static struct action newaction, transtable[17][10] =
+static struct action transtable[17][10] =
 {
 /*DEL     state0   state1   state2   state3   state4   state5   state6   state7   state8   state9*/
 /*-----------------------------------------------------------------------------------------------*/
@@ -230,7 +230,7 @@ int scgetc()
  ** unscan a character from outBuf. If we are about to go past pos 0 do **
  ** nothing, otherwise back up once and put the character into the buff.**
  *************************************************************************/
-int scungetc(c)
+static void scungetc(c)
 int c;
 {       if (outNext > 0)
             outBuf[--outNext] = c;
@@ -339,7 +339,7 @@ int ScanSetLineNum(n) { int old = liScanLineNum; liScanLineNum = n; return(old);
  static int retcount = 0;
  static int nestlevel = 0;
                                                  /***/
- static int metapush(n)
+ static void metapush(n)
  int n;
  {  if (TopOfMetaStack >= MAXMETANEST)
         serror(NULL,"meta [] nesting too deep",NULL,-1);
@@ -351,7 +351,7 @@ int ScanSetLineNum(n) { int old = liScanLineNum; liScanLineNum = n; return(old);
     return(MetaStack[--TopOfMetaStack]);
  }
                                                   /***/
- static int metareset()
+ static void metareset()
  {  nestlevel = retcount = TopOfMetaStack = 0;
  }
 
@@ -513,7 +513,7 @@ char *d,*s;
  ** from which up to N characters may be scgetc'ed. If it is exhaused it **
  ** feeds EOF's to the scanner. This is for use by readstr.              **
  **************************************************************************/
-ScanFromBuffer(buf,n)
+void ScanFromBuffer(buf,n)
 char *buf; int n;
 {     outBuf = buf;
       outNext = 0;

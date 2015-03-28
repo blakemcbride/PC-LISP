@@ -20,5 +20,6 @@ struct conscell *form;
 #         else
              gerror("exit not supported");
 #         endif
-       ierror("exit");
+       ierror("exit");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

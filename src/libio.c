@@ -253,7 +253,7 @@ er:  longjmp(sink->erh, 1);                               /* error so jump to th
  | clisps are written as C{L|N} <N> <lit1> ....<litN> <M> <byte1> ... <byteM>
  | We rearm the timout value (if it applies to this sink) periodically.
  */
-static putclisp(clisp, sink)
+static void putclisp(clisp, sink)
      struct clispcell *clisp; SINK *sink;
 {
      struct conscell **l; char *code; int size;
@@ -295,7 +295,8 @@ static long getlong(sink)
 {    long l;
      if (fread((char *)&(l), sizeof(long), 1, sink->fp) == 1)
          return((long)ntohl(l));
-     longjmp(sink->erh, 1);
+     longjmp(sink->erh, 1);  /*  doesn't return  */
+     return 0L;   /*  keep compiler happy  */
 }
 
 /*
@@ -306,7 +307,8 @@ static int getint(sink)
 {    long l;
      if (fread((char *)&(l), sizeof(long), 1, sink->fp) == 1)
          return((int)ntohl(l));
-     longjmp(sink->erh, 1);
+     longjmp(sink->erh, 1);  /*  doesn't return  */
+     return 0;   /*  keep compiler happy  */
 }
 
 /*
@@ -317,7 +319,8 @@ static double getdouble(sink)
 {    double d;
      if (fread((char *)&(d), sizeof(double), 1, sink->fp) == 1)
          return(d);
-     longjmp(sink->erh, 1);
+     longjmp(sink->erh, 1);  /*  doesn't return  */
+     return 0.0;   /*  keep compiler happy  */
 }
 
 /*
@@ -336,7 +339,8 @@ static char *getstring(sink,n)
      } else
          s[0] = '\0';
      return(s);
-er:  longjmp(sink->erh, 1);
+er:  longjmp(sink->erh, 1);  /*  doesn't return  */
+     return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -364,7 +368,8 @@ static struct conscell *getport(sink)
      }
      rewind(fd);
      return(MakePort(fd,CreateInternedAtom(fname)));
-er:  longjmp(sink->erh, 1);
+er:  longjmp(sink->erh, 1);  /*  doesn't return  */
+     return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -413,6 +418,8 @@ er:  if (code) free(code);                                                 /* er
          LIST(clisp)->carp = LIST(clisp)->cdrp = NULL;                     /* GC will later pick it up without problems */
      }                                                                     /* this is because GC gather would free lit & code */
      longjmp(sink->erh, 1);                                                /* error so jump to the sink's handler */
+  /*  doesn't return  */
+     return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -423,7 +430,7 @@ static void r_bwrite(e, sink)
      struct conscell *e;
      SINK *sink;
 {
-     char *x; int n;
+     int n;
 
     /*
      | If timeouts are enabled on this sink then periodically rearm the timer
@@ -695,7 +702,8 @@ static struct conscell *r_bread(sink)
                     if ((c >= ST0) && (c <= STL))
                         return(LIST(insertstring(getstring(sink,c-ST0))));
      }
- er: longjmp(sink->erh, 1);
+ er: longjmp(sink->erh, 1);  /*  doesn't return  */
+     return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -773,7 +781,8 @@ struct conscell *bubwrite(form)
              }
          }
      }
-er:  ierror("b-write");
+er:  ierror("b-write");  /*  doesn't return  */
+     return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -796,6 +805,7 @@ struct conscell *bubread(form)
              return(libread(p, timeout));
          }
      }
-er:  ierror("b-read");
+er:  ierror("b-read");  /*  doesn't return  */
+     return NULL;   /*  keep compiler happy  */
 }
 

@@ -28,5 +28,6 @@ struct conscell *butolower(form)
            return(LIST(insertstring(work)));
        }
    }
-   ierror("tolower");
+   ierror("tolower");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }

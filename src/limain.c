@@ -91,7 +91,7 @@ struct conscell *atomtable[ALPHATABSIZE];    /* table of buckets  */
 /**********************************************************
  ** function initatoms(): reset the atoms lists to null  **
  **********************************************************/
-initatoms()
+static void initatoms()
 {   int i;
     extern struct conscell *atomtable[];
     for(i=0; i < ALPHATABSIZE; atomtable[i++]=LIST(NULL));
@@ -330,7 +330,7 @@ char *s;
  ***************************************************************************/
  struct hunkcell *inserthunk(n)
  int n;
- {    struct hunkcell *h; char *heap,*p; int len,bytes,v,i;
+ {    struct hunkcell *h; char *heap; int len,bytes,v,i;
       struct conscell *l;
       if ((n<=0)||(n>(2*(MAXATOMSIZE/sizeof(char *)))))
          return(NULL);
@@ -453,7 +453,7 @@ struct hunkcell *h;
  ** first clisp literal because it points to the clisp from which we     **
  ** just came so this would be a waste of time.                          **
  **************************************************************************/
-markclispliterals(l)
+static void markclispliterals(l)
 struct conscell **l;
 {      register int n = (*((int *)l - 1))/sizeof(struct conscell *);
        --n; l++;
@@ -669,7 +669,7 @@ void mark()
  ** bindlabel, just like bindvar but puts the lexical level in the stack   **
  ** cell for checking by (go).                                             **
  ****************************************************************************/
- bindlabel(var,val)
+ void bindlabel(var,val)
  struct alphacell *var;
  struct conscell *val;
  {      struct conscell *temp;
@@ -697,7 +697,7 @@ void mark()
  ** bindtonil(vars) : Like pushvariables except that all values are NIL    **
  ** this is used when a prog is invoked establish locals all bound to NIL  **
  ****************************************************************************/
- bindtonil(vars)
+ void bindtonil(vars)
  struct conscell *vars;
  {      struct alphacell *at; struct conscell *temp;
         while(vars != NULL)
@@ -719,7 +719,7 @@ void mark()
  ** the variable is a LOCAL VARIABLE otherwise we unwind until there is    **
  ** one variable left on the stack, the GLOBAL value of this variable.     **
  ****************************************************************************/
- unwindscope()
+ void unwindscope()
  {      int i; struct alphacell *a; struct conscell *t,*l;
         for(i=0;i < ALPHATABSIZE;i++)
         {   l = atomtable[i];
@@ -962,7 +962,7 @@ struct conscell *l; char **where;
  ** so that the (read) and (readc) statements in the body will know which  **
  ** port to read from. We then eval this body, unbind the port and return. **
  ****************************************************************************/
-struct conscell *RunReadMacro(port,c)
+static struct conscell *RunReadMacro(port,c)
 struct filecell *port; char *c;
 {    struct conscell *n, *TakeSexpression();
      struct alphacell *at;
@@ -984,7 +984,8 @@ struct filecell *port; char *c;
               return(n);
           };
      };
-     gerror("read macro expression not found");
+     gerror("read macro expression not found");  /*  doesn't return  */
+     return NULL;   /*  keep compiler happy  */
 }
 
 /****************************************************************************
@@ -1056,6 +1057,7 @@ char  *s;double *flonum; long int *fixnum;
           return(REALATOM);                         /* make it a float. */
       }
       serror(NULL, "invalid fixnum/flonum format", s, -1);
+      return 0;  /*  keep compiler happy */
 }
 
 /****************************************************************************
@@ -1116,7 +1118,8 @@ struct filecell *port;
        if ISOPEN() return(TakeList(port));
        if (ISRMACRO()||ISSRMACRO())
           return(RunReadMacro(port,buff));
-       serror(NULL, "this token does not begin a valid S-expression", buff, -1);
+       serror(NULL, "this token does not begin a valid S-expression", buff, -1);  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /****************************************************************************
@@ -1157,7 +1160,8 @@ struct filecell *port;
                    RunReadMacro(port,buff) : TakeSexpression(port);
        curtok = scan(port->atom,buff);
        if ISCLOSE() fret(r,3);
-       serror(NULL, "expecting ')' after dotted pair, found", buff, -1);
+       serror(NULL, "expecting ')' after dotted pair, found", buff, -1);  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /************************************************************************
@@ -1701,11 +1705,11 @@ hit:  buresetlog(fp, 2);
  ** if the break was entered before execution began. So we reset the break**
  ** if we read the list from the standard input.                          **
  ***************************************************************************/
-processfile(port,echoflag,prompt)
+static void processfile(port,echoflag,prompt)
 struct filecell *port;
 int  echoflag;
 char *prompt;
-{   struct conscell *l; int oldNum;
+{   int oldNum;
     if (echoflag == ECHO) printf("%s",prompt);
     oldNum = ScanSetLineNum(port->linenum);          /* save old linenum and set current line number */
     curtok = scan((zapee = port->atom),buff);        /* log for (zapline) */
@@ -1738,7 +1742,7 @@ char *prompt;
  ** states that are liable to have been altered. Note that for MSDOS we   **
  ** call the video reset function in bufunc.c to set the sane video modes.**
  ***************************************************************************/
-takelispexit()
+static void takelispexit()
 {
 #      if GRAPHICSAVAILABLE
           resetvideo();
@@ -1753,7 +1757,7 @@ takelispexit()
  ***************************************************************************/
 int liargc = 0; char **liargv = NULL;
 
-int liargs(argc, argv)
+static void liargs(argc, argv)
     int argc; char **argv;
 {
     liargc = argc;
@@ -1784,7 +1788,7 @@ int liargs(argc, argv)
  ** invokation of the break level processor.                              **
  ***************************************************************************/
 #if !defined(MACRO)
-    main(argc,argv)
+    int main(argc,argv)
     int argc; char *argv[];
     {
 	printf("%s%s%s", "PC-LISP V", VERSION, " Copyright (C) Peter J.Ashwood-Smith, 1989-2015\n");
@@ -1821,6 +1825,7 @@ int liargs(argc, argv)
             if (!GetOption(IGNOREEOF))                      /* EOF, if !ignore    */
                 takelispexit();                             /* the exit else loop */
         }
+        return(0);
     }
 #else
 

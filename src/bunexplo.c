@@ -28,5 +28,6 @@ struct conscell *form;
             };
             xret(reverse(f),2);
        };
-  ERR: ierror("exploden");
+  ERR: ierror("exploden");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

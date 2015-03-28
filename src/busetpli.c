@@ -30,5 +30,6 @@ struct conscell *form;
               }
           }
        }
-       ierror("setplist");
+       ierror("setplist");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

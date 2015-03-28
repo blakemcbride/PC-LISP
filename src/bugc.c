@@ -26,5 +26,6 @@ struct conscell *form;
           SetLongVar("$gccount$",gccount);
           return(LIST(thold));    /* return value is 't' */
        }
-       ierror("gc");
+       ierror("gc");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

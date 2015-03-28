@@ -28,5 +28,6 @@ struct conscell *form;
                fret(temp2,1);
            };
        };
-       ierror("cons");
+       ierror("cons");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

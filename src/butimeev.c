@@ -35,5 +35,6 @@ struct conscell *form;
        if (t1us < 0) { t1s -= 1; t1us += 1000000; }
        diff = (float) t1s + (t1us / 1000000.0);
        return(LIST(newrealop(diff)));
-  er:  ierror("time-eval");
+  er:  ierror("time-eval");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

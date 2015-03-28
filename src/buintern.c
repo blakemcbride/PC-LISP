@@ -30,5 +30,6 @@ struct conscell *form;
                return(LIST(at));
            };
        };
-       ierror("intern");
+       ierror("intern");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

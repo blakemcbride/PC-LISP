@@ -17,5 +17,6 @@ struct conscell *form;
           if ((temp = form->carp) != NULL)
              if (temp->celltype == FIXATOM)
                 return(newintop((long)FIX(temp)->atom - 1L));
-       ierror("1-");
+       ierror("1-");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

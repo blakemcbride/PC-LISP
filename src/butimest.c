@@ -5,6 +5,7 @@
  */
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include "lisp.h"
 
 /*************************************************************************
@@ -27,5 +28,6 @@ struct conscell *form;
        len -= 1;
        if (s[len] == '\n') s[len] = '\0';    /* ctime may put a new line, get rid of it */
        return(LIST(insertstring(s)));
-er:    ierror("time-string");
+er:    ierror("time-string");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
  }

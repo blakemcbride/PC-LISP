@@ -11,6 +11,8 @@
 #  define _NFILE 128                         /* set the value to something reasonably big */
 #endif
 
+extern int close();
+
 /*************************************************************************
  ** lisp_opened is an array of booleans which are '1' if the file was   **
  ** opened by the LISP interpreter. It is updated when fopen is called  **

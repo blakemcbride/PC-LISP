@@ -242,7 +242,7 @@ int n;
  ** message, otherwise we extract the string from the table, format it,   **
  ** and dispatch the non returning function gerror().                     **
  ***************************************************************************/
-int syserror()
+void syserror()
 {   char buffer[256], *msg;
 #if 0 
     extern int sys_nerr,errno;        /* standard UNIX error message stuff */
@@ -282,6 +282,7 @@ struct exception *x;
         default       : gerror("unknown math exception occured");
     };
     gerror(s);
+    return 0;  /*  keep compiler happy  */
 }
 #endif
 
@@ -403,7 +404,7 @@ static void brktrap()                                     /* target of SIGINT in
     }
 }
 
-int brkhit()                                      /* this routine actually processes the INTERRUPT */
+void brkhit()                                      /* this routine actually processes the INTERRUPT */
 {   bkhitcount = 0;                               /* from the evaluator loop */
 #   if SIGINTWORKS
        signal(SIGINT,brktrap);                    /* reset for future signal catches */

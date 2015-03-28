@@ -19,5 +19,6 @@ struct conscell *form;
        {   if (form->cdrp == NULL)
                return(loadfile(fname) ? LIST(thold) : NULL);
        };
-       ierror("load/include");
+       ierror("load/include");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

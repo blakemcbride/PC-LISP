@@ -13,7 +13,8 @@ struct conscell *form;
           if (form->carp->celltype==CONSCELL)
               return(nreverse(form->carp));
        };
-       ierror("nreverse");
+       ierror("nreverse");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -27,6 +28,7 @@ struct conscell *form;
           if (form->carp->celltype==CONSCELL)
               return(reverse(form->carp));
        };
-       ierror("reverse");
+       ierror("reverse");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

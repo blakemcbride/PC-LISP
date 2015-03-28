@@ -32,5 +32,6 @@ struct conscell *form;
                 fret(val,1);
             };
        };
-       ierror("set");
+       ierror("set");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

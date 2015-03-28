@@ -5,6 +5,7 @@
  */
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include "lisp.h"
 
 /*************************************************************************
@@ -16,5 +17,6 @@ struct conscell *busystime(form)
 struct conscell *form;
 {      if (form == NULL)
            return(newintop(time(NULL)));
-       ierror("sys:time");
+       ierror("sys:time");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -17,5 +17,6 @@ struct conscell *form;
        {    if (form->carp->celltype == FILECELL)
                 return(LIST(PORT(form->carp)->fname));
        };
-       ierror("truename");
+       ierror("truename");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

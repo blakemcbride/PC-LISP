@@ -36,5 +36,6 @@ struct conscell *form;
                 }
             }
        }
-  er:  ierror("pairlis");
+  er:  ierror("pairlis");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

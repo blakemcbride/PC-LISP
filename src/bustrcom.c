@@ -25,8 +25,6 @@ struct conscell *bustrcomp(form)
           return(LIST(insertstring(work)));
       }
    }
-   ierror("strcomp");
+   ierror("strcomp");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }
-
-
-

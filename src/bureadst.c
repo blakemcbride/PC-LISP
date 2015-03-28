@@ -81,7 +81,8 @@ struct conscell *form;
        if (form == NULL) return(NULL);
        if (readstr(form, 1, &result))
            return(result);
-       ierror("readstr");
+       ierror("readstr");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -102,6 +103,7 @@ struct conscell *form;
        if (form->celltype != CONSCELL) goto er;
        if (readstr(form, 0, &result))
            return(result);
-  er:  ierror("readlist");
+  er:  ierror("readlist");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

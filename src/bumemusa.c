@@ -40,6 +40,7 @@ struct conscell *l;
               case CLISPCELL : return( (long) sizeof(struct clispcell) );
               default        : fatalerror("memusage");
        };
+       return 0L;  /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -52,5 +53,6 @@ struct conscell *bumemusage(form)
 struct conscell *form;
 {      if ((form != NULL)&&(form->cdrp == NULL))
             return(newintop(memoryusage(form->carp)));
-       ierror("memusage");
+       ierror("memusage");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

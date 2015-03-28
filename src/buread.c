@@ -43,5 +43,6 @@ struct conscell *form;
               };
           };
        };
-       ierror("read");
+       ierror("read");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

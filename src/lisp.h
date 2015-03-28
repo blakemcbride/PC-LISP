@@ -481,7 +481,7 @@ void stkovfl();
  ** put loop, and in the eval() function which is the core of all activity**
  ***************************************************************************/
 extern    int bkhitcount;
-extern    int brkhit();
+extern    void brkhit();
 #define   TEST_BREAK()  if (bkhitcount) brkhit()
 #define   BREAK_RESET() bkhitcount = 0
 
@@ -959,11 +959,31 @@ extern void    lifreelist();
 extern int     ScanSetLineNum();
 extern int     hash();
 extern int     CopyCellIfPossible();
-extern int     syserror();
+extern void    syserror();
 extern int     isalphatoken();
 extern void    ScanSetSynClassMacro();
 extern void    EnterTrace();
 extern void    ExitTrace();
+extern int     bu_byop_lookup_instruction();
+extern int     flatsize();
+extern int     bu_lookup_instruction();
+extern int     MixedTypeCompare();
+extern void    InstallBuiltInFunctions();
+extern int     eq();
+extern int     GetChar();
+extern int     liexpmem();
+extern void    bindtonil();
+extern void    bindlabel();
+extern int     loadfile();
+extern void    ScanFromBuffer();
+extern void    buresetasc();
+extern void    unwindscope();
+extern void    unmark();
+extern void    pushlexpr();
+extern void    poplexpr();
+extern int     liushash();
+extern void    bindingerror();
+extern void    deiniterrors();
 
 extern int     liargc;
 extern char  **liargv;

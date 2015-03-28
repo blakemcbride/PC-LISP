@@ -28,5 +28,6 @@ struct conscell *form;
             *d = '\0';
             return(LIST(CreateInternedAtom(work)));
        }
-  ERR: ierror("implode");
+  ERR: ierror("implode");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -38,5 +38,6 @@ struct conscell *form;
                }
            }
        }
-  ERR: ierror("gensym");
+       ierror("gensym");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

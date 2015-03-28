@@ -22,5 +22,6 @@ struct conscell *form;
             if (form->carp->celltype == CONSCELL)
                 return(LIST(ListToHunk(form->carp)));
        };
-       ierror("makhunk");
+       ierror("makhunk");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

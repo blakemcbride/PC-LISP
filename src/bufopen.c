@@ -25,7 +25,6 @@
 struct conscell *bufopen(form)
 struct conscell *form;
 {      char *fname, *fmode; FILE *fd,*fopen();
-       struct filecell *fcell;
        char name[MAXATOMSIZE + 1];
        if ((form != NULL)&&(GetString(form->carp,&fname))) {
            form = form->cdrp;
@@ -39,5 +38,6 @@ struct conscell *form;
                return(LIST(MakePort(fd,CreateInternedAtom(name))));
            }
        }
-       ierror("fileopen");
+       ierror("fileopen");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -19,6 +19,7 @@ struct conscell *buquote(form)
 struct conscell *form;
 {      if ((form != NULL)&&(form->cdrp == NULL))
             return(form->carp);
-       ierror("quote");
+       ierror("quote");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

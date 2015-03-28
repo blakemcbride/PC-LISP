@@ -36,5 +36,6 @@ struct conscell *form;
               return(l);
            };
        };
-  ERR: ierror("listarray");
+  ERR: ierror("listarray");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

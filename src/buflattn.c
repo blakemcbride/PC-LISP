@@ -139,6 +139,7 @@ struct conscell *buflatten(form)
        if ((form = form->carp) == NULL) return(NULL);
        if (form->celltype != CONSCELL) goto er;
        return(flatten(form));
-er:    ierror("flatten");
+er:    ierror("flatten");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

@@ -21,5 +21,6 @@ struct conscell *form;
                 return(newrealop((double)FIX(temp)->atom));
           };
        };
-       ierror("float");
+       ierror("float");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

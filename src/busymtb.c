@@ -132,7 +132,8 @@ struct hunkcell *busymtcreate(form)
 	   st_add(h, l->carp);                                     /* add element to the set */
        }
        fret(h,1);                                                  /* return built set */
-er:    ierror("symtab-create");
+er:    ierror("symtab-create");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -162,7 +163,8 @@ struct conscell *busymtlist(form)
 	   }
        }
        fret(out,1);                                             /* return built set */
-er:    ierror("symtab-list");
+er:    ierror("symtab-list");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -174,7 +176,7 @@ er:    ierror("symtab-list");
 struct conscell *busymtsize(form)
        struct conscell *form;
 {
-       struct conscell *n,*o;                                   /* output list */
+       struct conscell *o;                                      /* output list */
        struct hunkcell *h; int i;                               /* input symtab hunk */
        long int count = 0L;
        if ((form == NULL) || (form->cdrp != NULL)) goto er;     /* if arg error throw err */
@@ -188,7 +190,8 @@ struct conscell *busymtsize(form)
 	   }
        }
        return(newintop(count));                                 /* return tally */
-er:    ierror("symtab-size");
+er:    ierror("symtab-size");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -214,7 +217,8 @@ struct conscell *busymtmember(form)
 	       }
 	   }
        }
-er:    ierror("symtab-member");
+er:    ierror("symtab-member");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -253,7 +257,8 @@ struct hunkcell *busymtadd(form)
 	       }
 	   }
        }
-er:    ierror("symtab-add");
+er:    ierror("symtab-add");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -291,5 +296,6 @@ struct conscell *busymtremove(form)
 	       }
 	   }
        }
-er:    ierror("symtab-remove");
+er:    ierror("symtab-remove");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -25,7 +25,8 @@ struct conscell *bustrtrim(form)
           return(LIST(insertstring(work)));
       }
    }
-   ierror("strtrim");
+   ierror("strtrim");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }
 
 

@@ -37,5 +37,6 @@ struct conscell *form;
                };
            };
        };
-       ierror("nthcdr");
+       ierror("nthcdr");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

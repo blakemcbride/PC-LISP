@@ -28,6 +28,6 @@ struct conscell *butoupper(form)
            return(LIST(insertstring(work)));
        }
    }
-   ierror("toupper");
+   ierror("toupper");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }
-

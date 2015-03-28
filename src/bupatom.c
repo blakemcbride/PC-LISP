@@ -35,5 +35,6 @@ struct conscell *form;
           }
        }
        ierror("patom");
-IOERR: ioerror(p);
+IOERR: ioerror(p);  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

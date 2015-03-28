@@ -54,5 +54,6 @@ struct conscell *form;
        };
        xpop(2);
        return(retval);
-  ERR: ierror("PAR-setq");
+  ERR: ierror("PAR-setq");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

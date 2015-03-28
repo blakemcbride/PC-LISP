@@ -15,6 +15,7 @@ struct conscell *buhunk(form)
 struct conscell *form;
 {      if (form != NULL)
            return(LIST(ListToHunk(form)));
-       ierror("hunk");
+       ierror("hunk");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

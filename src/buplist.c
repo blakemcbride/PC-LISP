@@ -24,5 +24,6 @@ struct conscell *form;
                    return(topcopy(ALPHA(form)->proplist));
           };
        };
-       ierror("plist");
+       ierror("plist");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

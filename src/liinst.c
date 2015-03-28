@@ -376,7 +376,7 @@ void InstallSpecialAtoms()
  ** ----------------------------------------------------------------------- **
  ** NOTE:  Current Built In Function Count = 171  (170 + cadadar class)     **
  *****************************************************************************/
-InstallBuiltInFunctions()
+void InstallBuiltInFunctions()
 {
        funcinstall(FN_BUEVAL,buREPsopen ,"REP-socketopen",NULL);
        funcinstall(FN_BUEVAL,buabs ,"abs",NULL);

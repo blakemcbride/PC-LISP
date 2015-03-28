@@ -26,5 +26,6 @@ struct conscell *form;
        }
        if (isflt) return(newrealop(quot));
        return(newintop((long) quot));
-ERR:   ierror("quotient");
+ERR:   ierror("quotient");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

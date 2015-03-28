@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <pwd.h>
+#include <unistd.h>
 #include "lisp.h"
 
 /*
@@ -62,7 +63,8 @@ struct conscell *butildeexpand(form)
           return(LIST(insertstring(work)));
       }
    }
-er:ierror("tilde-expand");
+er:ierror("tilde-expand");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }
 
 

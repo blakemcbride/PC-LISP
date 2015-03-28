@@ -52,5 +52,6 @@ struct conscell *form;
                };
            };
        };
-  ERR: ierror("setsyntax");
+  ERR: ierror("setsyntax");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

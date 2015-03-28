@@ -17,6 +17,7 @@ struct conscell *bumacroexpand(form)
 struct conscell *form;
 {      if ((form != NULL)&&(form->cdrp == NULL))
            return(macroexpand(form->carp));
-       ierror("macroexpand");
+       ierror("macroexpand");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

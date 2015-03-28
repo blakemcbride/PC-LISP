@@ -17,4 +17,6 @@ struct conscell *form;
 {      if (form == NULL)                        /* check zero parameters */
            return(CopyOblist());
        ierror("oblist");                        /* more than zero parms */
+         /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

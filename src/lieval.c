@@ -56,7 +56,8 @@ struct conscell *buueval(form)
 struct conscell *form;
 {      if (form != NULL)
           return(eval(form->carp));
-       ierror("eval");
+       ierror("eval");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 
@@ -77,7 +78,8 @@ struct conscell *form;
                      return(apply(fn,largs));
            }
        }
-       ierror("apply");
+       ierror("apply");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -94,7 +96,8 @@ struct conscell *form;
            expush(form);
            exret(apply(func,args),1);
        }
-       ierror("funcall");
+       ierror("funcall");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -119,6 +122,8 @@ struct alphacell *at;
                printf("file %s could not be read to resolve autoload of atom %s\n", str, at->atom);
         }
         bindingerror(at->atom);               /* throw binding error */
+	  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -266,7 +271,8 @@ struct conscell *fn,*largs;
            case CLISPCELL:
                 xret(evalclisp(CLISP(fn)->code,CLISP(fn)->literal,largs),2);
        }
-       ierror("apply");
+       ierror("apply");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************

@@ -24,5 +24,6 @@ struct conscell *form;
        }
        *d = '\0';
        return(LIST(CreateUninternedAtom(work)));
-  ERR: ierror("uconcat");
+  ERR: ierror("uconcat");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

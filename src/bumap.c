@@ -82,7 +82,8 @@ struct conscell *form;
                 xret(reverse(last),4);
            }
        }
-  er:  ierror("mapcar");
+  er:  ierror("mapcar");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -145,7 +146,8 @@ struct conscell *form;
            }
            fret(ret,3);
        }
-  er:  ierror("mapc");
+  er:  ierror("mapc");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -179,7 +181,8 @@ struct conscell *form;
                 xret(reverse(last),3);
            }
        }
- er:   ierror("maplist");
+ er:   ierror("maplist");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -209,5 +212,6 @@ struct conscell *form;
            }
            fret(ret,2);
        }
-  er:  ierror("map");
+  er:  ierror("map");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -76,5 +76,6 @@ struct conscell *bureadln(form)
    if (rc == 1)
       return(LIST(insertstring(work)));
    ierror("readln");
-IO:ioerror(zapee);
+IO:ioerror(zapee);  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }

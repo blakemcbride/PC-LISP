@@ -13,7 +13,7 @@
  *************************************************************************/
 struct conscell *bulessp(form)
 struct conscell *form;
-{      double val,op; long temp;
+{      double val,op;
        if (form == NULL) return(LIST(thold));
        if (!GetFloat(form->carp,&val)) goto ERR;
        form = form->cdrp;
@@ -24,5 +24,6 @@ struct conscell *form;
             form = form->cdrp;
        };
        return(LIST(thold));
-ERR:   ierror("lessp");
+ERR:   ierror("lessp");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

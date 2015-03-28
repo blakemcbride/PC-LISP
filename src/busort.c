@@ -38,7 +38,8 @@ int flag;
     n = apply(f,n);                                     /* call function */
     xpop(3);                                            /* un GC protect */
     return(n != NULL);
-ER: ierror("sort|sortcar");
+ER: ierror("sort|sortcar");  /*  doesn't return  */
+    return 0;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -53,7 +54,7 @@ ER: ierror("sort|sortcar");
  ** sort in this case hence saving enourmouns amounts of time when there**
  ** are many duplicates in a list.                                      **
  *************************************************************************/
-partition(l1,mid,l2,l,f,flag)
+static int partition(l1,mid,l2,l,f,flag)
 struct conscell **l1,**mid,**l2,*l,*f;
 int flag;
 {   struct conscell *key,*ol1,*ol2,*temp; int allEq = 1;
@@ -142,7 +143,8 @@ struct conscell *form;
                };
           };
       };
-      ierror("sort");
+      ierror("sort");  /*  doesn't return  */
+      return NULL;   /*  keep compiler happy  */
 }
 
 /*************************************************************************
@@ -165,6 +167,7 @@ struct conscell *form;
                };
           };
       };
-      ierror("sortcar");
+      ierror("sortcar");  /*  doesn't return  */
+      return NULL;   /*  keep compiler happy  */
 }
 

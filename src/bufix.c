@@ -21,5 +21,6 @@ struct conscell *form;
                 return(newintop((long)REAL(temp)->atom));
           };
        };
-       ierror("fix");
+       ierror("fix");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

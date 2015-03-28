@@ -19,6 +19,7 @@ struct conscell *form;
            };
            return(NULL);
        };
-       ierror("hunkp");
+       ierror("hunkp");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

@@ -40,5 +40,6 @@ struct conscell *form;
               };
           };
        };
-       ierror("remprop");
+       ierror("remprop");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

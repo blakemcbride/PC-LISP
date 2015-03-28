@@ -14,7 +14,7 @@
 struct conscell *bustrpad(form)
    struct conscell *form;
 {
-   char *s, *w, work[MAXATOMSIZE];
+   char *s, work[MAXATOMSIZE];
    long int n; int m;
    if (form != NULL) {
        if (GetString(form->carp, &s)) {
@@ -32,6 +32,7 @@ struct conscell *bustrpad(form)
           }
        }
    }
-   ierror("strpad");
+   ierror("strpad");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }
 

@@ -19,5 +19,6 @@ struct conscell *form;
            else
                return(NULL);
        }
-       ierror("portp");
+       ierror("portp");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

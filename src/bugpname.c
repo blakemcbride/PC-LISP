@@ -19,5 +19,6 @@ struct conscell *form;
                return(LIST(insertstring(work))); /* when we insert */
            }
        };
-       ierror("get_pname");
+       ierror("get_pname");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

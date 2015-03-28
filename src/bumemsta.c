@@ -49,5 +49,6 @@ struct conscell *form;
 
            fret(t,2);
        }
-       ierror("memstat");
+       ierror("memstat");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -21,5 +21,6 @@ struct conscell *form;
                 return(LIST(CreateInternedAtom(val)));
           };
        };
-       ierror("getenv");
+       ierror("getenv");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

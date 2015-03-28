@@ -31,5 +31,6 @@ struct conscell *form;
                return(NULL);
            };
        };
-       ierror("listify");
+       ierror("listify");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

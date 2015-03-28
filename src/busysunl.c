@@ -18,5 +18,6 @@ struct conscell *form;
        {    if (GetString(form->carp,&name))
                 return(newintop((long)unlink(name)));
        };
-       ierror("sys:unlink");
+       ierror("sys:unlink");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

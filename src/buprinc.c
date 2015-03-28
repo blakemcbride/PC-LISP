@@ -36,5 +36,6 @@ struct conscell *form;
           }
        }
        ierror("princ");
-IOERR: ioerror(p);
+IOERR: ioerror(p);  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

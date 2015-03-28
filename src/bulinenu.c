@@ -29,5 +29,6 @@ struct conscell *form;
                return(NULL);
            }
        }
-       ierror("line-num");
+       ierror("line-num");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

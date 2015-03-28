@@ -39,7 +39,7 @@ static int next_spec(specin, specout)
        | Now enter the validation loop to find the end of the %<stuff>{d...} string and establish
        | its type.
        */
-       for( ; *s++ = *t ; *t++) {
+       for( ; *s++ = *t ; t++) {
 	   switch(*t) {
                case '%' :
                   *s = '\0';
@@ -151,7 +151,8 @@ struct conscell *buscanf(form)
        if (form->cdrp) goto er;
        zapee = stdin;
        return(do_scanf(fscanf,stdin,spec));
-er:    ierror("scanf");
+er:    ierror("scanf");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -171,6 +172,7 @@ struct conscell *bufscanf(form)
        p->state = 1;                                              /* set new state to reading */
        zapee = p->atom;
        return(do_scanf(fscanf,p->atom,spec));
-er:    ierror("fscanf");
+er:    ierror("fscanf");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

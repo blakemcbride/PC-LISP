@@ -46,5 +46,6 @@ struct conscell *form;
        return(expr);
 
    er: ierror("printstack");
-IOERR: ioerror(port);
+IOERR: ioerror(port);  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

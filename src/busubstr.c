@@ -52,5 +52,6 @@ struct conscell *form;
                 return(NULL);
             }
        }
-  ERR: ierror("substring");
+  ERR: ierror("substring");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

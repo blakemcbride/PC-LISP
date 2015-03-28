@@ -110,7 +110,8 @@ struct conscell *form;
       /*
        | Something wrong with the arguments.
        */
-  er:  ierror("*select");
+  er:  ierror("*select");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 

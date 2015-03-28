@@ -17,5 +17,6 @@ struct conscell *bustrlen(form)
    if ((form != NULL)&&(form->cdrp == NULL))
       if (GetString(form->carp, &s))
           return(LIST(newintop((long)strlen(s))));
-   ierror("strlen");
+   ierror("strlen");  /*  doesn't return  */
+   return NULL;   /*  keep compiler happy  */
 }

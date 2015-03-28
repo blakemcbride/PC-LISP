@@ -162,5 +162,6 @@ struct hunkcell *base;
             };
  TFTM:      gerror("array: too few/many subscripts provided");
        };
-       gerror("array: subscript(s) missing");
+       gerror("array: subscript(s) missing");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

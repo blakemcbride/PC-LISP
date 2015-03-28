@@ -16,5 +16,6 @@ struct conscell *form;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f))
               return(newrealop(sin(f)));
-       ierror("sin");
+       ierror("sin");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

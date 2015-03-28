@@ -60,7 +60,7 @@ static void PutErrString();
  ** errset, the value of the second optional parameter to errset which   **
  ** controls the printing of the error message.                          **
  **************************************************************************/
-PushCatchStack(stack,x)
+static void PushCatchStack(stack,x)
 struct alphacell *stack;
 struct conscell *x;
 {   struct conscell *temp;
@@ -74,7 +74,7 @@ struct conscell *x;
  ** Pop an expression off the stack of bindings associated with special  **
  ** atom 'stack'. Must return NULL if the stack is empty.                **
  **************************************************************************/
-struct conscell *PopCatchStack(stack)
+static struct conscell *PopCatchStack(stack)
 struct alphacell *stack;
 {   struct conscell *r;
     if ((r = stack->valstack) == NULL) return(NULL);
@@ -467,7 +467,7 @@ struct conscell *l; int IsArg;
          }
          return;
      }
-ERR: fatalerror("UnEval");
+     fatalerror("UnEval");
 }
 
 /**************************************************************************

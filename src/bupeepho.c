@@ -146,5 +146,6 @@ ok:
       /*
        | Throw error assembling instructions.
        */
-er:    ierror("ph-optimize");
+er:    ierror("ph-optimize");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

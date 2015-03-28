@@ -5,6 +5,7 @@
  */
 #include <stdio.h>
 #include <math.h>
+#include <unistd.h> /* for sleep & usleep  */
 #include "lisp.h"
 
 /*************************************************************************
@@ -33,5 +34,6 @@ struct conscell *form;
               }
           }
        }
-       ierror("sleep");
+       ierror("sleep");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

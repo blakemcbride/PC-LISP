@@ -18,5 +18,6 @@ struct conscell *form;
               if (f < 0.0) goto er;
               return(newrealop(sqrt(f)));
           }
- er:   ierror("sqrt");
+ er:   ierror("sqrt");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

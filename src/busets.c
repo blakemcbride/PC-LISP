@@ -126,7 +126,8 @@ static struct hunkcell *st_make(l)
        }
        if (siz == 0) h = NULL;                                  /* if empty set return nil */
        fret(h,1);                                               /* return built set */
-er:    ierror("set-create");
+er:    ierror("set-create");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -140,7 +141,8 @@ struct hunkcell *busetcreate(form)
 {
        if ((form == NULL)||(form->cdrp != NULL)) goto er;
        return(st_make(form->carp));
-er:    ierror("set-create");
+er:    ierror("set-create");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -174,7 +176,8 @@ struct conscell *busetlist(form)
            }
        }
        fret(out,2);                                             /* return built set */
-er:    ierror("set-list");
+er:    ierror("set-list");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -210,7 +213,8 @@ struct hunkcell *busetor(form)
        }
        if (siz == 0) h = NULL;                                  /* if empty set return nil */
        fret(h,1);                                               /* return built set */
-er:    ierror("set-or");
+er:    ierror("set-or");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -277,7 +281,8 @@ struct hunkcell *busetand(form)
        }
        if (siz == 0) r = NULL;
        fret(r,2);
-er:    ierror("set-and");
+er:    ierror("set-and");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -351,7 +356,8 @@ struct hunkcell *busetdiff(form)
        */
        if (siz == 0) d = NULL;
        fret(d,3);
-er:    ierror("set-diff");
+er:    ierror("set-diff");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 
 /*
@@ -399,6 +405,7 @@ struct conscell *busetmember(form)
            if (equal(s->carp, e)) return(LIST(thold));
        }
        return(NULL);
-er:    ierror("set-member");
+er:    ierror("set-member");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
 

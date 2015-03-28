@@ -30,5 +30,6 @@ struct conscell *form;
            *d = '\0';
            return(LIST(CreateUninternedAtom(work)));
        }
-  ERR: ierror("maknam");
+  ERR: ierror("maknam");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

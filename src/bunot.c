@@ -15,5 +15,6 @@ struct conscell *form;
           else
                return(NULL);
        };
-       ierror("not");
+       ierror("not");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

@@ -26,5 +26,6 @@ struct conscell *form;
                  return(getprop(atm,indic));
             }
        }
-       ierror("get");
+       ierror("get");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }

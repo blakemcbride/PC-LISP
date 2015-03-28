@@ -22,5 +22,6 @@ struct conscell *form;
               };
               return(newintop(val));
           };
-       ierror("fact");
+       ierror("fact");  /*  doesn't return  */
+       return NULL;   /*  keep compiler happy  */
 }
