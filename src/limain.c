@@ -1076,7 +1076,7 @@ char  *s;double *flonum; long int *fixnum;
  ****************************************************************************/
 struct conscell *takeatom()
 {      if ISREAL()
-       {  struct conscell *work; double flonum; long int fixnum;
+       {  struct conscell *work; double flonum; long int fixnum=0L;
           push(work);
           if (ConvertToBest(buff,&flonum,&fixnum) == REALATOM)
           {   work = LIST(new(REALATOM));

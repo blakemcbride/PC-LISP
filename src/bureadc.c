@@ -59,6 +59,7 @@ struct conscell *form;
           };
        };
        ierror("readc");
+       return NULL;  /*  kepp compiler happy  */
 IOERR: ioerror(fp);  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */
 }

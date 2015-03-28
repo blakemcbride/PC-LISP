@@ -23,7 +23,7 @@
  ****************************************************************************/
 struct conscell *ConstructLetArgList(alist)
 struct conscell *alist;
-{      struct conscell *nalist,*temp1,*temp2,*back;
+{      struct conscell *nalist,*temp1,*temp2,*back=NULL;  /*  back=NULL only needed to keep compiler happy  */
        push(nalist);                               /* NOTE nalist = NULL now!*/
        for(;alist!=NULL;alist=alist->cdrp)
        {   if ((temp1 = alist->carp) == NULL) ierror("defun|def");

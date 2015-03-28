@@ -45,6 +45,7 @@ struct conscell *form;
        | garbage collecting these cells inadvertantly.
        */
        push(rh);
+       rl = NULL;  /*  only needed to keep compiler happy  */
        for(l1s = l1; l1s != NULL; l1s = l1s->cdrp) {
             for(l2s = l2; l2s != NULL; l2s = l2s->cdrp)
                 if (eq(l1s->carp, l2s->carp)) break;

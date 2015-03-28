@@ -919,7 +919,6 @@ extern void    ResetTrace();
 extern void    SetOption();
 extern int     scan();
 extern void    serror();
-extern int     strcmp();
 extern void    printatom();
 extern void    marklist();
 extern void    ioerror();

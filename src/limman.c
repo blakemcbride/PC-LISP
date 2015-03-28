@@ -702,7 +702,7 @@ char *f,*t; int s;
 static void AdjustCurrentHeap(n)
 int n;
 {       register int i;
-        register char *m;
+        register char *m=NULL;
 
         for(i=CurrentBlock+1; i <= HeapLastBlock; i++)
             if (((struct HeapControl *)hblock[i])->free > n)

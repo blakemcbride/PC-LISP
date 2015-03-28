@@ -2414,7 +2414,7 @@ er:    cerror("time-eval: wrong # of args", args);
 static void bu_compile_declare(args, self)
        struct conscell  *args;
        struct alphacell *self;
-{      struct conscell  *arg, *type, *symbol;
+{      struct conscell  *arg, *type, *symbol=NULL;
        for( ; args != NULL; args = args->cdrp) {
             if (args->celltype != CONSCELL) goto er1;
             arg = args->carp;
