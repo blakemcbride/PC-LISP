@@ -7,7 +7,7 @@ Currently, the system has been tested on:
 	Mac (tested on Yosemite)
 	Microsoft Windows
 
-It should run fine on 32 bit Linux.  A Windows port is underway.
+It should run fine on 32 bit Linux. 
 
 To build on Linux or Mac:
 
