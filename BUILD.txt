@@ -23,7 +23,7 @@ You will end up with a file name "pc-lisp".  That is the system.
 
 Upon execution of pc-lisp, it will attempt to load a file named
 "pclisprc.l" in the current directory if it exists.  Any desired
-initial state of the machine cna be placed there.  You may want to
+initial state of the machine can be placed there.  You may want to
 copy the file "pc-lisp.l" to "pclisprc.l" as a good starting point.
 
 The manual is located in the file pc-lisp.doc
