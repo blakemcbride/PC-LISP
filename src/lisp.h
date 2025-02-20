@@ -212,7 +212,7 @@
 #define   SIGINTWORKS             1
 #define   SIGFPEWORKS             1
 #define   HASFCLOSEALL            1             /* has fcloseall() in stdio */
-#define   HASMATHERRFUNCTION      1
+#define   HASMATHERRFUNCTION      0
 #define   WANTERRNOTESTING        1             /* check errno after calls */
 #define   GRAPHICSAVAILABLE       0
 #define   NEEDNLAFTERBREAKEXIT    1

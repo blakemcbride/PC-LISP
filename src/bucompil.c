@@ -589,6 +589,7 @@ static void bu_declare_func(symbol, func)
  */
 static void bu_declare_nocompile(symbol, linenum)
        struct conscell *symbol;
+       unsigned linenum;
 {
        struct conscell *typel;
        if ((symbol == NULL)||(symbol->celltype != ALPHAATOM)) return;

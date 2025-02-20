@@ -251,7 +251,7 @@ int c;
  *************************************************************************/
 
 int liScanLineNum = 1;
-int ScanSetLineNum(n) { int old = liScanLineNum; liScanLineNum = n; return(old); }
+int ScanSetLineNum(int n) { int old = liScanLineNum; liScanLineNum = n; return(old); }
 
 /*************************************************************************
  ** nexttoken(b): is just a Deterministic Finite state Autotata. We     **

@@ -330,6 +330,7 @@ static double getdouble(sink)
  */
 static char *getstring(sink,n)
      SINK *sink;
+     int n;
 {    static char s[MAXATOMSIZE]; register char *t = s; int m = MAXATOMSIZE-1;
      if (n != 0) {
          while(*t++ = getc(sink->fp)) {
