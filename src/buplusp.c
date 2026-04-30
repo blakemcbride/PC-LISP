@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buplusp:(plusp number) Return t if number is positive.              **
  *************************************************************************/
-struct conscell *buplusp(form)
-struct conscell *form;
+struct conscell * buplusp(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

@@ -11,8 +11,7 @@
  ** bugreap (greaterp -numbers-) Return t if the numbers are strictly   **
  ** decreasing from left to right.                                      **
  *************************************************************************/
-struct conscell *bugreap(form)
-struct conscell *form;
+struct conscell * bugreap(struct conscell *form)
 {      double val,op;
        if (form == NULL) return(LIST(thold));
        if (!GetFloat(form->carp,&val)) goto ERR;

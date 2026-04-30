@@ -12,8 +12,7 @@
  ** buremprop: Will remove the property named from the property list of **
  ** the given atom. ie (remprop 'peter 'lastname)                       **
  *************************************************************************/
-struct conscell *buremprop(form)
-struct conscell *form;
+struct conscell * buremprop(struct conscell *form)
 {      struct alphacell *at;
        struct conscell  *ex,**prev,*next;
        if (form != NULL)

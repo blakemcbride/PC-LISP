@@ -16,8 +16,7 @@
  ** normally so just read from stdin. Otherwise read from the parameter **
  ** port given, and return if appropriage the optional end of file flag **
  *************************************************************************/
-struct conscell *bureadc(form)
-struct conscell *form;
+struct conscell * bureadc(struct conscell *form)
 {      FILE *fp; struct conscell *rexp; char work[2]; int c;
        struct filecell *p;
        if (form == NULL)

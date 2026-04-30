@@ -12,8 +12,7 @@
  ** read the size from the hunk cell field 'size' and turn it into a    **
  ** fixnum cell, then return it.                                        **
  *************************************************************************/
-struct conscell *buhsize(form)
-struct conscell *form;
+struct conscell * buhsize(struct conscell *form)
 {      if ((form != NULL)&&(form->carp != NULL)&&(form->cdrp == NULL))
        {    if (form->carp->celltype == HUNKATOM)
                 return(newintop((long)HUNK(form->carp)->size ));

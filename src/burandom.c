@@ -11,8 +11,7 @@
  ** then multiplying by the limit, then by the sign and returning it.   **
  ** Note rand() is assumed to return numbers in 0..2^15-1 as per UNIX.  **
  *************************************************************************/
-struct conscell *burandom(form)
-struct conscell *form;
+struct conscell * burandom(struct conscell *form)
 {      long limit; int sign; double temp; extern int rand();
        if (form != NULL)
        {  if ((form->carp != NULL)&&(form->cdrp == NULL))

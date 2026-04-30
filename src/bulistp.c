@@ -11,8 +11,7 @@
 /*************************************************************************
  ** bulistp : Given a parameter return 't' if a list or 'nil otherwise. **
  *************************************************************************/
-struct conscell *bulistp(form)
-struct conscell *form;
+struct conscell * bulistp(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
        {   if ((form->carp == NULL)||(form->carp->celltype == CONSCELL))
                return(LIST(thold));

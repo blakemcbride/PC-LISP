@@ -14,8 +14,7 @@
  ** arg to printlist. This is most useful when dumping tracebacks that  **
  ** should contain the <**> form.                                       **
  *************************************************************************/
-struct conscell *buprintstack(form)
-struct conscell *form;
+struct conscell * buprintstack(struct conscell *form)
 {      struct conscell *expr, *subexpr;
 	struct filecell *port=NULL;  /*  NULL assignment to keep compiler happy  */
 
@@ -46,6 +45,6 @@ struct conscell *form;
        return(expr);
 
    er: ierror("printstack");
-IOERR: ioerror(port);  /*  doesn't return  */
+IOERR: ioerror(port ? port->atom : NULL);  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */
 }

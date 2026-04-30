@@ -13,13 +13,12 @@
  ** result does not overflow the work buffer. The resulting atom is not **
  ** and interned atom.                                                  **
  *************************************************************************/
-struct conscell *buuconcat(form)
-struct conscell *form;
+struct conscell * buuconcat(struct conscell *form)
 {      char work[MAXATOMSIZE], *d,*s; int n = MAXATOMSIZE;
        if (form == NULL) return(NULL);
        for(d = work; form != NULL; form = form->cdrp, d--)
        {   if (!GetNumberOrString(form->carp,&s)) goto ERR;
-           while(*d++ = *s++)
+           while((*d++ = *s++) != '\0')
                if (--n <= 0) gerror("atom too big");
        }
        *d = '\0';

@@ -14,8 +14,7 @@
  ** we are not at the break-level HoldStackOperation will show the last **
  ** held chunk of the mark stack, this may be empty.                    **
  *************************************************************************/
-struct  conscell *bushowstack(form)
-struct  conscell *form;
+struct  conscell * bushowstack(struct  conscell *form)
 {       if (form == NULL)
         {   HoldStackOperation(DUMP_STACK);
             return(LIST(thold));

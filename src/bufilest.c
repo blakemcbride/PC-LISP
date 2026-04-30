@@ -9,8 +9,7 @@
  ** from the files stat strucuture. If the file cannot be found it will **
  ** return nil.                                                         **
  *************************************************************************/
-struct conscell *bufilestat(form)
-struct conscell *form;
+struct conscell * bufilestat(struct conscell *form)
 {      char *path; struct stat s_buf;
        struct conscell *h, *l;
        if ((form != NULL)&&(form->cdrp == NULL)) {

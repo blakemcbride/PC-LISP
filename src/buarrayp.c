@@ -10,9 +10,8 @@
 /*************************************************************************
  ** (arrayp Sexp) Returns t if Sexp is an array, otherwise returns nil  **
  *************************************************************************/
-struct conscell *buarrayp(form)
-struct conscell *form;
-{      struct arraycell *temp;
+struct conscell * buarrayp(struct conscell *form)
+{      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if (ExtractArray(form->carp,&temp))
               return(LIST(thold));

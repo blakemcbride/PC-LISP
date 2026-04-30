@@ -7,8 +7,7 @@
 #include <math.h>
 #include "lisp.h"
 
-struct conscell *bunot(form)
-struct conscell *form;
+struct conscell * bunot(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
        {  if (form->carp == NULL)
                return((struct conscell *)thold);

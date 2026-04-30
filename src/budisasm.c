@@ -44,8 +44,7 @@
  | and also during run time trace debugging of the byte coded interpreter hence the reason for
  | which it is non static..
  */
-char *bu_disassemble_1_inst(fp, ip, literal)
-       FILE *fp; char *ip; struct conscell **literal;
+char * bu_disassemble_1_inst(FILE *fp, char *ip, struct conscell **literal)
 {
 	int kind, n, *cntr, lit=0, lit2=0, op = *ip; char *name;  /* 0 assignment to keep compiler happy  */
 
@@ -94,8 +93,7 @@ char *bu_disassemble_1_inst(fp, ip, literal)
 /*
  | The actual (disassemble clisp [port]) primitive body.
  */
-struct conscell *budisassemble(form)
-       struct conscell *form;
+struct conscell * budisassemble(struct conscell *form)
 {
        struct clispcell *clisp;
        struct conscell  **l;
@@ -164,11 +162,12 @@ struct conscell *budisassemble(form)
        for(n = 0; n < n_lit; l++, n++) {
            fprintf(fp,"[%04d] = ", n);
            prettyprint(*l, 10, 10, fp);
-           if ((*l) && ((*l)->celltype == CLISPCELL))
+           if ((*l) && ((*l)->celltype == CLISPCELL)) {
                 if (*l != LIST(clisp))
                     fprintf(fp, "   <--- recursive disassembly follows below (see LIT[%d])", n);
                 else
                     fprintf(fp, "   <--- self");
+           }
            fprintf(fp,"\n");
        }
 

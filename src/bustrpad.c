@@ -11,8 +11,7 @@
  |  This function returns its argument string padded to n characters
  |  long.
  */
-struct conscell *bustrpad(form)
-   struct conscell *form;
+struct conscell * bustrpad(struct conscell *form)
 {
    char *s, work[MAXATOMSIZE];
    long int n; int m;

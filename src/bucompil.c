@@ -67,20 +67,20 @@
  <16>     ZPUSH    <lit>          | inverse of above, used for unwinding shallow bindings during throw.
 */
 
-typedef void (*fptr)();
+typedef void (*fptr)(struct conscell *args, struct alphacell *func);
 
 
-static long bu_litref();
-static void bu_compile_list();
-static void bu_compile_func_args();
-static void bu_compile_literal();
-static int  bu_compile_arg_list();
-static void bu_compile_func_list();
-static void bu_compile_lambda_body();
-static void bu_compile_nlambda_body();
-static void bu_compile_lexpr_body();
-static void bu_compile_cadr();
-static fptr bu_lookup_compile_func();
+static long bu_litref(struct conscell *lit);
+static void bu_compile_list(struct conscell *l);
+static void bu_compile_func_args(struct alphacell *func, struct conscell *args, int linenum, struct conscell *funcargs);
+static void bu_compile_literal(struct conscell *lit);
+static int  bu_compile_arg_list(struct conscell *l);
+static void bu_compile_func_list(struct conscell *func, struct conscell *args);
+static void bu_compile_lambda_body(struct conscell *args, struct alphacell *self);
+static void bu_compile_nlambda_body(struct conscell *args, struct alphacell *self);
+static void bu_compile_lexpr_body(struct conscell *args, struct alphacell *self);
+static void bu_compile_cadr(char *name, struct conscell *args);
+static fptr bu_lookup_compile_func(char *name);
 
 
 /*
@@ -115,9 +115,7 @@ static struct conscell *errlist = NULL;
  | of a (reason loc <expr> ...) which is then placed on the front of the errlist which will
  | eventually make its way onto into the returned $$clisp expression as the second element.
  */
-static void cerror(msg, loc)
-       char *msg;
-       struct conscell *loc;
+static void cerror(char *msg, struct conscell *loc)
 {
        struct conscell *head, *n;
        push(head);
@@ -161,8 +159,7 @@ static void cerror(msg, loc)
  | contain as the second element of its returned list a list of all the errors in all subcompilations
  | below it.
  */
-static void bu_hoist_errors(clisp)
-       struct conscell *clisp;
+static void bu_hoist_errors(struct conscell *clisp)
 {
        register struct conscell *l;
        if (!clisp || (clisp->celltype != CONSCELL)) return;
@@ -180,17 +177,20 @@ static void bu_hoist_errors(clisp)
  | We use the symtab functions from C as they are extremely useful for
  | working with labels and literals.
  */
-extern struct conscell *busymtcreate(), *busymtmember(), *busymtadd(), *busymtlist();
+extern struct hunkcell *busymtcreate(struct conscell *form);
+extern struct conscell *busymtmember(struct conscell *form);
+extern struct hunkcell *busymtadd(struct conscell *form);
+extern struct conscell *busymtlist(struct conscell *form);
 
 /*
  | Reverse utility used for destructive expression list generation.
  */
-extern struct conscell *nreverse();
+/* nreverse is now declared in lisp.h */
 
 /*
  | The compiler is used recursively so we must declare it forward.
  */
-struct conscell *bucompile();
+struct conscell *bucompile(struct conscell *form);
 
 /*
  | This is a pointer to the ATOM which when calls are detected to will cause compile
@@ -221,8 +221,7 @@ static struct conscell *all, *eml;
 /*
  | EMIT1ATM - will add to the current output instruction the atom 'e'.
  */
-static void EMIT1ATM(s)
-       char *s;
+static void EMIT1ATM(char *s)
 {      struct conscell *t = new(CONSCELL);
        t->cdrp = eml;
        eml = t;
@@ -232,8 +231,7 @@ static void EMIT1ATM(s)
 /*
  | EMIT1FIX - will add to the current output instruction the fixnum 'e'.
  */
-static void EMIT1FIX(e)
-       long e;
+static void EMIT1FIX(long e)
 {      struct conscell *t = new(CONSCELL);
        t->cdrp = eml;
        eml = t;
@@ -243,8 +241,7 @@ static void EMIT1FIX(e)
 /*
  | EMIT1ATM - will add to the current output instruction the compiler label 'e'
  */
-static void EMIT1LAB(d)
-       int d;
+static void EMIT1LAB(int d)
 {
        char name[32];
        sprintf(name,"l%d",d);
@@ -254,8 +251,7 @@ static void EMIT1LAB(d)
 /*
  | EMIT1ATM - will output a complete compiler label prefixed with 'l'.
  */
-static void EMITLABEL(e)
-       int e;
+static void EMITLABEL(int e)
 {      struct conscell *t = new(CONSCELL);
        char name[32];
        t->cdrp = all;
@@ -326,8 +322,7 @@ static int  return_stack_free = MAX_RETURN_STACK;
  | Push label onto the return stack pushing a 0 means that in the current context
  | return is not allowed.
  */
-static void return_push(label)
-       int label;
+static void return_push(int label)
 {      if (return_stack_free <= 0)
            cerror("return: not allowed in this context", NULL);
        *return_stack_top++ = label;
@@ -364,8 +359,7 @@ static int return_called()
  | If no args are provided we must return NIL from expression being compiled
  | otherwise the argument has already been compiled.
  */
-static void bu_compile_return(args)
-       struct conscell *args;
+static void bu_compile_return(struct conscell *args, struct alphacell *self)
 {      int *top; int label;
        if (return_stack_free >= MAX_RETURN_STACK) goto er;
        if (args == NULL) { EMIT1ATM("PUSHNIL"); EMITEND(); }
@@ -389,8 +383,7 @@ er:    cerror("return: illegal; not allowed in this context",NULL);
  |
  | hence we must xpush the argument to protect it against G.C.
  */
-static long bu_litref(lit)
-       struct conscell *lit;
+static long bu_litref(struct conscell *lit)
 {
        struct conscell c1, c2, c3, *pair; long ret;
        xpush(lit);                                         /* must mark for GC */
@@ -398,10 +391,10 @@ static long bu_litref(lit)
        c1.carp = c2.cdrp = NULL;
        c1.cdrp = &c2;
        c2.carp = LIST(thold);
-       if (litset == NULL) litset = busymtcreate(&c1);     /* (symtab-create NULL 't) { we want 'eq' collisions} */
+       if (litset == NULL) litset = LIST(busymtcreate(&c1));     /* (symtab-create NULL 't) { we want 'eq' collisions} */
        c1.carp = litset;
        c2.carp = lit;
-       if (pair = busymtmember(&c1))
+       if ((pair = busymtmember(&c1)) != NULL)
            ret = FIX(pair->cdrp)->atom;
        else {
            nextLit += 1;
@@ -430,8 +423,7 @@ static struct conscell *typeset = NULL;
  | to indicate a lambda of N arguments. eg (defun fred(x) ..) has (fred . lambda1) as an entry
  | in the typeset table.
  */
-static int bu_lambda_n_type(t)
-       struct conscell *t;
+static int bu_lambda_n_type(struct conscell *t)
 {
        int n;
        if (t == NULL) return(-1);
@@ -461,8 +453,7 @@ static int bu_lambda_n_type(t)
  | above and a 't' cdr indicates that the symbol is NOT to be compiled. NULL indicates that
  | compile is to occur.
  */
-static int bu_type_clash(t1, typel)
-       struct conscell *t1, *typel;
+static int bu_type_clash(struct conscell *t1, struct conscell *typel)
 {
        struct conscell *t2; long m1, m2;
        if ((typel == NULL)||(typel->celltype != CONSCELL)) return(0);     /* should not happen */
@@ -505,13 +496,12 @@ static int bu_type_clash(t1, typel)
  | lambdaN represents the function type and the T | NULL is a flag indicating if compilation is desired
  | or not.
  */
-static struct conscell *bu_declare_symbol(symbol, linenum)
-       struct conscell *symbol; int linenum;
+static struct conscell * bu_declare_symbol(struct conscell *symbol, int linenum)
 {
        struct conscell c1, c2, c3, *pair;
        c1.celltype = CONSCELL;
        c1.carp = c1.cdrp = NULL;
-       if (typeset == NULL) typeset = busymtcreate(&c1);
+       if (typeset == NULL) typeset = LIST(busymtcreate(&c1));
        c1.carp = typeset;
        c1.cdrp = &c2;
        c2.celltype = CONSCELL;
@@ -539,8 +529,7 @@ static struct conscell *bu_declare_symbol(symbol, linenum)
  | number. This function returns the real type so that if fexpr's are called the argument
  | compilation will be suppressed.
  */
-static struct conscell *bu_declare(symbol, type, linenum)
-       struct conscell *symbol, *type; int linenum;
+static struct conscell * bu_declare(struct conscell *symbol, struct conscell *type, int linenum)
 {
        struct conscell *typel;
        if ((symbol == NULL)||(symbol->celltype != ALPHAATOM)) return NULL;
@@ -565,8 +554,7 @@ static struct conscell *bu_declare(symbol, type, linenum)
  | An symbol is being compiled as a function type. Look at the 'func' type and determine what type to add
  | to the symbol table for this function body.
  */
-static void bu_declare_func(symbol, func)
-       struct conscell *symbol, *func;
+static void bu_declare_func(struct conscell *symbol, struct conscell *func)
 {
        struct conscell *type;
        if ((func == NULL) || (func->celltype != CONSCELL)) return;
@@ -587,9 +575,7 @@ static void bu_declare_func(symbol, func)
  | T. We lookup this symbol and if it exists we set the nocompile flat to T. If it does not exist we
  | enter it and set its type to NULL.
  */
-static void bu_declare_nocompile(symbol, linenum)
-       struct conscell *symbol;
-       unsigned linenum;
+static void bu_declare_nocompile(struct conscell *symbol, unsigned linenum)
 {
        struct conscell *typel;
        if ((symbol == NULL)||(symbol->celltype != ALPHAATOM)) return;
@@ -617,8 +603,7 @@ static void bu_pretype()
  | the cdr of the type is of the form (nlambda . t) otherwise if it is of the form (nlambda)
  | then the nocompile option is not set.
  */
-static int bu_want_compile(symbol)
-       struct conscell *symbol;
+static int bu_want_compile(struct conscell *symbol)
 {
        struct conscell c1, c2, *pair;
        if (typeset == NULL) return(1);
@@ -636,10 +621,9 @@ static int bu_want_compile(symbol)
  | that is the literal reference to the atom. At the same time store the atom in the
  | literals set under the given literal number.
  */
-static void bu_compile_atom(a)
-       struct alphacell *a;
+static void bu_compile_atom(struct conscell *a)
 {
-       EMIT1FIX((long)bu_litref(a));
+       EMIT1FIX((long)bu_litref(LIST(a)));
 }
 
 /*
@@ -663,8 +647,7 @@ static char *bu_sifs[] = { "*", "+", "-", "/", "1+", "1-", "<", "=", ">", "abs",
  | composition of the above functions will be (eval'ed) to fold it to its minimum form before
  | compiling.
  */
-static int bu_is_sef_bu(l)
-       struct conscell *l;
+static int bu_is_sef_bu(struct conscell *l)
 {
        register char *satom;
        register int mid, r, lo, hi;
@@ -687,8 +670,7 @@ yes:   return(1);
  | Constant function expressions MUST have at least 1 argument otherwise
  | they have side effects (ie read etc.)
  */
-static int bu_is_a_constant(l)
-       struct conscell *l;
+static int bu_is_a_constant(struct conscell *l)
 {
        if ((l == NULL) || (l == LIST(thold))) goto yes;
        switch(l->celltype) {
@@ -713,8 +695,7 @@ yes:   return(1);
  | this is compiled as a literal directly. After folding the expression may require
  | quoting so add (quote <expr>) if not a trivial leaf.
  */
-static struct conscell *bu_fold_constant_expr(l)
-       struct conscell *l;
+static struct conscell * bu_fold_constant_expr(struct conscell *l)
 {
        struct conscell *o, *p;
        if ((l == NULL) || (l->celltype != CONSCELL)) goto no;
@@ -739,8 +720,7 @@ static struct conscell *bu_fold_constant_expr(l)
  | a sub function, for fixnums and flonums we generate code to push the fixnum
  | or flonum on the stack respectively.
  */
-static void bu_compile_expr(l)
-       struct conscell *l;
+static void bu_compile_expr(struct conscell *l)
 {
        struct conscell cc;
 
@@ -809,7 +789,7 @@ static void bu_compile_expr(l)
            switch(l->celltype) {
                case ALPHAATOM :
                     EMIT1ATM("PUSHLV");
-                    bu_compile_atom(l);
+                    bu_compile_atom(LIST(l));
                     EMITEND();
                     break;
                case CONSCELL :
@@ -841,8 +821,7 @@ cleanup:
  | the special case of a macro by first expanding the macro and then compiling
  | the resulting expression.
  */
-static void bu_compile_list(l)
-       struct conscell *l;
+static void bu_compile_list(struct conscell *l)
 {
        struct conscell *func;
 
@@ -867,14 +846,14 @@ static void bu_compile_list(l)
                     xpop(1);
                 } else
                     if (ALPHA(func) == lambdahold)
-                       bu_compile_lambda_body(l->cdrp);
+                       bu_compile_lambda_body(l->cdrp, NULL);
                     else
                        if (ALPHA(func) == nlambdahold)
-                          bu_compile_nlambda_body(l->cdrp);
+                          bu_compile_nlambda_body(l->cdrp, NULL);
                        else if (ALPHA(func) == lexprhold)
-                                bu_compile_lexpr_body(l->cdrp);
+                                bu_compile_lexpr_body(l->cdrp, NULL);
                             else
-                                bu_compile_func_args(func, l->cdrp, l->linenum, l);
+                                bu_compile_func_args(ALPHA(func), l->cdrp, l->linenum, l);
                 break;
            case CONSCELL:
                 bu_compile_func_list(func, l->cdrp);
@@ -902,11 +881,7 @@ er2:   cerror("(t ..): t is not a function", l);
  | of arguments. When a call is made to type nlambda the arguments become one
  | big literal which is pushed and a call is made with one argument.
  */
-static void bu_compile_func_args(func, args, linenum, funcargs)
-       struct alphacell *func;
-       struct conscell *args;
-       int linenum;
-       struct conscell *funcargs;
+static void bu_compile_func_args(struct alphacell *func, struct conscell *args, int linenum, struct conscell *funcargs)
 {
        fptr fa = bu_lookup_compile_func(func->atom);
        char *call = "CALL";
@@ -916,7 +891,7 @@ static void bu_compile_func_args(func, args, linenum, funcargs)
            bu_compile_cadr(func->atom, args);
        else {
            long int n = liulength(args);
-           struct conscell *type = bu_declare(func, LIST(newintop(n)), linenum);
+           struct conscell *type = bu_declare(LIST(func), LIST(newintop(n)), linenum);
            if (type == LIST(nlambdahold)) {
                struct conscell *arg;
                call = "CALLNF";                                  /* use non freeing call for NLAMBDA */
@@ -948,7 +923,7 @@ static void bu_compile_func_args(func, args, linenum, funcargs)
            if ((ALPHA(func) != rcall_atom) || (type == LIST(nlambdahold))) {
                EMIT1ATM(call);
                EMIT1FIX((long)n);
-               EMIT1FIX((long)bu_litref(func));
+               EMIT1FIX((long)bu_litref(LIST(func)));
            } else {
                EMIT1ATM("RCALL");             /* rcall faster for lambda but not allwed for nlambda */
                EMIT1FIX((long)n);             /* because it free's its arguments */
@@ -967,8 +942,7 @@ er1:   cerror("dotted pair not allowed as arg to nlambda", args);
  | a literal on the stack. Each unique literal is referenced by a number so we
  | generate PUSHL <n> where <n> is the literals reference.
  */
-static void bu_compile_literal(lit)
-       struct conscell *lit;
+static void bu_compile_literal(struct conscell *lit)
 {
        long litref;
        if (!lit) goto er;
@@ -992,8 +966,7 @@ er:    cerror("literal: a literal is required but not found", lit);
  | with N arguments pushed on it. This function will return the number of
  | arguments on the stack so that the caller can use it for reference.
  */
-static int bu_compile_arg_list(l)
-       struct conscell *l;
+static int bu_compile_arg_list(struct conscell *l)
 {
        int n = 0;
        while(l != NULL) {
@@ -1021,14 +994,13 @@ static int bu_compile_arg_list(l)
  | are not processed in the bodies and when a simple atom will compile to a
  | push of its value.
  */
-static void bu_compile_bodies(l)
-       struct conscell *l;
+static void bu_compile_bodies(struct conscell *l)
 {
        if (l == NULL) { EMIT1ATM("PUSHNIL"); EMITEND(); }
        while(l) {
            if (l->celltype != CONSCELL) goto er;
            bu_compile_expr(l->carp);
-           if (l = l->cdrp) { EMIT1ATM("POP"); EMITEND(); }
+           if ((l = l->cdrp) != NULL) { EMIT1ATM("POP"); EMITEND(); }
        }
        return;
 er:    cerror("list of statements: may not contain a dotted pair", l);
@@ -1055,8 +1027,7 @@ er:    cerror("list of statements: may not contain a dotted pair", l);
  | scope level or the go is not allowed, ie we do not allow (go)'s outside or
  | into another list of bodies.
  */
-static void bu_compile_prog_bodies(bods)
-       struct conscell *bods;
+static void bu_compile_prog_bodies(struct conscell *bods)
 {
        struct conscell *e,*l,*scope; long label;
        push(scope);
@@ -1119,8 +1090,7 @@ er:    cerror("prog: bodies may not contain dotted pair", bods);
  |                                                POP
  |                                                ...
  */
-static void bu_compile_cond(args)
-       struct conscell *args;
+static void bu_compile_cond(struct conscell *args, struct alphacell *self)
 {
        int special, elt_exit, cond_exit = NEWLABEL()
        struct conscell *elt;
@@ -1130,7 +1100,7 @@ static void bu_compile_cond(args)
            if (!elt) goto er2;
            if (elt->celltype != CONSCELL) goto er3;
            bu_compile_expr(elt->carp);                          /* code to compute guard value */
-           if (special = (elt->cdrp == NULL)) {                 /* if no body must DUP expr value as return value */
+           if ((special = (elt->cdrp == NULL))) {                /* if no body must DUP expr value as return value */
                EMIT1ATM("DUP"); EMITEND();                      /* of cond if value is non nil */
            }
            elt_exit = NEWLABEL()
@@ -1170,8 +1140,7 @@ er3:   cerror("(cond ... ?? ...): non list case not permitted", args);
  |                                                SPOP y
  |
  */
-static void bu_compile_disembodied_lambda(func, args)
-       struct conscell *func, *args;
+static void bu_compile_disembodied_lambda(struct conscell *func, struct conscell *args)
 {
        int nfargs, naargs;
        struct conscell *s;
@@ -1185,13 +1154,13 @@ static void bu_compile_disembodied_lambda(func, args)
        for(s = func->carp; s != NULL; s = s->cdrp) {
            if ((s->carp == NULL) || (s->carp == LIST(thold)) || (s->carp->celltype != ALPHAATOM)) goto er3;
            EMIT1ATM("SPUSHNIL");
-           bu_compile_atom(s->carp);
+           bu_compile_atom(LIST(s->carp));
            EMITEND();
        }
        for(s = func->carp; s != NULL; s = s->cdrp) {
            bu_compile_expr(args->carp);
            EMIT1ATM("SETQ");
-           bu_compile_atom(s->carp);
+           bu_compile_atom(LIST(s->carp));
            EMITEND();
            EMIT1ATM("POP"); EMITEND();
            args = args->cdrp;
@@ -1200,7 +1169,7 @@ static void bu_compile_disembodied_lambda(func, args)
        if (func->carp) { EMIT1ATM("ZPOP"); EMITEND(); }
        for(s = func->carp; s != NULL; s = s->cdrp) {
            EMIT1ATM("SPOP");
-           bu_compile_atom(s->carp);
+           bu_compile_atom(LIST(s->carp));
            EMITEND();
        }
        return_pop();
@@ -1228,8 +1197,7 @@ er3:   cerror("( (lambda(nil/t/etc.) ) arg1 arg2 ..): invalid formal argument", 
  |                                                ZPOP
  |                                                SPOP <l>
  */
-static void bu_compile_disembodied_nlambda(func, args)
-       struct conscell *func, *args;
+static void bu_compile_disembodied_nlambda(struct conscell *func, struct conscell *args)
 {
        int naargs = 0;
        struct conscell *work;
@@ -1253,16 +1221,16 @@ static void bu_compile_disembodied_nlambda(func, args)
        if ((work == NULL) || (work == LIST(thold)) || (work->celltype != ALPHAATOM)) goto er3;
        emitZPUSH();
        EMIT1ATM("SPUSHNIL");
-       bu_compile_atom(work);
+       bu_compile_atom(LIST(work));
        EMITEND();
        EMIT1ATM("SETQ");
-       bu_compile_atom(work);
+       bu_compile_atom(LIST(work));
        EMITEND();
        EMIT1ATM("POP"); EMITEND();
        bu_compile_bodies(func->cdrp);
        EMIT1ATM("ZPOP"); EMITEND();
        EMIT1ATM("SPOP");
-       bu_compile_atom(work);
+       bu_compile_atom(LIST(work));
        EMITEND();
        return_pop();
        return;
@@ -1290,8 +1258,7 @@ er3:   cerror("( (nlambda(nil/t/etc.) ) arg1 arg2 ..): invalid formal argument",
  | unusual form into an (apply <clisp> (arg1 ... argN)) and simply call the bucompile
  | function recursively to produce the <clisp> literal for the lexpr form.
  */
-static void bu_compile_disembodied_lexpr(func, args)
-       struct conscell *func, *args;
+static void bu_compile_disembodied_lexpr(struct conscell *func, struct conscell *args)
 {
        int naargs; struct conscell c1, *clisp;
        if (func->cdrp == NULL) goto er1;
@@ -1315,8 +1282,7 @@ er1:   cerror("( (lexpr) arg1 arg2 ..): badly formed lexpr being applied", func)
  | i.e. ( (lambda (x y) (+ x y))  10 20)
  |      ( (nlambda(l) ...) )
  */
-static void bu_compile_func_list(func, args)
-       struct conscell *func, *args;
+static void bu_compile_func_list(struct conscell *func, struct conscell *args)
 {
        struct alphacell *at = ALPHA(func->carp);
        if (at == lambdahold)
@@ -1345,8 +1311,7 @@ er:    cerror("not a valid disembodied function type", func);
  |                                                SPOP <lit>
  |                                                SPOP <lit>
  */
-static void bu_compile_lambda_body(args)
-       struct conscell *args;
+static void bu_compile_lambda_body(struct conscell *args, struct alphacell *self)
 {
        struct conscell *l = args;
        if (l == NULL) goto er;
@@ -1357,14 +1322,14 @@ static void bu_compile_lambda_body(args)
            if (l->carp->celltype != ALPHAATOM) goto er;
            if (l->carp == LIST(thold)) goto er2;
            EMIT1ATM("SPUSHWARG");
-           bu_compile_atom(l->carp);
+           bu_compile_atom(LIST(l->carp));
            EMITEND();
        }
        bu_compile_bodies(args->cdrp);
        if (args->carp) { EMIT1ATM("ZPOP"); EMITEND(); }
        for(l = args->carp; l != NULL; l = l->cdrp) {
            EMIT1ATM("SPOP");
-           bu_compile_atom(l->carp);
+           bu_compile_atom(LIST(l->carp));
            EMITEND();
        }
        return;
@@ -1383,8 +1348,7 @@ er2:   cerror("(lambda()..): t cannot be rebound by using as formal argument", l
  | )                                              .. body ..
  |                                                SPOP <lit>
  */
-static void bu_compile_nlambda_body(args)
-       struct conscell *args;
+static void bu_compile_nlambda_body(struct conscell *args, struct alphacell *self)
 {
        struct conscell *l = args;
        if (l == NULL) goto er;
@@ -1396,14 +1360,14 @@ static void bu_compile_nlambda_body(args)
            if (l->carp == LIST(thold)) goto er2;
            emitZPUSH();
            EMIT1ATM("SPUSHARGS");
-           bu_compile_atom(l->carp);
+           bu_compile_atom(LIST(l->carp));
            EMITEND();
        }
        bu_compile_bodies(args->cdrp);
        if (l) {
            EMIT1ATM("ZPOP"); EMITEND();
            EMIT1ATM("SPOP");
-           bu_compile_atom(l->carp);
+           bu_compile_atom(LIST(l->carp));
            EMITEND();
        }
        return;
@@ -1422,8 +1386,7 @@ er2:   cerror("(nlambda()..): t cannot be rebound by using as formal argument", 
  |                                                SPOP      _N_    ; pop the binding of _N_ and return top of stack
  |  )
  */
-static void bu_compile_lexpr_body(args)
-       struct conscell *args;
+static void bu_compile_lexpr_body(struct conscell *args, struct alphacell *self)
 {
        struct conscell *l = args;
        if (l == NULL) goto er;
@@ -1435,14 +1398,14 @@ static void bu_compile_lexpr_body(args)
            if (l->carp == LIST(thold)) goto er2;
            emitZPUSH();
            EMIT1ATM("SPUSHLEX");
-           bu_compile_atom(l->carp);
+           bu_compile_atom(LIST(l->carp));
            EMITEND();
        }
        bu_compile_bodies(args->cdrp);
        if (l) {
            EMIT1ATM("ZPOP"); EMITEND();
            EMIT1ATM("SPOP");
-           bu_compile_atom(l->carp);
+           bu_compile_atom(LIST(l->carp));
            EMITEND();
        }
        return;
@@ -1461,8 +1424,7 @@ er2:   cerror("(lexpr()..): t cannot be rebound by using as formal argument", l)
  |                                                PUSHFIX 20
  |                                                SETQ b
  */
-static void bu_compile_setq(args)
-       struct conscell *args;
+static void bu_compile_setq(struct conscell *args, struct alphacell *self)
 {
        struct conscell *var;
        if (args == NULL) goto er1;
@@ -1475,7 +1437,7 @@ static void bu_compile_setq(args)
             if (args == NULL) goto er1;
             bu_compile_expr(args->carp);
             EMIT1ATM("SETQ");
-            bu_compile_atom(var);
+            bu_compile_atom(LIST(var));
             EMITEND();
             if ((args = args->cdrp) != NULL) {
                 EMIT1ATM("POP"); EMITEND();
@@ -1512,8 +1474,7 @@ er4:   cerror("setq: nil may not be rebound", args);
  |                   L2:      POP               ; pop the null list on stack
  |                            SPOP a            ; unwind scope of a and exit with return value
  */
-static void bu_compile_foreach(args)
-       struct conscell *args;
+static void bu_compile_foreach(struct conscell *args, struct alphacell *self)
 {
        struct conscell *lvar;
        int elt_top  = NEWLABEL()
@@ -1527,7 +1488,7 @@ static void bu_compile_foreach(args)
        if (lvar == LIST(thold)) goto er4;
        EMIT1ATM("PUSHNIL"); EMITEND();
        emitZPUSH();
-       EMIT1ATM("SPUSHNIL"); bu_compile_atom(lvar); EMITEND();
+       EMIT1ATM("SPUSHNIL"); bu_compile_atom(LIST(lvar)); EMITEND();
        args = args->cdrp;
        if (args == NULL) goto er5;
        bu_compile_expr(args->carp);
@@ -1539,7 +1500,7 @@ static void bu_compile_foreach(args)
        EMIT1ATM("SETQ"); EMIT1FIX((long)bu_litref(lvar)); EMITEND();
        EMIT1ATM("POP"); EMITEND();
        EMIT1ATM("CDR"); EMITEND();
-       if (args = args->cdrp) {
+       if ((args = args->cdrp) != NULL) {
            bu_compile_prog_bodies(args);
            EMIT1ATM("STORR"); EMIT1FIX(-2L); EMITEND();
        }
@@ -1580,8 +1541,7 @@ er5:   cerror("foreach: badly structured, requires a 2nd argument", args);
  |                   L2:
  |
  */
-static void bu_compile_while(args)
-       struct conscell *args;
+static void bu_compile_while(struct conscell *args, struct alphacell *self)
 {
        int elt_top  = NEWLABEL()
        int elt_exit = NEWLABEL()
@@ -1592,7 +1552,7 @@ static void bu_compile_while(args)
        EMITLABEL(elt_top);
        bu_compile_expr(args->carp);
        EMIT1ATM("JNIL"); EMIT1LAB(elt_exit); EMITEND();
-       if (args = args->cdrp) {
+       if ((args = args->cdrp) != NULL) {
            bu_compile_prog_bodies(args);
            EMIT1ATM("STORR"); EMIT1FIX(-1L); EMITEND();
        }
@@ -1619,8 +1579,7 @@ er:    cerror("while: wrong # of args", args);
  |                                                SPOP b
  |
  */
-static void bu_compile_prog(args)
-       struct conscell *args;
+static void bu_compile_prog(struct conscell *args, struct alphacell *self)
 {
        int elt_retn = NEWLABEL()
        struct conscell *s;
@@ -1633,7 +1592,7 @@ static void bu_compile_prog(args)
            if (s->carp->celltype != ALPHAATOM) goto er3;
            if (s->carp == LIST(thold)) goto er4;
            EMIT1ATM("SPUSHNIL");
-           bu_compile_atom(s->carp);
+           bu_compile_atom(LIST(s->carp));
            EMITEND();
        }
        if (args->cdrp)
@@ -1646,7 +1605,7 @@ static void bu_compile_prog(args)
        if (args->carp) { EMIT1ATM("ZPOP"); EMITEND(); }
        for(s = args->carp; s != NULL; s = s->cdrp) {
            EMIT1ATM("SPOP");
-           bu_compile_atom(s->carp);
+           bu_compile_atom(LIST(s->carp));
            EMITEND();
        }
        return_pop();
@@ -1672,8 +1631,7 @@ er5:   cerror("prog: second argument must be a list of atoms", s);
  | in a file and is only there so that the error handling mechanisms
  | of liszt.l can figure out which file the source came from.
  */
-static void bu_compile_file_prog(args)
-       struct conscell *args;
+static void bu_compile_file_prog(struct conscell *args, struct alphacell *self)
 {
        if (args == NULL) goto er1;
        args = args->cdrp;
@@ -1698,8 +1656,7 @@ er1:   cerror("$file-prog$: wrong # of args", args);
  |                   L3:      STORR -2          ; return target if called
  |                   L2:      POP               ; pop the loop count exposing return value
  */
-static void bu_compile_repeat(args)
-       struct conscell *args;
+static void bu_compile_repeat(struct conscell *args, struct alphacell *self)
 {
        int elt_top  = NEWLABEL()
        int elt_exit = NEWLABEL()
@@ -1737,12 +1694,11 @@ er1:   cerror("repeat: wrong # of args", args);
  |                                  PUSHFIX 20
  |                                  PUSHFIX 10
  */
-static void bu_compile_parsetq_values(args)
-       struct conscell *args;
+static void bu_compile_parsetq_values(struct conscell *args, struct alphacell *self)
 {
        if (args == NULL) return;
        if ((args = args->cdrp) == NULL) return;
-       bu_compile_parsetq_values(args->cdrp);
+       bu_compile_parsetq_values(args->cdrp, NULL);
        bu_compile_expr(args->carp);
 }
 
@@ -1758,8 +1714,7 @@ static void bu_compile_parsetq_values(args)
  |                                  POP
  |                                  SETQ c
  */
-static void bu_compile_parsetq(args)
-       struct conscell *args;
+static void bu_compile_parsetq(struct conscell *args, struct alphacell *self)
 {
        struct conscell *var;
 
@@ -1772,7 +1727,7 @@ static void bu_compile_parsetq(args)
        | Recursively generate the parsetq value expressions in reverse order.
        | Using a recursive function to create the reverse output code.
        */
-       bu_compile_parsetq_values(args);
+       bu_compile_parsetq_values(args, NULL);
 
       /*
        | Now generate the setq's in the order they occur in the input expression.
@@ -1786,7 +1741,7 @@ static void bu_compile_parsetq(args)
             if (var->celltype != ALPHAATOM) goto er3;
             if (var == LIST(thold)) goto er4;
             EMIT1ATM("SETQ");
-            bu_compile_atom(var);
+            bu_compile_atom(LIST(var));
             EMITEND();
             if ((args = args->cdrp) != NULL) {
                 EMIT1ATM("POP"); EMITEND();
@@ -1815,8 +1770,7 @@ er4:   cerror("PAR-setq/do: t may not be rebound", args);
  |                              L1: PUSHNIL
  |                              L2:
  */
-static void bu_compile_and(args)
-       struct conscell *args;
+static void bu_compile_and(struct conscell *args, struct alphacell *self)
 {
        struct conscell *cdrp;
        if (!args) {
@@ -1826,7 +1780,7 @@ static void bu_compile_and(args)
            int l2 = NEWLABEL()
            while(args != NULL) {
                 bu_compile_expr(args->carp);
-                if (cdrp = args->cdrp) {
+                if ((cdrp = args->cdrp) != NULL) {
                     EMIT1ATM("JNIL"); EMIT1LAB(l1); EMITEND();
                     args = cdrp;
                 } else {
@@ -1858,8 +1812,7 @@ static void bu_compile_and(args)
  |                                  JNNIL l1:
  |                              L1:
  */
-static void bu_compile_or(args)
-       struct conscell *args;
+static void bu_compile_or(struct conscell *args, struct alphacell *self)
 {
        struct conscell *cdrp;
        if (!args) {
@@ -1870,7 +1823,7 @@ static void bu_compile_or(args)
                 bu_compile_expr(args->carp);
                 EMIT1ATM("DUP"); EMITEND();
                 EMIT1ATM("JNNIL"); EMIT1LAB(l1); EMITEND();
-                if (cdrp = args->cdrp) {
+                if ((cdrp = args->cdrp) != NULL) {
                     EMIT1ATM("POP"); EMITEND();
                     args = cdrp;
                 } else {
@@ -1911,8 +1864,7 @@ static void bu_compile_or(args)
  | NOTE: a special case occurs when there is no (t <body>) default case. When this occurs
  | we generate a default case of (t nil).
  */
-static void bu_compile_caseq(aargs)
-       struct conscell *aargs;
+static void bu_compile_caseq(struct conscell *aargs, struct alphacell *self)
 {
        int i, has_t_case, nbod, origLabel;
        struct conscell *lits, *next, *args = aargs;
@@ -1988,9 +1940,7 @@ er5:   cerror("caseq: dotted pair not allowed in tag list", lits);
  |                                  CDR
  |                                  CAR
  */
-static void bu_compile_cadr(name, args)
-       char *name;
-       struct conscell *args;
+static void bu_compile_cadr(char *name, struct conscell *args)
 {      char *s; char msg[50];
        int n = strlen(name);
        if (bu_compile_arg_list(args) != 1) goto er;
@@ -2017,8 +1967,7 @@ er:    if (n + 20 >= sizeof(msg)) name = "c{a|d}+r";
  | corresponds to the user label. See the compile_prog_bodies code for more
  | details.
  */
-static void bu_compile_go(args)
-       struct conscell *args;
+static void bu_compile_go(struct conscell *args, struct alphacell *self)
 {
        struct alphacell *label; long scope;
        if ((args == NULL) || (args->cdrp != NULL)) goto er1;
@@ -2031,9 +1980,9 @@ static void bu_compile_go(args)
        return;
 er1:   cerror("go: wrong # of args", args);
        return;
-er2:   cerror("go: target not an atom", label);
+er2:   cerror("go: target not an atom", LIST(label));
        return;
-er3:   cerror("go: target out of scope of closest enclosing prog, while, foreach or repeat", label);
+er3:   cerror("go: target out of scope of closest enclosing prog, while, foreach or repeat", LIST(label));
        return;
 }
 
@@ -2041,8 +1990,7 @@ er3:   cerror("go: target out of scope of closest enclosing prog, while, foreach
  | Compile (car <expr>)
  | ~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_car(args)
-       struct conscell *args;
+static void bu_compile_car(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2055,8 +2003,7 @@ er:    cerror("car: wrong # of args", args);
  | Compile (cdr <expr>)
  | ~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_cdr(args)
-       struct conscell *args;
+static void bu_compile_cdr(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2069,8 +2016,7 @@ er:    cerror("cdr: wrong # of args", args);
  | Compile (cons <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_cons(args)
-       struct conscell *args;
+static void bu_compile_cons(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 2) goto er;
@@ -2083,8 +2029,7 @@ er:    cerror("cons: wrong # of args", args);
  | Compile (eq <expr> <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_eq(args)
-       struct conscell *args;
+static void bu_compile_eq(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 2) goto er;
@@ -2097,8 +2042,7 @@ er:    cerror("eq: wrong # of args", args);
  | Compile (zerop <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_zerop(args)
-       struct conscell *args;
+static void bu_compile_zerop(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2111,8 +2055,7 @@ er:    cerror("zerop: wrong # of args", args);
  | Compile (1+ <expr>)
  | ~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_inc(args)
-       struct conscell *args;
+static void bu_compile_inc(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2125,8 +2068,7 @@ er:    cerror("1+: wrong # of args", args);
  | Compile (length <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_length(args)
-       struct conscell *args;
+static void bu_compile_length(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2139,8 +2081,7 @@ er:    cerror("length: wrong # of args", args);
  | Compile (1- <expr>)
  | ~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_dec(args)
-       struct conscell *args;
+static void bu_compile_dec(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2153,8 +2094,7 @@ er:    cerror("1-: wrong # of args", args);
  | Compile (null <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_null(args)
-       struct conscell *args;
+static void bu_compile_null(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2167,8 +2107,7 @@ er:    cerror("null: wrong # of args", args);
  | Compile (not <expr>)
  | ~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_not(args)
-       struct conscell *args;
+static void bu_compile_not(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2181,8 +2120,7 @@ er:    cerror("not: wrong # of args", args);
  | Compile (listp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_listp(args)
-       struct conscell *args;
+static void bu_compile_listp(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2195,8 +2133,7 @@ er:    cerror("listp: wrong # of args", args);
  | Compile (fixp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_fixp(args)
-       struct conscell *args;
+static void bu_compile_fixp(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2209,8 +2146,7 @@ er:    cerror("fixp: wrong # of args", args);
  | Compile (hunkp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_hunkp(args)
-       struct conscell *args;
+static void bu_compile_hunkp(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2223,8 +2159,7 @@ er:    cerror("hunkp: wrong # of args", args);
  | Compile (atom <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_atomp(args)
-       struct conscell *args;
+static void bu_compile_atomp(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2237,8 +2172,7 @@ er:    cerror("atom: wrong # of args", args);
  | Compile (numbp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_numbp(args)
-       struct conscell *args;
+static void bu_compile_numbp(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2251,8 +2185,7 @@ er:    cerror("numbp: wrong # of args", args);
  | Compile (floatp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_floatp(args)
-       struct conscell *args;
+static void bu_compile_floatp(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2265,8 +2198,7 @@ er:    cerror("floatp: wrong # of args", args);
  | Compile (stringp <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_stringp(args)
-       struct conscell *args;
+static void bu_compile_stringp(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2279,8 +2211,7 @@ er:    cerror("stringp: wrong # of args", args);
  | Compile (arg <expr>)
  | ~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_arg(args)
-       struct conscell *args;
+static void bu_compile_arg(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2293,8 +2224,7 @@ er:    cerror("arg: wrong # of args", args);
  | Compile (arg? <expr> <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_argQ(args)
-       struct conscell *args;
+static void bu_compile_argQ(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 2) goto er;
@@ -2307,8 +2237,7 @@ er:    cerror("arg?: wrong # of args", args);
  | Compile (listify <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_listify(args)
-       struct conscell *args;
+static void bu_compile_listify(struct conscell *args, struct alphacell *self)
 {
        int n = bu_compile_arg_list(args);
        if (n != 1) goto er;
@@ -2321,8 +2250,7 @@ er:    cerror("listify: wrong # of args", args);
  | Compile (quote <expr>)
  | ~~~~~~~~~~~~~~~~~~~~~~
  */
-static void bu_compile_quote(args)
-       struct conscell *args;
+static void bu_compile_quote(struct conscell *args, struct alphacell *self)
 {
        if (!args || args->cdrp) goto er;
        if (args->carp == NULL) {
@@ -2342,9 +2270,7 @@ er:    cerror("quote: wrong # of args", args);
  |     <expr2>                                CALL 1, <errset>|<catch>
  |     CALL 2, <errset>|<catch>
  */
-static void bu_compile_errset_or_catch(args, self)
-       struct conscell  *args;
-       struct alphacell *self;
+static void bu_compile_errset_or_catch(struct conscell *args, struct alphacell *self)
 {
        struct conscell c1, *clisp; int n;
        n = liulength(args);
@@ -2362,7 +2288,7 @@ static void bu_compile_errset_or_catch(args, self)
           } else if (args == LIST(thold)) {
               EMIT1ATM("PUSHT"); EMITEND();
           } else {                              /* must quote it because errset will eval */
-              bu_compile_literal(quotehold);
+              bu_compile_literal(LIST(quotehold));
               bu_compile_expr(args);            /* and it has already been compiled. */
               EMIT1ATM("PUSHNIL"); EMITEND();
               EMIT1ATM("CONS"); EMITEND();
@@ -2371,7 +2297,7 @@ static void bu_compile_errset_or_catch(args, self)
        }
        EMIT1ATM("CALL");
        EMIT1FIX((long) n);
-       EMIT1FIX((long) bu_litref(self));
+       EMIT1FIX((long) bu_litref(LIST(self)));
        EMITEND();
        return;
 er:    cerror("errset/catch: wrong # of args", args);
@@ -2383,9 +2309,7 @@ er:    cerror("errset/catch: wrong # of args", args);
  |     PUSHL <compiled_expr_literal>
  |     CALL 1, <time-eval>
  */
-static void bu_compile_time_eval(args, self)
-       struct conscell  *args;
-       struct alphacell *self;
+static void bu_compile_time_eval(struct conscell *args, struct alphacell *self)
 {
        struct conscell c1, *clisp;
        if (liulength(args) != 1) goto er;
@@ -2397,7 +2321,7 @@ static void bu_compile_time_eval(args, self)
        bu_compile_literal(clisp);
        EMIT1ATM("CALL");
        EMIT1FIX(1L);
-       EMIT1FIX((long) bu_litref(self));
+       EMIT1FIX((long) bu_litref(LIST(self)));
        EMITEND();
        return;
 er:    cerror("time-eval: wrong # of args", args);
@@ -2412,9 +2336,7 @@ er:    cerror("time-eval: wrong # of args", args);
  | an error will generate the appropriate errors. If a nocompile call then we call
  | the declare_nocompile to set the appropriate flags in the symbol table.
  */
-static void bu_compile_declare(args, self)
-       struct conscell  *args;
-       struct alphacell *self;
+static void bu_compile_declare(struct conscell *args, struct alphacell *self)
 {      struct conscell  *arg, *type, *symbol=NULL;
        for( ; args != NULL; args = args->cdrp) {
             if (args->celltype != CONSCELL) goto er1;
@@ -2449,8 +2371,7 @@ er3:   cerror("declare: expecting an atom found", symbol);
  | atom. We must save the original body first though so that we can
  | restore it later.
  */
-static void bu_compile_defun(args, self)
-       struct conscell *args, *self;
+static void bu_compile_defun(struct conscell *args, struct alphacell *self)
 {
        struct conscell c1, c2, *form, *func_hold;
        struct alphacell *atm;
@@ -2459,7 +2380,7 @@ static void bu_compile_defun(args, self)
        atm = ALPHA(args->carp);
        if (!atm || (atm->celltype != ALPHAATOM)) goto er2;
 
-       want_compile = bu_want_compile(atm);                            /* ask if we are to compile this or not */
+       want_compile = bu_want_compile(LIST(atm));                            /* ask if we are to compile this or not */
        push(form);
        n = 1;
        fntype_hold = atm->fntype;
@@ -2469,12 +2390,12 @@ static void bu_compile_defun(args, self)
            n += 1;
        }
        budefun(args);
-       atmref = bu_litref(atm);                                        /* allocate a reference# for this atom */
+       atmref = bu_litref(LIST(atm));                                        /* allocate a reference# for this atom */
        if ( atm->fntype == FN_USEXPR ) {                               /* if user expression compile it, if macro we're done */
            c1.celltype = c2.celltype = CONSCELL;                       /* now create ( (lambda(xx)...) atm ) for pass to compile */
            c2.carp = LIST(atm); c2.cdrp = NULL;                        /* using stack based conscell's c1 & c2 to reduce GC requirements */
            c1.carp = LIST(atm->func); c1.cdrp = &c2;
-           bu_declare_func(atm, atm->func);                            /* declare the type for future type checking */
+           bu_declare_func(LIST(atm), LIST(atm->func));                            /* declare the type for future type checking */
            if (want_compile) {
                form = bucompile(&c1);                                  /* compile it for insertion into literals */
                bu_hoist_errors(form);                                  /* remove errors from clisp and append to errlist */
@@ -2485,7 +2406,7 @@ static void bu_compile_defun(args, self)
                EMITEND();                                              /* generate the PUTCLISP of the code body */
            } else {                                                    /* if not compiling generate an (apply 'defun '(args...)) */
                EMIT1ATM("PUSHL");
-                  bu_compile_atom(self);                               /* PUSHL <defun> */
+                  bu_compile_atom(LIST(self));                               /* PUSHL <defun> */
                EMITEND();                                              /* PUSHL <args> */
                EMIT1ATM("PUSHL");
                   EMIT1FIX(bu_litref(args));
@@ -2495,7 +2416,7 @@ static void bu_compile_defun(args, self)
                   bu_compile_atom(LIST(CreateInternedAtom("apply")));
                EMITEND();
            }
-           atm->func = ((struct conscell *(*)())(func_hold));          /* restore the original function binding */
+           atm->func = ((struct conscell *(*)(struct conscell *))(func_hold));          /* restore the original function binding */
            atm->fntype = fntype_hold;                                  /* and its type */
        } else {
            if (atm->fntype == FN_USMACRO) {                            /* a MACRO was defun'ed so we will compile */
@@ -2503,7 +2424,7 @@ static void bu_compile_defun(args, self)
                bu_compile_atom(LIST(atm));                             /* PUSHL <atom> */
                EMITEND();
                EMIT1ATM("PUSHL");
-               EMIT1FIX(bu_litref(atm->func));                         /* PUSHL <func body> */
+               EMIT1FIX(bu_litref(LIST(atm->func)));                         /* PUSHL <func body> */
                EMITEND();
                EMIT1ATM("CALL");                                       /* CALL 2, <putd> */
                EMIT1FIX(2);
@@ -2535,15 +2456,14 @@ er2:   cerror("defun: first argument must be an atom", args);
  | time but at the same time we interpret it now so that the macro is
  | properly defined for compile time expansion.
  */
-static void bu_compile_defmacro(args, self)
-       struct conscell *args, *self;
+static void bu_compile_defmacro(struct conscell *args, struct alphacell *self)
 {
        struct alphacell *atm;
        if (!args) goto er;
        atm = ALPHA(args->carp);
        if (!atm || (atm->celltype != ALPHAATOM)) goto er2;
-       apply(self, args);
-       bu_declare_func(atm, atm->func);                         /* declare the type for future type checking */
+       apply(LIST(self), args);
+       bu_declare_func(LIST(atm), LIST(atm->func));                         /* declare the type for future type checking */
        EMIT1ATM("PUSHL");
        bu_compile_atom(LIST(self));                             /* PUSHL <defmacro> */
        EMITEND();
@@ -2615,8 +2535,7 @@ static struct { char *name; fptr func; } bu_ftable[] = {
  | This function is just the standard binary search on the table above which
  | returns the address of the function associated with the given name.
  */
-static fptr bu_lookup_compile_func(name)
-       char *name;
+static fptr bu_lookup_compile_func(char *name)
 {      register int mid, r;
        register int lo = 0, hi = (sizeof(bu_ftable)/sizeof(bu_ftable[0])) - 1;
        while(lo <= hi) {
@@ -2663,8 +2582,7 @@ static fptr bu_lookup_compile_func(name)
  | the existing lambda body of 'func with a compiled body which was compiled to
  | use RCALLs to the function 'func.
  */
-struct conscell *bucompile(form)
-       struct conscell *form;
+struct conscell * bucompile(struct conscell *form)
 {
        struct conscell *tmp, *tmp2, c1;
        struct conscell *all_hold = all;
@@ -2696,7 +2614,7 @@ struct conscell *bucompile(form)
        level += 1;
        if (level == 1) {
            breaks_while_compiling = 0;                       /* no user SIGINT's occured yet */
-           lierrh(cerror);                                   /* on any interpreter error call 'cerror' */
+           lierrh((int (*)(char *, char *))cerror);          /* on any interpreter error call 'cerror' */
            push(typeset);                                    /* new NULL typeset only for TOP level, rest shared */
            bu_pretype();                                     /* declare predefined functions and their types */
        }

@@ -11,8 +11,7 @@
 /*************************************************************************
  ** buand: Logically and all the parameters we have. any nulls return nil*
  *************************************************************************/
-struct conscell *buand(form)
-struct conscell *form;
+struct conscell * buand(struct conscell *form)
 {      struct conscell *r;
        if (form != NULL)
        {   do

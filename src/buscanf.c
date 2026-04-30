@@ -12,8 +12,7 @@
  | will return specout='<stuff> ... %10d' and a return valud of FIXNUM to indicate the %10d argument
  | is a FIXNUM. If an illegal spec is encountered this function returns -2.
  */
-static int next_spec(specin, specout)
-       char *specin, *specout;
+static int next_spec(char *specin, char *specout)
 {
        register char *s = specout;
        register char *t = specin;
@@ -39,7 +38,7 @@ static int next_spec(specin, specout)
        | Now enter the validation loop to find the end of the %<stuff>{d...} string and establish
        | its type.
        */
-       for( ; *s++ = *t ; t++) {
+       for( ; (*s++ = *t) != '\0' ; t++) {
 	   switch(*t) {
                case '%' :
                   *s = '\0';
@@ -89,16 +88,14 @@ static int next_spec(specin, specout)
  | This function will iterate through each of the specs in 'spec' calling (*func)(arg1,"%....",&thing);
  | and accululate a list of the resulting things.
  */
-static struct conscell *do_scanf(f, arg1, spec)
-       int    (*f)();
-       char   *arg1, *spec;
+static struct conscell *do_scanf(int (*f)(FILE *, const char *, ...), FILE *arg1, char *spec)
 {
        char   subspec[MAXATOMSIZE];
        char   str[MAXATOMSIZE];
        char   *s;
        int    fix, rc;
        float  flo;
-       struct conscell *r, *n, *t, *nreverse();
+       struct conscell *r, *n, *t;
        push(r); push(n);
        for(s = spec; *s; s += strlen(subspec) ) {              /* iterate through each subspec in the string of specs */
            switch( next_spec(s, subspec) ) {                   /* get 'subspec' and its type */
@@ -142,8 +139,7 @@ static struct conscell *do_scanf(f, arg1, spec)
  |  (val val ..) <- (scanf spec)
  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-struct conscell *buscanf(form)
-       struct conscell *form;
+struct conscell * buscanf(struct conscell *form)
 {
        char *s, spec[MAXATOMSIZE];
        if ((form == NULL) || (!GetString(form->carp, &s))) goto er;
@@ -159,8 +155,7 @@ er:    ierror("scanf");  /*  doesn't return  */
  |  (val val ...) <- (fscanf port spec)
  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-struct conscell *bufscanf(form)
-       struct conscell *form;
+struct conscell * bufscanf(struct conscell *form)
 {
        char *s, spec[MAXATOMSIZE]; struct filecell *p;
        if ((form == NULL) || ((p = PORT(form->carp)) == NULL)) goto er;

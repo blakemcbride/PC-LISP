@@ -22,9 +22,8 @@
  ** buffer first. This is true of all calls to GetString so be carefull,**
  ** this took me several days to track down with a very spurious error. **
  *************************************************************************/
-struct conscell *bufopen(form)
-struct conscell *form;
-{      char *fname, *fmode; FILE *fd,*fopen();
+struct conscell * bufopen(struct conscell *form)
+{      char *fname, *fmode; FILE *fd;
        char name[MAXATOMSIZE + 1];
        if ((form != NULL)&&(GetString(form->carp,&fname))) {
            form = form->cdrp;

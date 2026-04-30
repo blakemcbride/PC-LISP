@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buadd1: (add1 number)  Add number and 1 and return the result.      **
  *************************************************************************/
-struct conscell *buadd1(form)
-struct conscell *form;
+struct conscell * buadd1(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

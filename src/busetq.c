@@ -15,8 +15,7 @@
  ** the reference will be made global by setting the botvaris field to  **
  ** be GLOBALVAR. Same as set except that first arg is not evaluated.   **
  *************************************************************************/
-struct conscell *busetq(form)
-struct conscell *form;
+struct conscell * busetq(struct conscell *form)
 {      struct conscell *var,*val;
        push(val);
        while(form != NULL)

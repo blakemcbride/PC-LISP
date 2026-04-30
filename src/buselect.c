@@ -29,8 +29,7 @@
  ** by multiplying by 1 million.                                                               **
  ************************************************************************************************/
 
-struct conscell *buselect(form)
-struct conscell *form;
+struct conscell * buselect(struct conscell *form)
 {
 #ifndef _MSC_VER
        fd_set rfdset, wfdset;
@@ -61,7 +60,7 @@ struct conscell *form;
 #endif
            } else {
                double timeout; long secs;                           /* argument not a port, must be the optional timeout */
-               if (!GetFloat(port, &timeout)) goto er;              /* try to get a float from this argument */
+               if (!GetFloat(LIST(port), &timeout)) goto er;              /* try to get a float from this argument */
                if (s->cdrp) goto er;                                /* if other arguments follow this then throw an error */
                tv = &tv_s;                                          /* a timeout is specified so call select with it instead of NULL */
                secs = floor(timeout);                               /* #seconds to wait is floor of timeout value */

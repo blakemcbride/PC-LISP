@@ -22,8 +22,9 @@
  ** a sigchld handler if there is not one so as to avoid <defunc> pid's **
  *************************************************************************/
 #ifndef _MSC_VER
-static void sigchld_handler()
+static void sigchld_handler(int sig)
 {      int status; struct rusage rusage;
+       (void)sig;
        signal(SIGCHLD,sigchld_handler);
        wait3(&status, WNOHANG, &rusage);
 }
@@ -38,12 +39,11 @@ static void sigchld_handler()
  ** pipe. If read/write ports are asked for then a list of the form     **
  ** (readport writeport pid) is returned.                               **
  *************************************************************************/
-struct conscell *buprocess(form)
-struct conscell *form;
+struct conscell * buprocess(struct conscell *form)
 {
 #ifndef _MSC_VER
        char *str, *s, *t; FILE *fd_pr = NULL, *fd_pw = NULL;
-       struct conscell *h, *n, *buexec();
+       struct conscell *h, *n, *buexec(struct conscell *);
        char fname[MAXATOMSIZE + 50]; int i, tty, tty2, pid;
        int want_pr = 0, want_pw = 0; char ttybuf[16], ptybuf[16];
        static int first_process = 1;
@@ -94,7 +94,7 @@ found:
        | and get their inputs multiplexed. Finally we want to make sure the input/output queues are empty
        | since the last user of the PTY sometimes leaves garbage. (I think this is a bug?).
        */
-#      if ! defined(RS6000)  &&  ! defined(__linux__)
+#      if ! defined(RS6000)  &&  ! defined(__linux__) && ! defined(__APPLE__)
             i = 1; ioctl(tty, TIOCREMOTE, &i);
 #      endif
        i = 1; ioctl(tty, TIOCEXCL,  &i);
@@ -107,7 +107,7 @@ found:
        | zombie processes.
        */
        if (first_process) {
-           void (*f)();
+           void (*f)(int);
            first_process = 0;
            f = signal(SIGCHLD, sigchld_handler);
            if (f != SIG_DFL) signal(SIGCHLD, f);

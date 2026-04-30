@@ -10,8 +10,7 @@
 /*************************************************************************
  ** busub1: (sub1 number)  subtract 1 from number and return result     **
  *************************************************************************/
-struct conscell *busub1(form)
-struct conscell *form;
+struct conscell * busub1(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

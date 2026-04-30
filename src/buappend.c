@@ -12,8 +12,7 @@
  ** l1 with l2 following it. We do not need to copy l2 because we are   **
  ** not changing it.                                                    **
  *************************************************************************/
-static struct conscell *append(l,l2)
-struct conscell *l,*l2;
+static struct conscell * append(struct conscell *l, struct conscell *l2)
 {      struct conscell *first,*last,*s;
        if (l2 == NULL) return(l);                /* nothing to append ? */
        if (l != NULL) {
@@ -52,8 +51,7 @@ struct conscell *l,*l2;
  **  #5   l    = append((a b c), l)                                     **
  **  #6   form = ( (a b c) (d e f) (g h i) )                            **
  *************************************************************************/
-struct conscell *buappend(form)
-       struct conscell *form;
+struct conscell * buappend(struct conscell *form)
 {      struct conscell *l,*t;
        if (form == NULL) return(NULL);
        form = nreverse(form);                           /* temporarily reverse for processing */

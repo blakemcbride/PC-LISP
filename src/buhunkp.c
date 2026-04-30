@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buhunkp (hunkp s) Returns t if s is a Hunk otherwise it returns nil **
  *************************************************************************/
-struct conscell *buhunkp(form)
-struct conscell *form;
+struct conscell * buhunkp(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
        {   if (form->carp != NULL)
            {   if (form->carp->celltype == HUNKATOM)

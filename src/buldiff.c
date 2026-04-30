@@ -15,10 +15,8 @@
  | We use a very simple O(NxM) algorithm to do this. We just check each element
  | in list1 against each in list2.
  */
-struct conscell *buldiff(form)
-struct conscell *form;
+struct conscell * buldiff(struct conscell *form)
 {      struct conscell *l1, *l2, *l1s, *l2s, *rh, *rl;
-       extern int eq();
 
       /*
        | Basic error checking, do we have two list parameters? Also check the

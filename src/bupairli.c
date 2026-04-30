@@ -15,8 +15,7 @@
  ** (pairlis '(GE IBM) '(appliances computers) '( (a.A) (B.b)))         **
  ** is ( (GE.appliances) (IBM.computers) (a.A) (B.b) )                  **
  *************************************************************************/
-struct conscell *bupairlis(form)
-struct conscell *form;
+struct conscell * bupairlis(struct conscell *form)
 {      struct conscell *vars,*vals,*alist;
        xpush(form);
        if (form != NULL) {

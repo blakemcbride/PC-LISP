@@ -13,8 +13,7 @@
  ** by +heap+ bytes. The actual amounts are rounded up to the nearest   **
  ** block so the exact byte counts are not honored.                     **
  *************************************************************************/
-struct conscell *buexpandmemory(form)
-struct conscell *form;
+struct conscell * buexpandmemory(struct conscell *form)
 {
        long int a, c, h;
 

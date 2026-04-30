@@ -14,8 +14,7 @@
  ** shallow binding stack for non null. We then must return(nil.value)  **
  ** as per the Franz manual.                                            **
  *************************************************************************/
-struct conscell *buboundp(form)
-struct conscell *form;
+struct conscell * buboundp(struct conscell *form)
 {      struct alphacell *r; struct conscell *t;
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if (form->carp->celltype == ALPHAATOM)

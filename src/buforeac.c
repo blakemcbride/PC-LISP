@@ -16,8 +16,7 @@
  ** the elements in list and will for each binding evaluat each of e1.. **
  ** eN. It allows labels and go/return similar to prog.                 **
  *************************************************************************/
-struct conscell *buforeach(form)
-struct conscell *form;
+struct conscell * buforeach(struct conscell *form)
 {      register struct conscell *temp,*value,*pp,*local;
        struct conscell *vallis;
        int has_labels = 0;

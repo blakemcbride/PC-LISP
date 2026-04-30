@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buasin:Returns the arc sine of the single double parameter.         **
  *************************************************************************/
-struct conscell *buasin(form)
-struct conscell *form;
+struct conscell * buasin(struct conscell *form)
 {      double f;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f))

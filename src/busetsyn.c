@@ -18,8 +18,7 @@
  ** body when the macro is triggered and executed by RunReadMacro in the**
  ** main.c module.                                                      **
  *************************************************************************/
-struct conscell *busetsyntax(form)
-struct conscell *form;
+struct conscell * busetsyntax(struct conscell *form)
 {      struct alphacell *at,*kind; struct conscell *expr;
        if (form != NULL)
        {   at = ALPHA(form->carp);
@@ -44,7 +43,7 @@ struct conscell *form;
                            else
                                goto ERR;
                        };
-                       bindvar(at,expr);
+                       bindvar(LIST(at),expr);
                        at->botvaris = GLOBALVAR;
                        at->permbit = PERM;        /* atom is now permantent */
                        return(LIST(thold));

@@ -12,8 +12,7 @@
  ** and flag (1 or 0) according to the printname of 'option and the val **
  ** of expr nil = 0 non nil = t. Neither parameter is evaluated.        **
  *************************************************************************/
-struct conscell *busstatus(form)
-struct conscell *form;
+struct conscell * busstatus(struct conscell *form)
 {      char *option; struct conscell *expr;
        int opt;
        if (form != NULL)

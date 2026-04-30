@@ -17,8 +17,7 @@
  ** safe to double x and divide y by 2 and maintain the same result, by **
  ** doubling and halving we make the algorithm O(lg(n)) intead of O(n). **
  *************************************************************************/
-long intexpt(x,y)
-long x,y;
+long intexpt(long x, long y)
 {    long z;
      if (y < 0) return(0L);                        /* neg exponent ans=0 */
      z = 1L;                                       /* x^0 = 1 = z */
@@ -34,8 +33,7 @@ long x,y;
  ** on the IEE floating point power function 'pow' to do the work for us**
  ** It probably uses x^y = e^(y*log(x)).                                **
  *************************************************************************/
-struct conscell *buexpt(form)
-struct conscell *form;
+struct conscell * buexpt(struct conscell *form)
 {      struct conscell *p1,*p2; double fop1,fop2;
        if (form != NULL) {
            p1 = form->carp;

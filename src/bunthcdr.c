@@ -12,8 +12,7 @@
  ** list parameter remembering that (cdr nil) is nil. If number is < 0  **
  ** we return (cons nil list) {Don't ask me why but Franz does this? }  **
  *************************************************************************/
-struct conscell *bunthcdr(form)
-struct conscell *form;
+struct conscell * bunthcdr(struct conscell *form)
 {      long int n; struct conscell *temp;
        if (form != NULL)
        {   if (GetFix(form->carp,&n))

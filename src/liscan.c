@@ -119,8 +119,7 @@ static struct asciitypes chartype[129] =
  ** after it has been read. This allows the TakeSexpression function in   **
  ** main.c to envoke a read or spliced read macro when necessary.         **
  ***************************************************************************/
-void ScanSetSynClassMacro(c,kind)
-int c,kind;
+void ScanSetSynClassMacro(int c, int kind)
 {   if ((c < 1)||(c > 127))
         fatalerror("ScanSetSynClassMacro");
     chartype[c+1].type = (kind == 0) ? MC0 : MC1;
@@ -230,8 +229,7 @@ int scgetc()
  ** unscan a character from outBuf. If we are about to go past pos 0 do **
  ** nothing, otherwise back up once and put the character into the buff.**
  *************************************************************************/
-static void scungetc(c)
-int c;
+static void scungetc(int c)
 {       if (outNext > 0)
             outBuf[--outNext] = c;
 }
@@ -272,10 +270,8 @@ int ScanSetLineNum(int n) { int old = liScanLineNum; liScanLineNum = n; return(o
  ** if it is CUL (a comment left char) we read until we get a CUR (the  **
  ** comment right char). If it is not a CUL char we exit the white loop.**
  *************************************************************************/
- static int nexttoken(fp,b)
- FILE *fp;
- char *b;
- {    int state = 0; char *bx; int token = -1; int c; int ch;
+ static int nexttoken(FILE *fp, char *b)
+ {    int state = 0; char *bx = b; int token = -1; int c; int ch;
       struct action *actptr; int n = MAXATOMSIZE;
       for(;;) {
           for(ch = GETC(fp); chartype[ch+1].type == OTH ; ch = GETC(fp));
@@ -339,8 +335,7 @@ int ScanSetLineNum(int n) { int old = liScanLineNum; liScanLineNum = n; return(o
  static int retcount = 0;
  static int nestlevel = 0;
                                                  /***/
- static void metapush(n)
- int n;
+ static void metapush(int n)
  {  if (TopOfMetaStack >= MAXMETANEST)
         serror(NULL,"meta [] nesting too deep",NULL,-1);
     MetaStack[TopOfMetaStack++] = n;
@@ -369,8 +364,7 @@ int ScanSetLineNum(int n) { int old = liScanLineNum; liScanLineNum = n; return(o
  ** since this expansion is non FRANZ, we only do it if option SMARTSLASH is **
  ** set otherwise we do the normal FRANZ thing.                              **
  ******************************************************************************/
- int ShiftAndResolve(s)
- char *s;
+ int ShiftAndResolve(char *s)
  {    register int c,ss=GetOption(SMARTSLASH);  /* do "\*" ==> '\*' txlat? */
       register char *d = s;                     /* dest of copy */
       register int delim = *s++;                /* delimiting character is */
@@ -410,12 +404,11 @@ int ScanSetLineNum(int n) { int old = liScanLineNum; liScanLineNum = n; return(o
  ** Since this expansion is non FRANZ, we only do it if option SMARTSLASH is **
  ** set otherwise we do the normal FRANZ thing.                              **
  ******************************************************************************/
-void ExpandEscapesInto(d,s)
-char *d,*s;
+void ExpandEscapesInto(char *d, char *s)
 {    register char c;
      register int ss = GetOption(SMARTSLASH);
-     while(c = *s++)
-     {   if ((c < ' ')||(c > 128)||(c == '|')||(c == '"')||(c == '\\'))
+     while((c = *s++) != '\0')
+     {   if ((c < ' ')||((unsigned char)c > 128)||(c == '|')||(c == '"')||(c == '\\'))
          {   if (ss)
              {   switch(c)
                  {   case '\r' : c = 'r'; break;
@@ -452,9 +445,7 @@ char *d,*s;
  ** pe sequences and to return ALPHATOKEN or STRINGTOKEN depending on the    **
  ** delimiters value.                                                        **
  *****************************************************************************/
- int scan(fp,r)
- FILE *fp;
- char *r;
+ int scan(FILE *fp, char *r)
  {    int next;
       if (retcount > 0)                                 /* if in close all */
       {   retcount--;                                   /* mode, return )  */
@@ -484,8 +475,7 @@ char *d,*s;
  ** check by running the DFA on string 's' and seeing if it runs strlen(s)   **
  ** times and if in the token returned is #6 (ALPHATOKEN).                   **
  ******************************************************************************/
- int isalphatoken(s)
- char *s;
+ int isalphatoken(char *s)
  {    int state = 0, token = -1, c, n = 0;
       struct action *actptr;
       char ch, *t = s;
@@ -513,8 +503,7 @@ char *d,*s;
  ** from which up to N characters may be scgetc'ed. If it is exhaused it **
  ** feeds EOF's to the scanner. This is for use by readstr.              **
  **************************************************************************/
-void ScanFromBuffer(buf,n)
-char *buf; int n;
+void ScanFromBuffer(char *buf, int n)
 {     outBuf = buf;
       outNext = 0;
       outMax = n-1;

@@ -40,7 +40,9 @@
  | The assembler uses symbol tables to track the location of labels so that jump
  | displacements can be computed.
  */
-extern struct conscell *busymtcreate(), *busymtmember(), *busymtadd();
+extern struct hunkcell *busymtcreate(struct conscell *form);
+extern struct conscell *busymtmember(struct conscell *form);
+extern struct hunkcell *busymtadd(struct conscell *form);
 /*
  | The table is the instruction table it gives foreach instruction the number
  | of 16 bit arguments that it takes hence the size of any entry is 1+nargs*2
@@ -101,8 +103,7 @@ static struct { char *name; int nargs, kind, instrcount; } bu_itable[] = {
  | This function returns the op code and number of arguments for a given
  | instruction. It does this with a simple binary search on the above table.
  */
-int bu_lookup_instruction(name, opcode, nargs, kind)
-       char *name; int *opcode, *nargs, *kind;
+int bu_lookup_instruction(char *name, int *opcode, int *nargs, int *kind)
 {      register int mid, r;
        register int lo = 0, hi = (sizeof(bu_itable)/sizeof(bu_itable[0])) - 1;
        while(lo <= hi) {
@@ -124,8 +125,7 @@ int bu_lookup_instruction(name, opcode, nargs, kind)
  | name etc. It is used by the disassemble primitive to figure out what a given
  | op code's mnomonic is.
  */
-int bu_byop_lookup_instruction(opcode, name, nargs, kind, count)
-       char **name; int opcode, *nargs, *kind, **count;
+int bu_byop_lookup_instruction(int opcode, char **name, int *nargs, int *kind, int **count)
 {
        if ((opcode <= 0) || (opcode >= OP_MAX_OP)) return(0);
        opcode -= 1;
@@ -139,13 +139,12 @@ int bu_byop_lookup_instruction(opcode, name, nargs, kind, count)
 /*
  | The actual (assemble <clisp>) primtiive.
  */
-struct conscell *buassemble(form)
-       struct conscell *form;
+struct conscell * buassemble(struct conscell *form)
 {
        struct conscell *label, *pair, *labset;
        struct conscell *literals, *instructions, *inst, *ip, c1, c2, c3;
        int    nlit, i, op, n, kind; long dist, pos, ipo = 0L;
-       struct clispcell *clisp;
+       struct clispcell *clisp = NULL;
        struct conscell **l;
        char   *code;
 
@@ -186,7 +185,7 @@ struct conscell *buassemble(form)
        */
        c1.celltype = c2.celltype = c3.celltype = CONSCELL;
        c1.carp = c1.cdrp = NULL;
-       labset = busymtcreate(&c1);
+       labset = LIST(busymtcreate(&c1));
        c1.carp = labset; c1.cdrp = &c2; c2.cdrp = &c3; c3.cdrp = NULL;
        for(ip = instructions; ip != NULL; ip = ip->cdrp) {
            TEST_BREAK();                                 /* if interrupted abort */

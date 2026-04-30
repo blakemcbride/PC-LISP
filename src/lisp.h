@@ -364,7 +364,7 @@
 #define   min(a,b)      (((a)<(b))?(a):(b))       /* min. */
 #endif
 
-void stkovfl();
+void stkovfl(int cause);
 
 /*
  | These are the mark stack and memory manager block sizes. We must be
@@ -471,13 +471,25 @@ void stkovfl();
  ** eval() parameter onto the eval stack (this is at the opposite end of  **
  ** the mystack space so it grows downward.                               **
  ***************************************************************************/
-#define   push(x)           OVFT mystack[mytop++]=(struct conscell **)&x;x=NULL
-#define   xpush(x)          OVFT mystack[mytop++]=(struct conscell **)&x
+/*
+ | Launder a pointer through an empty inline asm so the compiler loses track of
+ | its provenance. The mark stack stores addresses of local variables (the GC's
+ | design), which would otherwise trigger -Wdangling-pointer at every push site.
+ | The locals stay alive because callers always xpop/fret/xret before returning;
+ | the laundering just hides that fact from the optimizer's escape analysis.
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#define   _MARK_LAUNDER(p)  ({ struct conscell **_lp = (p); __asm__("" : "+r"(_lp)); _lp; })
+#else
+#define   _MARK_LAUNDER(p)  (p)
+#endif
+#define   push(x)           OVFT mystack[mytop++]=_MARK_LAUNDER((struct conscell **)&x);x=NULL
+#define   xpush(x)          OVFT mystack[mytop++]=_MARK_LAUNDER((struct conscell **)&x)
 #define   MarkStackTop()    ((mytop > 0) ? *mystack[mytop-1] : NULL)
 #define   ClearMarkStacks() { mytop = 0; emytop = MSSIZE-1; }
 #define   EmptyMarkStacks() ((mytop == 0)&&(emytop == MSSIZE-1))
 #define   xpop(nn)          mytop -= nn;
-#define   expush(x)         OVFT mystack[emytop--]=(struct conscell **)&x
+#define   expush(x)         OVFT mystack[emytop--]=_MARK_LAUNDER((struct conscell **)&x)
 #define   expop(nn)         emytop += nn;
 
 /***************************************************************************
@@ -516,7 +528,7 @@ void stkovfl();
  ** put loop, and in the eval() function which is the core of all activity**
  ***************************************************************************/
 extern    int bkhitcount;
-extern    void brkhit();
+extern    void brkhit(void);
 #define   TEST_BREAK()  if (bkhitcount) brkhit()
 #define   BREAK_RESET() bkhitcount = 0
 
@@ -660,7 +672,7 @@ struct  alphacell                               /* lisp alpha cell */
 		unsigned botvaris  : 1;         /* var type of bot of valstack*/
 		struct   conscell  * valstack;  /* scope stack for this var */
 		struct   conscell  * proplist;  /* propert list pointer */
-		struct   conscell *(*func)();   /* C function or Lambda expr */
+		struct   conscell *(*func)(struct conscell *);   /* C function or Lambda expr */
 		char     *atom;                 /* print name string       */
 };
 	
@@ -845,7 +857,7 @@ struct  clispcell                            /* compiled LISP cell */
 #define         STRING(x)       ((struct stringcell *)(x))
 #define         HUNK(x)         ((struct hunkcell   *)(x))
 #define         ARRAY(x)        ((struct arraycell  *)(x))
-#define         FUNCTION(x)     ((int (*)())(x))
+#define         FUNCTION(x)     ((struct conscell *(*)(struct conscell *))(x))
 #define         CLISP(x)        ((struct clispcell  *)(x))
 
 /*** compute roof(n/2) used for hunk size computations ***/
@@ -890,134 +902,131 @@ struct  clispcell                            /* compiled LISP cell */
  ** extern definitions here to make sure that no pointer problems occur**
  ** on machines with unusual pointer representations ie non int ptrs.  **
  ************************************************************************/
-extern struct conscell   * apply();                 /* joint two lists       */
-extern struct conscell   * arrayaccess();           /* array get/put routine */
-extern struct conscell   * bucadar();               /* the c{a|d}+r function.*/
-extern struct conscell   * copy();                  /* complete copy of parm.*/
-extern struct alphacell  * CreateInternedAtom();
-extern struct alphacell  * CreateUninternedAtom();
-extern struct conscell   * CopyOblist();            /* returns (oblist)      */
-extern struct conscell   * eval();                  /* main evaluator.       */
-extern struct conscell   * evlis();                 /* main evalutor of list */
-extern struct conscell   * evalclisp();             /* run byte coded eval   */
-extern struct conscell  ** GetHunkIndex();          /* returns H[i] ptr ptr  */
-extern struct conscell  ** GetArrayIndex();         /* returns A[i] ptr ptr  */
-extern struct conscell   * GetTraced();             /* all (trace'ed) funcs  */
-extern struct conscell   * getprop();               /* get property of atom  */
-extern struct conscell   * HashStatus();            /* the collision counts  */
-extern struct conscell   * HunkToList();            /* explode Hunk to list  */
-extern struct stringcell * insertstring();          /* makes a new string    */
-extern struct hunkcell   * inserthunk();            /* makes a new hunk      */
-extern struct alphacell  * insertatom();            /* makes a new atom      */
-extern struct alphacell  * lookupatom();            /* given name finds atom */
-extern struct conscell   * lexprify();              /* process &optional's   */
-extern struct conscell   * enlist();                /* (cons l nil)          */
-extern struct conscell   * MakePort();              /* returns an opened port*/
-extern struct conscell   * macroexpand();           /* run macro on code     */
+extern struct conscell   * apply(struct conscell *fn, struct conscell *largs);
+extern struct conscell   * arrayaccess(struct conscell *info, struct hunkcell *base, struct conscell *dlist);
+extern struct conscell   * bucadar(struct conscell *form, char *s);
+extern struct conscell   * copy(struct conscell *l);
+extern struct alphacell  * CreateInternedAtom(char *s);
+extern struct alphacell  * CreateUninternedAtom(char *s);
+extern struct conscell   * CopyOblist(void);
+extern struct conscell   * eval(struct conscell *form);
+extern struct conscell   * evlis(struct conscell *form);
+extern struct conscell   * evalclisp(char *code, struct conscell **literals, struct conscell *form);
+extern struct conscell  ** GetHunkIndex(struct hunkcell *h, int i);
+extern struct conscell  ** GetArrayIndex(struct hunkcell *hunk, long int loc, long int size);
+extern struct conscell   * GetTraced(void);
+extern struct conscell   * getprop(struct conscell *atm, struct conscell *indic);
+extern struct conscell   * HashStatus(void);
+extern struct conscell   * HunkToList(struct hunkcell *h);
+extern struct stringcell * insertstring(char *s);
+extern struct hunkcell   * inserthunk(int n);
+extern struct alphacell  * insertatom(char *s, int permsetting);
+extern struct alphacell  * lookupatom(char *s, int kind);
+extern struct conscell   * lexprify(struct conscell *form);
+extern struct conscell   * enlist(struct conscell *x);
+extern struct conscell   * MakePort(FILE *fd, struct alphacell *at);
+extern struct conscell   * macroexpand(struct conscell *l);
 #define new(x) newcons(x)                           /* rename new it clashes */
-extern struct conscell   * newcons();               /* cell allocator fn.    */
-extern struct alphacell  * newalpha();              /* alpha cell allocator  */
-extern struct conscell   * newintop();              /* calls new(FIXATOM).   */
-extern struct conscell   * newfixfixop();           /* calls new(FIXFIXATOM).*/
-extern struct conscell   * newrealop();             /* calls new(REALATOM).  */
-extern struct conscell   * nreverse();              /* destructive 'reverse' */
-extern struct conscell   * reverse();               /* top level reverse     */
-extern struct conscell   * ReadExpression();        /* read S expr from port */
-extern struct conscell   * takenewlist();           /* used by 'input'       */
-extern struct conscell   * topcopy();               /* make top level copy   */
-extern struct conscell   * putprop();
-extern struct conscell   * pairlis();
-extern struct hunkcell   * ListToHunk();
-extern struct conscell   * assoc();
-extern struct conscell   * buREPsopen();
-extern struct conscell   * budefun();
-extern struct conscell   * buppform();
-extern struct conscell   * liudump();
-	
+extern struct conscell   * newcons(int t);
+extern struct alphacell  * newalpha(void);
+extern struct conscell   * newintop(long int val);
+extern struct conscell   * newfixfixop(long int a, long int b);
+extern struct conscell   * newrealop(double val);
+extern struct conscell   * nreverse(struct conscell *l);
+extern struct conscell   * reverse(struct conscell *l);
+extern struct conscell   * ReadExpression(struct filecell *port, struct conscell *eofval, int lnflag);
+extern struct conscell   * topcopy(struct conscell *l);
+extern struct conscell   * putprop(struct conscell *atm, struct conscell *indic, struct conscell *prop);
+extern struct conscell   * pairlis(struct conscell *vars, struct conscell *vals, struct conscell *alist);
+extern struct hunkcell   * ListToHunk(struct conscell *l);
+extern struct conscell   * assoc(struct conscell *var, struct conscell *alist);
+extern struct conscell   * buREPsopen(struct conscell *form);
+extern struct conscell   * budefun(struct conscell *form);
+extern struct conscell   * buppform(struct conscell *form);
+extern struct conscell   * liudump(struct conscell *e);
+
   /*** VOID OR SIMPLE FUNCTIONS ***/
 
-extern void    funcinstall();
-extern char ** FindReferent();            /* need for relocation */
-extern int     gather();
-extern void    prettyprint();
-extern void    pushvariables();
-extern char *  getenv();
-extern int     GetOption();
-extern char *  heapget();
-extern void    ierror();
-extern void    initmem();
-extern void    mark();
-extern void *  malloc();
-extern long int     memorystatus();
-extern void    printlist();
-extern void    ResetTrace();
-extern void    SetOption();
-extern int     scan();
-extern void    serror();
-extern void    printatom();
-extern void    marklist();
-extern void    ioerror();
-extern int     GetFloat();
-extern int     GetString();
-extern int     GetFix();
-extern int     ExtractArray();
-extern void    HoldStackOperation();
-extern void    gerror();
-extern void    bindvar();
-extern int     liulength();
-extern void    lierrh();
-extern void    unbindvar();
-extern int     iscadar();
-extern void    buresetlog();
-extern int     equal();
-extern int     GetNumberOrString();
-extern void    removehunk();
-extern void    fatalerror();
-extern void    removeatom();
-extern void    putclisptos();
-extern void    UpError();
-extern void    catcherror();
-extern int     TestForNonNil();
-extern int     ScanReset();
-extern void    printstats();
-extern void    InitMarkStack();
-extern void    markstack();
-extern void    ExpandEscapesInto();
-extern void    removestring();
-extern void    markclisp();
-extern void    SetLongVar();
-extern void    initerrors();
-extern void    InstallSpecialAtoms();
-extern void    popvariables();
-extern void    lifreelist();
-extern int     ScanSetLineNum();
-extern int     hash();
-extern int     CopyCellIfPossible();
-extern void    syserror();
-extern int     isalphatoken();
-extern void    ScanSetSynClassMacro();
-extern void    EnterTrace();
-extern void    ExitTrace();
-extern int     bu_byop_lookup_instruction();
-extern int     flatsize();
-extern int     bu_lookup_instruction();
-extern int     MixedTypeCompare();
-extern void    InstallBuiltInFunctions();
-extern int     eq();
-extern int     GetChar();
-extern int     liexpmem();
-extern void    bindtonil();
-extern void    bindlabel();
-extern int     loadfile();
-extern void    ScanFromBuffer();
-extern void    buresetasc();
-extern void    unwindscope();
-extern void    unmark();
-extern void    pushlexpr();
-extern void    poplexpr();
-extern int     liushash();
-extern void    bindingerror();
-extern void    deiniterrors();
+extern void    funcinstall(int type, struct conscell *(*body)(struct conscell *), char *name, struct conscell *at);
+extern char ** FindReferent(char *s, int n);
+extern int     gather(long int *cgot, long int *agot);
+extern void    prettyprint(struct conscell *expression, int indent_level, int indent_so_far, FILE *sink);
+extern void    pushvariables(struct conscell *vars, struct conscell *vals);
+extern int     GetOption(int o);
+extern char *  heapget(int n);
+extern void    ierror(char *s);
+extern void    initmem(void);
+extern void    mark(void);
+extern long int memorystatus(int n);
+extern void    printlist(FILE *p, struct conscell *l, int how, struct conscell *squash, int *counter);
+extern void    ResetTrace(void);
+extern void    SetOption(int o, int v);
+extern int     scan(FILE *fp, char *r);
+extern void    serror(struct conscell *l, char *s1, char *s2, int num2);
+extern void    printatom(FILE *p, struct conscell *l, int how, int *counter);
+extern void    marklist(struct conscell *pres);
+extern void    ioerror(FILE *p);
+extern int     GetFloat(struct conscell *l, double *where);
+extern int     GetString(struct conscell *l, char **where);
+extern int     GetFix(struct conscell *l, long int *where);
+extern int     ExtractArray(struct conscell *list, struct conscell **where);
+extern void    HoldStackOperation(int flag);
+extern void    gerror(char *s);
+extern void    bindvar(struct conscell *var, struct conscell *val);
+extern int     liulength(struct conscell *l);
+extern void    lierrh(int (*func)(char *, char *));
+extern void    unbindvar(struct conscell *var);
+extern int     iscadar(char *s);
+extern void    buresetlog(FILE *fp, int kind);
+extern int     equal(struct conscell *x, struct conscell *y);
+extern int     GetNumberOrString(struct conscell *l, char **where);
+extern void    removehunk(struct conscell *a);
+extern void    fatalerror(char *s);
+extern void    removeatom(struct conscell *a);
+extern void    putclisptos(struct conscell **ntos);
+extern void    UpError(char *s);
+extern void    catcherror(char *s);
+extern int     TestForNonNil(char *s, int def);
+extern int     ScanReset(void);
+extern void    printstats(void);
+extern void    InitMarkStack(void);
+extern void    markstack(void);
+extern void    ExpandEscapesInto(char *d, char *s);
+extern void    removestring(struct conscell *a);
+extern void    markclisp(void);
+extern void    SetLongVar(char *s, long int val);
+extern void    initerrors(void);
+extern void    InstallSpecialAtoms(void);
+extern void    popvariables(struct conscell *vars);
+extern void    lifreelist(struct conscell *l);
+extern int     ScanSetLineNum(int n);
+extern int     hash(char *s, int n);
+extern int     CopyCellIfPossible(char *d, char *s);
+extern void    syserror(void);
+extern int     isalphatoken(char *s);
+extern void    ScanSetSynClassMacro(int c, int kind);
+extern void    EnterTrace(struct conscell *fn, struct conscell *largs);
+extern void    ExitTrace(struct conscell *fn, struct conscell *result);
+extern int     bu_byop_lookup_instruction(int opcode, char **name, int *nargs, int *kind, int **count);
+extern int     flatsize(struct conscell *l, int limit);
+extern int     bu_lookup_instruction(char *name, int *opcode, int *nargs, int *kind);
+extern int     MixedTypeCompare(struct conscell *a, struct conscell *b);
+extern void    InstallBuiltInFunctions(void);
+extern int     eq(struct conscell *e1, struct conscell *e2);
+extern int     GetChar(struct conscell *l, char *where);
+extern int     liexpmem(long int a, long int c, long int h);
+extern void    bindtonil(struct conscell *vars);
+extern void    bindlabel(struct conscell *var, struct conscell *val);
+extern int     loadfile(char *fname);
+extern void    ScanFromBuffer(char *buf, int n);
+extern void    buresetasc(FILE *fp, int asc_fd);
+extern void    unwindscope(void);
+extern void    unmark(void);
+extern void    pushlexpr(struct conscell *at, struct conscell *args);
+extern void    poplexpr(struct conscell *at);
+extern int     liushash(struct conscell *e);
+extern void    bindingerror(char *s);
+extern void    deiniterrors(void);
 
 extern int     liargc;
 extern char  **liargv;
@@ -1067,7 +1076,7 @@ extern int      liScanLineNum;            /* line number stored by scanner */
  ***************************************************************************************/
 
 #define NEW(type, var)                       \
-        { if (var = lifreecons) {            \
+        { if ((var = lifreecons) != NULL) {  \
               lifreecons = lifreecons->carp; \
               var->celltype = type;          \
           } else                             \
@@ -1084,7 +1093,7 @@ extern int      liScanLineNum;            /* line number stored by scanner */
  ***************************************************************************************/
 
 #define NEWCONS(var)                         \
-        { if (var = lifreecons)              \
+        { if ((var = lifreecons) != NULL)    \
               lifreecons = lifreecons->carp; \
           else                               \
               var = new(CONSCELL);           \
@@ -1097,7 +1106,7 @@ extern int      liScanLineNum;            /* line number stored by scanner */
  ***************************************************************************************/
 
 #define NEWINTOP(value, var)                 \
-        { if (var = lifreecons) {            \
+        { if ((var = lifreecons) != NULL) {  \
               lifreecons = lifreecons->carp; \
               var->celltype = FIXATOM;       \
           } else                             \

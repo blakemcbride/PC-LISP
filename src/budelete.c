@@ -26,8 +26,7 @@
  | the parameter fetch and error checking for all of them. The parameters
  | are (<exp> <list> [<fixnum>]).
  */
-static int getdelparms(form, e, l, n)
-struct conscell *form, **e, **l; long int *n;
+static int getdelparms(struct conscell *form, struct conscell **e, struct conscell **l, long int *n)
 {      *n = N_ALL;
        if (form == NULL) goto er;
        *e = form->carp;
@@ -47,8 +46,7 @@ er:    return(0);
  | removes from 'l' all elements that compare equal to to 'e' using the 'cmp'
  | function. It returns the new head pointer to the list.
  */
-static struct conscell *deletexp(l, e, n, cmp)
-struct conscell *l, *e; int n; int (*cmp)();
+static struct conscell *deletexp(struct conscell *l, struct conscell *e, int n, int (*cmp)(struct conscell *, struct conscell *))
 {       struct conscell *h = l, *t;
 
        /*
@@ -100,10 +98,9 @@ done:
  | This primitive will physically delete the first 'n' occurrences of <exp>
  | from <list>. The function 'equal' is used to do the comparison.
  */
-struct conscell *budelete(form)
-struct conscell *form;
+struct conscell * budelete(struct conscell *form)
 {      struct conscell *e=NULL, *l=NULL;  /*  NULL assignment to keep compiler happy  */
-       long int n; extern int equal();
+       long int n;
        if (!getdelparms(form, &e, &l, &n)) ierror("delete");
        return(deletexp(l, e, (int) n, equal));
 }
@@ -114,10 +111,9 @@ struct conscell *form;
  | This primitive will physically delete the first 'n' occurrences of <exp>
  | from <list>. The function 'eq' us used to do the comparison.
  */
-struct conscell *budelq(form)
-struct conscell *form;
+struct conscell * budelq(struct conscell *form)
 {      struct conscell *e=NULL, *l=NULL;  /*  NULL assignment to keep compiler happy  */
-       long int n; extern int eq();
+       long int n;
        if (!getdelparms(form, &e, &l, &n)) ierror("delq");
        return(deletexp(l, e, (int) n, eq));
 }
@@ -128,10 +124,9 @@ struct conscell *form;
  | This primitive will non destructively delete the first 'n' occurrences of
  | <exp> from <list>. The function 'equal' is used to do the comparison.
  */
-struct conscell *buremove(form)
-struct conscell *form;
+struct conscell * buremove(struct conscell *form)
 {      struct conscell *e=NULL, *l=NULL;  /*  NULL assignment to keep compiler happy  */
-       long int n; extern int equal();
+       long int n;
        if (!getdelparms(form, &e, &l, &n)) ierror("remove");
        return(deletexp(topcopy(l), e, (int) n, equal));
 }
@@ -142,10 +137,9 @@ struct conscell *form;
  | This primitive will non destructively delete the first 'n' occurrences of
  | <exp> from <list>. The function 'eq' is used to do the comparison.
  */
-struct conscell *buremq(form)
-struct conscell *form;
+struct conscell * buremq(struct conscell *form)
 {      struct conscell *e=NULL, *l=NULL;  /*  NULL assignment to keep compiler happy  */
-       long int n; extern int eq();
+       long int n;
        if (!getdelparms(form, &e, &l, &n)) ierror("remq");
        return(deletexp(topcopy(l), e, (int) n, eq));
 }

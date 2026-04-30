@@ -56,8 +56,15 @@
 #define         ECHO         1                  /* processfile() flags */
 #define         NOECHO       0                  /* parameter */
 
-static int CanStoreInLong();
-static void WriteHunkBase();
+static int CanStoreInLong(double d);
+static void WriteHunkBase(struct hunkcell *hunk, int index, char *ptr);
+static struct conscell *TakeSexpression(struct filecell *port);
+static struct conscell *TakeList(struct filecell *port);
+static struct conscell *takeatom(void);
+static struct conscell *RunReadMacro(struct filecell *port, char *c);
+extern char *liuffnam(struct fixfixcell *ff);
+extern struct conscell *libread(struct filecell *port, long timeout);
+extern struct conscell *liloadbinary(char *fname);
 
 static  int curtok;                       /* we make call curtok=scan(buff)  */
 static  char buff[MAXATOMSIZE+4];         /* this is where tok string goes   */
@@ -104,8 +111,7 @@ static void initatoms()
  ** We just hash into the table and walk down the bucket list looking for **
  ** a string, atom or hunk atom that owns this pointer 's'.               **
  ***************************************************************************/
- char **FindReferent(s,n)
- char *s; int n;
+ char ** FindReferent(char *s, int n)
  {    struct conscell *l,*o;
       l = atomtable[hash(s,n)];
       while(l != NULL)
@@ -139,8 +145,7 @@ static void initatoms()
  ** look for atoms whose interned bit is set to 'kind' this makes it more **
  ** generally usefull throughout the rest of the program.                 **
  ***************************************************************************/
- struct alphacell *lookupatom(s,kind)
- char *s; int kind;
+ struct alphacell * lookupatom(char *s, int kind)
  {    register struct conscell *l, *t; register struct alphacell *at;
       if (strcmp(s,"nil") == 0) return(NULL);
       for(t = l = atomtable[hash(s,strlen(s)+1)]; l != NULL; l = l->cdrp) {
@@ -171,8 +176,7 @@ static void initatoms()
  ** caller must call lookupatom first before calling insertatom if an     **
  ** interned atom is too be created. See CreateInternedAtom....           **
  ***************************************************************************/
- struct alphacell *insertatom(s,permsetting)
- char *s; int permsetting;
+ struct alphacell * insertatom(char *s, int permsetting)
  {    struct conscell *n; struct alphacell *k;
       int h,len; char *temp;
       if ((permsetting == NOT_PERM)&&(strcmp(s,"nil")==0))
@@ -207,8 +211,7 @@ static void initatoms()
  ** or is there but is an uninterned atom, we must create a new one. Must **
  ** be careful of s = "nil" because insertatom will return NULL.          **
  ***************************************************************************/
-struct alphacell *CreateInternedAtom(s)
-char *s;
+struct alphacell * CreateInternedAtom(char *s)
 {    register struct alphacell *r;
      if ((r = lookupatom(s,INTERNED)) != NULL)
           return(r);
@@ -221,8 +224,7 @@ char *s;
  ** CreateUninternedAtom - just insert a new NOT_PERM ie (gc'able) atom   **
  ** with perm bit set uninterned.  Watch out for s = "nil" get NULL back. **
  ***************************************************************************/
-struct alphacell *CreateUninternedAtom(s)
-char *s;
+struct alphacell * CreateUninternedAtom(char *s)
 {     register struct alphacell *r;
       if ((r = insertatom(s,NOT_PERM)) != NULL)
            r->interned = NOT_INTERNED;
@@ -240,8 +242,7 @@ char *s;
  ** atom fields have not been initialized yet and GC will follow these    **
  ** uninitialized fields.                                                 **
  ***************************************************************************/
- struct stringcell *insertstring(s)
- char *s;
+ struct stringcell * insertstring(char *s)
  {    struct stringcell *k; struct conscell *n; int h,len;
       char *temp, swork[MAXATOMSIZE];
       push(k);
@@ -270,11 +271,10 @@ char *s;
  ** an atom from the atom table after its print name heap space has been  **
  ** freed. The removestring function does exactly the same with a strcell **
  ***************************************************************************/
- void removeatom(a)
- struct alphacell *a;
+ void removeatom(struct conscell *a)
  {    struct conscell *l,**root;
-      l = *(root = &atomtable[hash(a->atom,strlen(a->atom)+1)]);
-      while((l != NULL)&&(l->carp != LIST(a)))
+      l = *(root = &atomtable[hash(ALPHA(a)->atom,strlen(ALPHA(a)->atom)+1)]);
+      while((l != NULL)&&(l->carp != a))
       {    root = &(l->cdrp);
            l = l->cdrp;
       };
@@ -289,11 +289,10 @@ char *s;
  ** The strings heap space will have been freed prior to this call by the **
  ** memory manager function gather().                                     **
  ***************************************************************************/
- void removestring(a)
- struct stringcell *a;
+ void removestring(struct conscell *a)
  {    struct conscell *l,**root;
-      l = *(root = &atomtable[hash(a->atom,strlen(a->atom)+1)]);
-      while((l != NULL)&&(l->carp != LIST(a)))
+      l = *(root = &atomtable[hash(STRING(a)->atom,strlen(STRING(a)->atom)+1)]);
+      while((l != NULL)&&(l->carp != a))
       {    root = &(l->cdrp);
            l = l->cdrp;
       };
@@ -328,8 +327,7 @@ char *s;
  ** birth to it's death and never be changed. Their car and cdr pointers  **
  ** may of course be altered to change the elements of the hunk.          **
  ***************************************************************************/
- struct hunkcell *inserthunk(n)
- int n;
+ struct hunkcell * inserthunk(int n)
  {    struct hunkcell *h; char *heap; int len,bytes,v,i;
       struct conscell *l;
       if ((n<=0)||(n>(2*(MAXATOMSIZE/sizeof(char *)))))
@@ -344,7 +342,7 @@ char *s;
       for(i=0;i<len;i++)                      /* BASE MUST BE NULL INCASE */
           WriteHunkBase(h,i,NULL);            /* OF GC IN FOLLOWING new() */
       for(i=0;i<len;i++)                      /* point bases to cons cells*/
-          WriteHunkBase(h,i,new(CONSCELL));   /* point base[i] to new cons */
+          WriteHunkBase(h,i,(char *)new(CONSCELL));   /* point base[i] to new cons */
       v = hash(heap,bytes);                   /* get hash bucket address */
       l = new(CONSCELL);                      /* make a new bucket entry*/
       l->carp = LIST(h);                      /* and link hunk into bucket*/
@@ -363,12 +361,11 @@ char *s;
  ** a hunk  from the atom table after its base ptr   heap space has been  **
  ** freed. This is eactly like removestring and removeatom.               **
  ***************************************************************************/
- void removehunk(a)
- struct hunkcell *a;
+ void removehunk(struct conscell *a)
  {    struct conscell *l,**root; register int n;
-      n = CEILING_DIV_2(a->size) * sizeof(char *);
-      l = *(root = &atomtable[hash(a->atom,n)]);
-      while((l != NULL)&&(l->carp != LIST(a)))
+      n = CEILING_DIV_2(HUNK(a)->size) * sizeof(char *);
+      l = *(root = &atomtable[hash(HUNK(a)->atom,n)]);
+      while((l != NULL)&&(l->carp != a))
       {    root = &(l->cdrp);
            l = l->cdrp;
       };
@@ -383,8 +380,7 @@ char *s;
  ** We also use it to set the base to NULL pointers. Should be totally   **
  ** portable to any of the cyber/prime etc. Machines with strange ptrs.  **
  **************************************************************************/
- static void WriteHunkBase(hunk,index,ptr)
- struct hunkcell *hunk; int index; char *ptr;
+ static void WriteHunkBase(struct hunkcell *hunk, int index, char *ptr)
  {      register char *s,*d;  register int n;
         n = sizeof(char *);
         d = hunk->atom + index*n;
@@ -397,8 +393,7 @@ char *s;
  ** does so in a machine/alignment independent way. Because Hunk Base ptr**
  ** array may be moved around in memory for garbage collection/compaction**
  **************************************************************************/
- struct conscell *ReadHunkBase(hunk,index)
- struct hunkcell *hunk; int index;
+ struct conscell * ReadHunkBase(struct hunkcell *hunk, int index)
  {      register char *s,*d;  register int n;
         struct conscell *ret;
         n = sizeof(char *);
@@ -414,8 +409,7 @@ char *s;
  ** index, then we use the remainder to decide if it is the car or cdr   **
  ** pointer of this base element. No legality checks are done!           **
  **************************************************************************/
-struct conscell **GetHunkIndex(h,i)
-struct hunkcell *h; int i;
+struct conscell ** GetHunkIndex(struct hunkcell *h, int i)
 {      register int index1,index2;
        register struct conscell *c;
        index1 = i>>1;                   /* index1 says which consc cell */
@@ -435,8 +429,7 @@ struct hunkcell *h; int i;
  ** construction of an array and a possible GC during the construction,  **
  ** we must therefore test this or we very occasionally get a crash.     **
  **************************************************************************/
-static void markhunk(h)
-struct hunkcell *h;
+static void markhunk(struct hunkcell *h)
 {      register int basesize,i;
        if (h == NULL) return;
        h->markbit = SET;
@@ -453,8 +446,7 @@ struct hunkcell *h;
  ** first clisp literal because it points to the clisp from which we     **
  ** just came so this would be a waste of time.                          **
  **************************************************************************/
-static void markclispliterals(l)
-struct conscell **l;
+static void markclispliterals(struct conscell **l)
 {      register int n = (*((int *)l - 1))/sizeof(struct conscell *);
        --n; l++;
        while(--n >= 0)
@@ -485,8 +477,7 @@ struct conscell **l;
  ** reaches a non set travbit it jumps to the 'right' code to handle the    **
  ** unvisited right subtree. etc. etc. etc.                                 **
  *****************************************************************************/
-void marklist(pres)
-struct conscell *pres;
+void marklist(struct conscell *pres)
 {      register struct conscell *prev,*next;
        if (pres == NULL) return;
        prev = NULL;
@@ -495,17 +486,17 @@ left:  if (pres->markbit == SET) goto up;
        switch(pres->celltype)
        {   case STRINGATOM: case REALATOM: case FIXFIXATOM: case FIXATOM:
                             goto up;
-           case FILECELL  : marklist(PORT(pres)->fname);
+           case FILECELL  : marklist(LIST(PORT(pres)->fname));
                             goto up;
            case HUNKATOM  : markhunk(HUNK(pres));
                             goto up;
            case ARRAYATOM : marklist(ARRAY(pres)->info);
-                            marklist(ARRAY(pres)->base);
+                            marklist(LIST(ARRAY(pres)->base));
                             goto up;
            case ALPHAATOM : marklist(ALPHA(pres)->valstack);
                             marklist(ALPHA(pres)->proplist);
                             if ( FN_ISUS(ALPHA(pres)->fntype) || FN_ISCLISP(ALPHA(pres)->fntype) )
-                               marklist(ALPHA(pres)->func);
+                               marklist(LIST(ALPHA(pres)->func));
                             goto up;
            case CLISPCELL:  markclispliterals(CLISP(pres)->literal);
                             goto up;
@@ -591,8 +582,7 @@ void mark()
  ** bound to nil. If &aux is found the following variables are not passed  **
  ** parameters but local variables which are to be bound to nil.           **
  ****************************************************************************/
- void pushvariables(vars,vals)
- struct conscell *vars,*vals;
+ void pushvariables(struct conscell *vars, struct conscell *vals)
  {      struct alphacell *at; struct conscell *temp;
         while((vars != NULL)&&(vals != NULL))
         {     at = (struct alphacell *)vars->carp;
@@ -621,14 +611,14 @@ void mark()
  ** passed in 'atom'. This saves us looking up something that we already   **
  ** have direct access to.                                                 **
  ****************************************************************************/
- void funcinstall(type,body,name,at)
- int type; struct conscell *(*body)(); char *name; struct alphacell *at;
- {      if (at == NULL)
-        {  at = CreateInternedAtom(name);
-           at->permbit = PERM;
+ void funcinstall(int type, struct conscell *(*body)(struct conscell *), char *name, struct conscell *at)
+ {      struct alphacell *a = ALPHA(at);
+        if (a == NULL)
+        {  a = CreateInternedAtom(name);
+           a->permbit = PERM;
         };
-        at->fntype = type;
-        at->func = body;
+        a->fntype = type;
+        a->func = body;
  }
 
 /****************************************************************************
@@ -636,8 +626,7 @@ void mark()
  ** of the variables in the list of atoms 'vars'. This is the end scope op.**
  ** It also frees up the shallow stack cons cells.                         **
  ****************************************************************************/
- void popvariables(vars)
- struct conscell *vars;
+ void popvariables(struct conscell *vars)
  {      struct alphacell *at;
         register struct conscell *f;
         while(vars != NULL)
@@ -655,39 +644,34 @@ void mark()
  ** bindvar and unbindvar: These are like the pushvariables and pop vars   **
  ** above but the operate on only one variable.                            **
  ****************************************************************************/
- void bindvar(var,val)
- struct alphacell *var;
- struct conscell *val;
+ void bindvar(struct conscell *var, struct conscell *val)
  {      struct conscell *temp;
         temp = new(CONSCELL);
         temp->carp = val;                             /* push var onto valstack */
-        temp->cdrp = var->valstack;
-        var->valstack = temp;
+        temp->cdrp = ALPHA(var)->valstack;
+        ALPHA(var)->valstack = temp;
  }
 
 /****************************************************************************
  ** bindlabel, just like bindvar but puts the lexical level in the stack   **
  ** cell for checking by (go).                                             **
  ****************************************************************************/
- void bindlabel(var,val)
- struct alphacell *var;
- struct conscell *val;
+ void bindlabel(struct conscell *var, struct conscell *val)
  {      struct conscell *temp;
         temp = new(CONSCELL);
         temp->linenum = lillev;
         temp->carp = val;                             /* push var onto valstack */
-        temp->cdrp = var->valstack;
-        var->valstack = temp;
+        temp->cdrp = ALPHA(var)->valstack;
+        ALPHA(var)->valstack = temp;
  }
 
 /****************************************************************************
  ** unbindvar(var): Pop one value from the value stack for atom 'var' and  **
  ** free up the shallow stack cons cell.                                   **
  ****************************************************************************/
- void unbindvar(var)
- struct alphacell *var;
- {      register struct conscell *f = var->valstack;
-	var->valstack = f->cdrp;                      /* pop the valstack once */
+ void unbindvar(struct conscell *var)
+ {      register struct conscell *f = ALPHA(var)->valstack;
+	ALPHA(var)->valstack = f->cdrp;               /* pop the valstack once */
         f->cdrp = NULL;
         f->carp = lifreecons;
         lifreecons = f;
@@ -697,8 +681,7 @@ void mark()
  ** bindtonil(vars) : Like pushvariables except that all values are NIL    **
  ** this is used when a prog is invoked establish locals all bound to NIL  **
  ****************************************************************************/
- void bindtonil(vars)
- struct conscell *vars;
+ void bindtonil(struct conscell *vars)
  {      struct alphacell *at; struct conscell *temp;
         while(vars != NULL)
         {     at = (struct alphacell *)vars->carp;
@@ -748,8 +731,7 @@ void mark()
  ** set the value of a variable that is not present it is an error, or if **
  ** that variable has no system binding that is also an error.            **
  ***************************************************************************/
- void SetLongVar(s,val)
- char *s; long int val;
+ void SetLongVar(char *s, long int val)
  {    struct alphacell *a; struct conscell *l;
       if ((a=lookupatom(s,INTERNED))==NULL) goto ERR;   /* atom present ? */
       if (a->valstack == NULL) goto ERR;                /* bound ? */
@@ -768,8 +750,7 @@ void mark()
  ** assumed non-nil if they do not exist, or to be assumed nil if they do **
  ** exits.                                                                **
  ***************************************************************************/
- int TestForNonNil(s,def)
- char *s; int def;
+ int TestForNonNil(char *s, int def)
  {    struct alphacell *a;
       if ((a=lookupatom(s,INTERNED))==NULL)
           return(def);
@@ -790,8 +771,7 @@ void mark()
  ** function because we will be called recursively and asked to mark the  **
  ** holdstack. Hence holdtop must be correct when new is called.          **
  ***************************************************************************/
- void HoldStackOperation(flag)
- int flag;
+ void HoldStackOperation(int flag)
  {      struct conscell *temp, *h; register int ix;
         static struct conscell *hold[HSSIZE];
         static int holdtop = 0;
@@ -809,8 +789,8 @@ void mark()
                      printf("[] ");
                      h = hold[ix];
                      if (h && (h->celltype == FIXFIXATOM)) {
-                         char *liuffnam(), *s;
-                         s = liuffnam(h);
+                         char *s;
+                         s = liuffnam((struct fixfixcell *)h);
                          printf("(%s -\?\?\?-)", s ? s : "?");
                      } else
                          printlist(stdout,h,DELIM_ON,temp,NULL);
@@ -887,13 +867,12 @@ void mark()
  ** may be either fixnum or flonum. We will do the comparisson for the mix-**
  ** tures of numeric type. Note that these comparissons are pretty slow!   **
  ****************************************************************************/
-int MixedTypeCompare(a,b)
-struct fixcell *a,*b;
+int MixedTypeCompare(struct conscell *a, struct conscell *b)
 {   if ((a==NULL)||(b==NULL)) return(MT_ERROR);
     if ((a->celltype == FIXATOM)&&(b->celltype  == FIXATOM))
-    {    if (a->atom < b->atom)  return(MT_LESS);
-         if (a->atom > b->atom)  return(MT_GREATER);
-         if (a->atom == b->atom) return(MT_EQUAL);
+    {    if (FIX(a)->atom < FIX(b)->atom)  return(MT_LESS);
+         if (FIX(a)->atom > FIX(b)->atom)  return(MT_GREATER);
+         if (FIX(a)->atom == FIX(b)->atom) return(MT_EQUAL);
     };
     if ((a->celltype == REALATOM)&&(b->celltype == REALATOM))
     {    if (REAL(a)->atom < REAL(b)->atom)  return(MT_LESS);
@@ -901,14 +880,14 @@ struct fixcell *a,*b;
          if (REAL(a)->atom == REAL(b)->atom) return(MT_EQUAL);
     };
     if ((a->celltype == FIXATOM)&&(b->celltype == REALATOM))
-    {    if (a->atom < REAL(b)->atom)  return(MT_LESS);
-         if (a->atom > REAL(b)->atom)  return(MT_GREATER);
-         if (a->atom == REAL(b)->atom) return(MT_EQUAL);
+    {    if (FIX(a)->atom < REAL(b)->atom)  return(MT_LESS);
+         if (FIX(a)->atom > REAL(b)->atom)  return(MT_GREATER);
+         if (FIX(a)->atom == REAL(b)->atom) return(MT_EQUAL);
     };
     if ((a->celltype == REALATOM)&&(b->celltype == FIXATOM))
-    {    if (REAL(a)->atom < b->atom)  return(MT_LESS);
-         if (REAL(a)->atom > b->atom)  return(MT_GREATER);
-         if (REAL(a)->atom == b->atom) return(MT_EQUAL);
+    {    if (REAL(a)->atom < FIX(b)->atom)  return(MT_LESS);
+         if (REAL(a)->atom > FIX(b)->atom)  return(MT_GREATER);
+         if (REAL(a)->atom == FIX(b)->atom) return(MT_EQUAL);
     };
     return(MT_ERROR);
 }
@@ -921,8 +900,7 @@ struct fixcell *a,*b;
  ** must check to see if it has a simple long representation or not. See   **
  ** the printatom code for more comments on what is going on here.         **
  ****************************************************************************/
-int GetNumberOrString(l,where)
-struct conscell *l; char **where;
+int GetNumberOrString(struct conscell *l, char **where)
 {   static char numbuf[MAXATOMSIZE]; double v;
     if (l != NULL)
     {   switch(l->celltype)
@@ -962,9 +940,8 @@ struct conscell *l; char **where;
  ** so that the (read) and (readc) statements in the body will know which  **
  ** port to read from. We then eval this body, unbind the port and return. **
  ****************************************************************************/
-static struct conscell *RunReadMacro(port,c)
-struct filecell *port; char *c;
-{    struct conscell *n, *TakeSexpression();
+static struct conscell * RunReadMacro(struct filecell *port, char *c)
+{    struct conscell *n;
      struct alphacell *at;
      if (*c == '\'')
      {   push(n);
@@ -978,9 +955,9 @@ struct filecell *port; char *c;
      if ((at = lookupatom(c,INTERNED)) != NULL)         /* get macro atom */
      {    if (at->valstack != NULL)                     /* its value is body */
           {   n = at->valstack->carp;                   /* n is macro to run */
-              bindvar(macroporthold,port);              /* bind for read(c) */
+              bindvar(LIST(macroporthold),LIST(port));              /* bind for read(c) */
               n = eval(n);                              /* run it */
-              unbindvar(macroporthold);                 /* drop binding */
+              unbindvar(LIST(macroporthold));                 /* drop binding */
               return(n);
           };
      };
@@ -993,9 +970,7 @@ struct filecell *port; char *c;
  ** name whose string is the print name of atom 'at'. Just allocate it and **
  ** link in the fields.                                                    **
  ****************************************************************************/
-struct conscell *MakePort(fd,at)
-FILE *fd;
-struct alphacell *at;
+struct conscell * MakePort(FILE *fd, struct alphacell *at)
 {      struct filecell *fcell;
        xpush(at);
        fcell = PORT(new(FILECELL));
@@ -1015,10 +990,9 @@ struct alphacell *at;
  ** this range then we check to see if it is whole or not. If non whole    **
  ** it cannot be stored in a long without loosing the fraction.            **
  ****************************************************************************/
-static int CanStoreInLong(d)
-double d;
+static int CanStoreInLong(double d)
 {   long l;
-    if ((d > MAXLONG)||(d < MINLONG)) return(0);
+    if ((d > (double)MAXLONG)||(d < (double)MINLONG)) return(0);
     l = (long) d;
     return(((double) l) == d);
 }
@@ -1028,8 +1002,7 @@ double d;
  ** cannot be represented as a fixnum. This is determinted by looking for  **
  ** any of the sci notation stuff e or E or the radix point '.'.           **
  ****************************************************************************/
-int HasFloatPart(s)
-char *s;
+int HasFloatPart(char *s)
 {   while(*s)
     {   if ((*s == '.')||(*s == 'e')||(*s == 'E')) return(1);
         s++;
@@ -1044,8 +1017,7 @@ char *s;
  ** parameter as appropriate and return a value of REALATOM  or FIXATOM to **
  ** indicate which type was chosen.                                        **
  ****************************************************************************/
-int   ConvertToBest(s,flonum,fixnum)
-char  *s;double *flonum; long int *fixnum;
+int ConvertToBest(char *s, double *flonum, long int *fixnum)
 {     char junk;
       if (sscanf(s,"%lf%c",flonum,&junk)==1) {      /* extract a double number */
           if (HasFloatPart(s))                      /* if it has . e or E then*/
@@ -1074,7 +1046,7 @@ char  *s;double *flonum; long int *fixnum;
  ** call newstring to allocate a cell and heap space for the string. All   **
  ** strings are considered unique objects unlike alpha atoms.              **
  ****************************************************************************/
-struct conscell *takeatom()
+static struct conscell *takeatom()
 {      if ISREAL()
        {  struct conscell *work; double flonum; long int fixnum=0L;
           push(work);
@@ -1111,10 +1083,8 @@ struct conscell *takeatom()
  ** and then return the result. If we get an error, we dump the top expr    **
  ** ession on the mark stack, this is usually from TakeList, the value 'r'. **
  *****************************************************************************/
-struct conscell *TakeSexpression(port)
-struct filecell *port;
-{      extern struct conscell *TakeList();
-       if ISATOM() return(takeatom());
+static struct conscell * TakeSexpression(struct filecell *port)
+{      if ISATOM() return(takeatom());
        if ISOPEN() return(TakeList(port));
        if (ISRMACRO()||ISSRMACRO())
           return(RunReadMacro(port,buff));
@@ -1129,8 +1099,7 @@ struct filecell *port;
  ** if we encounter a splice read macro we run it and splice it into the   **
  ** list so far.                                                           **
  ****************************************************************************/
-struct conscell *TakeList(port)
-struct filecell *port;
+static struct conscell * TakeList(struct filecell *port)
 {      struct conscell *l,*r,*n; int lineNum = liScanLineNum;
        push(l); push(n); push(r);               /* r ON TOP OF STACK */
        curtok = scan((zapee = port->atom),buff);/* log for zapline */
@@ -1173,10 +1142,7 @@ struct filecell *port;
  ** currently being read. If lnflag is false the line numbers are not  **
  ** saved/restored, this is the case when readmacros are being run.    **
  ************************************************************************/
-struct conscell *ReadExpression(port,eofval,lnflag)
-struct filecell *port;
-struct conscell *eofval;
-int    lnflag;
+struct conscell * ReadExpression(struct filecell *port, struct conscell *eofval, int lnflag)
 {      int oldNum;
        if (port->atom == NULL) ioerror(NULL);          /* NULL if port closed */
        if (lnflag)
@@ -1206,10 +1172,7 @@ int    lnflag;
  ** we are computing the counter length of the hunk we exit if this    **
  ** count ever goes positive.                                          **
  ************************************************************************/
-static void printhunk(p,h,how,counter)
-FILE *p;
-struct hunkcell *h;
-int  how; int *counter;
+static void printhunk(FILE *p, struct hunkcell *h, int how, int *counter)
 {    int basesize,i,j;
      struct conscell *c;
      if (counter != NULL) (*counter)++; else fprintf(p,"{");
@@ -1245,23 +1208,20 @@ int  how; int *counter;
  ** Note that tbuff must be 2*256 to allow for doubling due to \ insert**
  ** ion by the ExpandEscapes function.                                 **
  ************************************************************************/
-void printatom(p,l,how,counter)
-FILE *p;
-struct alphacell *l;
-int  how; int *counter;
+void printatom(FILE *p, struct conscell *l, int how, int *counter)
 {    char tbuf[MAXATOMSIZE * 2];
      if ((counter != NULL)&&(*counter >= 0))  return;
      if (l != NULL)
      {   switch(l->celltype)
          {  case ALPHAATOM :
-                 if ((how == DELIM_OFF)||(isalphatoken(l->atom)))
+                 if ((how == DELIM_OFF)||(isalphatoken(ALPHA(l)->atom)))
                  {  if (counter == NULL)
-                        fprintf(p,"%s",l->atom);
+                        fprintf(p,"%s",ALPHA(l)->atom);
                     else
-                        *counter += strlen(l->atom);
+                        *counter += strlen(ALPHA(l)->atom);
                  }
                  else
-                 {  ExpandEscapesInto(tbuf,l->atom);
+                 {  ExpandEscapesInto(tbuf,ALPHA(l)->atom);
                     if (counter == NULL)
                         fprintf(p,"|%s|",tbuf);
                     else
@@ -1333,10 +1293,10 @@ int  how; int *counter;
                  };
                  break;
             case HUNKATOM:
-                 printhunk(p,l,how,counter);
+                 printhunk(p,HUNK(l),how,counter);
                  break;
             case ARRAYATOM:
-                 l = ALPHA(ARRAY(l)->info->carp);    /* size is info->carp */
+                 l = ARRAY(l)->info->carp;    /* size is info->carp */
                  if (counter == NULL)
                  {   fprintf(p,"array[");
                      printatom(p,l,how,counter);
@@ -1369,10 +1329,7 @@ int  how; int *counter;
  ** is used by the functions (flatc) and (flatsize). Note that if the count **
  ** ever goes positive we stop because the callers limit has been reached.  **
  *****************************************************************************/
-void printlist(p,l,how,squash,counter)
-FILE  *p;
-struct conscell *l,*squash;
-int    how; int *counter;
+void printlist(FILE *p, struct conscell *l, int how, struct conscell *squash, int *counter)
 {      int n = 0; struct alphacell *at;
        TEST_BREAK();
        if ((counter != NULL)&&(*counter >= 0))  return;
@@ -1388,7 +1345,7 @@ int    how; int *counter;
            return;
        };
        if (l->celltype != CONSCELL)
-       {   printatom(p,(struct alphacell *) l,how,counter);
+       {   printatom(p,LIST((struct alphacell *) l),how,counter);
            return;
        };
        if (l->carp != NULL)                               /* handle (quote X)*/
@@ -1427,7 +1384,7 @@ int    how; int *counter;
                          else
                              *counter += 1;
                       };
-                      printatom(p,(struct alphacell *) l->carp,how,counter);
+                      printatom(p,LIST((struct alphacell *) l->carp),how,counter);
                   };
               } else
                   {   if (n>0)
@@ -1441,7 +1398,7 @@ int    how; int *counter;
               if (l->cdrp != NULL)
               {   if (l->cdrp->celltype != CONSCELL)
                   {   if (counter == NULL) fprintf(p," . "); else *counter +=3;
-                      printatom(p,(struct alphacell *) l->cdrp,how,counter);
+                      printatom(p,LIST((struct alphacell *) l->cdrp),how,counter);
                       if (counter == NULL) fprintf(p,")"); else *counter +=1;
                       return;
                   };
@@ -1459,9 +1416,7 @@ int    how; int *counter;
  ** stop printing when the count goes positive we just start the print    **
  ** counter at -limit and wait for it to go positive or finish.           **
  ***************************************************************************/
-int flatsize(l,limit)
-struct conscell *l;
-int limit;
+int flatsize(struct conscell *l, int limit)
 {      int i;
        limit = i = -limit;
        printlist(NULL,l,DELIM_ON,NULL,&i);
@@ -1478,11 +1433,7 @@ int limit;
  ** This pretty printer algorithm was taken of USENET  a while ago. It is **
  ** not perfect but it gets the job done.                                 **
  ***************************************************************************/
-void prettyprint(expression,indent_level,indent_so_far,sink)
-struct conscell *expression;
-int    indent_level;
-int    indent_so_far;
-FILE * sink;
+void prettyprint(struct conscell *expression, int indent_level, int indent_so_far, FILE *sink)
 {      struct conscell *current_expression;
        struct conscell *CARexpr,*CDRexpr,*CADRexpr,*CDDRexpr;
        int new_level,is_prog,at_size,i,sizeCARexpr;
@@ -1554,8 +1505,7 @@ FILE * sink;
  ** is a DIRSEPCHAR on the end of the extracted path, we strip it off.    **
  ** This is because the loadfile function will put in its own DIRSEPSTRING**
  ***************************************************************************/
-int CopyNextPath(to,from)
-char *to,**from;
+int CopyNextPath(char *to, char **from)
 {    register int n = 0;
      while((**from != '\0')&&(**from != ':'))    /* copy up to \0 or : */
      {  if (**from == ' ')                       /* blank ? so just    */
@@ -1589,9 +1539,8 @@ char *to,**from;
  ** set from to point to the end of the copied path. CopyNextPath returns **
  ** 1 when it extraces a path and 0 when none is found.                   **
  ***************************************************************************/
-int  loadfile(fname)
-char *fname;
-{     FILE *fp, *fopen();
+int loadfile(char *fname)
+{     FILE *fp;
       char work[512], *path;
       struct conscell *input;
       struct filecell *port;
@@ -1668,7 +1617,6 @@ hit:  buresetlog(fp, 2);
            ungetc(c, fp);
            errno = 0;                                      /* clear for new errors */
            if (c >= 128) {
-               extern struct conscell *libread();
                input = libread(port, 0L);
                if (!input || (input->celltype != CONSCELL) || !input->carp) break;
                input = input->carp;
@@ -1705,10 +1653,7 @@ hit:  buresetlog(fp, 2);
  ** if the break was entered before execution began. So we reset the break**
  ** if we read the list from the standard input.                          **
  ***************************************************************************/
-static void processfile(port,echoflag,prompt)
-struct filecell *port;
-int  echoflag;
-char *prompt;
+static void processfile(struct filecell *port, int echoflag, char *prompt)
 {   int oldNum;
     if (echoflag == ECHO) printf("%s",prompt);
     oldNum = ScanSetLineNum(port->linenum);          /* save old linenum and set current line number */
@@ -1757,8 +1702,7 @@ static void takelispexit()
  ***************************************************************************/
 int liargc = 0; char **liargv = NULL;
 
-static void liargs(argc, argv)
-    int argc; char **argv;
+static void liargs(int argc, char **argv)
 {
     liargc = argc;
     liargv = argv;
@@ -1788,8 +1732,7 @@ static void liargs(argc, argv)
  ** invokation of the break level processor.                              **
  ***************************************************************************/
 #if !defined(MACRO)
-    int main(argc,argv)
-    int argc; char *argv[];
+    int main(int argc, char *argv[])
     {
 	printf("%s%s%s", "PC-LISP V", VERSION, " Copyright (C) Peter J.Ashwood-Smith, 1989-2015\n");
         zapee = stdin;
@@ -1836,8 +1779,7 @@ static void liargs(argc, argv)
     | in lieval.c except that it returns TRUE or FALSE for the lidomac and lidomaca
     | functions.
     */
-    static struct alphacell *lookupmacro(func)
-    char *func;
+    static struct alphacell * lookupmacro(char *func)
     {   extern struct alphacell *autoloadhold; char *str;
         extern struct conscell *getprop();
         struct conscell *s; struct alphacell *at;
@@ -1899,8 +1841,7 @@ static void liargs(argc, argv)
     | package. Fn is the name of the file that is to be loaded for this
     | application.
     */
-    int liinit(fn1,fn2)
-    char *fn1,*fn2;
+    int liinit(char *fn1, char *fn2)
     {
         if (!liprimed) { liprime(); liprimed = 1; }
         if (!setjmp(env)) {                                 /* <-- IERROR TARGET */
@@ -1939,8 +1880,7 @@ static void liargs(argc, argv)
     | Make LISP interpreter safe. This means that SIGINTS are handled by whoever
     | called us but we do not respond to them.
     */
-    void lisafe(enable)
-    int enable;
+    void lisafe(int enable)
     {   disableerrors(0, !enable);
     }
 
@@ -1951,8 +1891,7 @@ static void liargs(argc, argv)
     | default start up file and then load 'fn' and finally return to the application.
     | These are used to implement the actions 'gotoLISP' and 'rebootLISP' in FUNDES.
     */
-    void limacro(fn1,fn2)
-    char *fn1,*fn2;
+    void limacro(char *fn1, char *fn2)
     {   printf("%s%s%s", "\nPC-LISP V" , VERSION, " Copyright (C) Peter J.Ashwood-Smith, 1989-1992\n");
         printf("Press CONTROL-D to return to PC-LISP application.\n");
         if (fn1 != NULL) {
@@ -1997,8 +1936,7 @@ static void liargs(argc, argv)
     | Validate the spec as "%s "a %d .." that will be passed to lidomac and
     | lidomaca above. Return 0 if it is ok.
     */
-    int livalspc(spec)
-    char *spec;
+    int livalspc(char *spec)
     {    while(*spec != '\0') {       /* loop through %s %d .. spec */
            if (*spec == '%') {        /* if it is a type spec */
               spec++;
@@ -2023,8 +1961,7 @@ static void liargs(argc, argv)
     | livalmac(mac) - will return 0 if and only if the macro 'mac' exists and is
     | of the proper type to be executed, otherwise it returns -1.
     */
-    int livalmac(mac)
-    char *mac;
+    int livalmac(char *mac)
     {
         struct alphacell *fname;
         fname = lookupmacro(mac);                        /* find the function's atom may autoload */
@@ -2168,8 +2105,7 @@ static void liargs(argc, argv)
     | 0 if the function returns nil, 1 if it returns true, or the value
     | of the fixnum, if it returns a fixnum.
     */
-    int lidomaca(func, spec, argc, argv)
-    char *func, *spec, argv[][81]; int argc;
+    int lidomaca(char *func, char *spec, int argc, char argv[81])
     {   double f_parm;                                   /* current float parm */
         long i_parm, n;                                  /* current integer parm */
         char *s_parm, *argvs, *str;                      /* current string parm and arg */
@@ -2330,11 +2266,10 @@ static void liargs(argc, argv)
     | predicate if desired. Because liadpred may get called before liinit we must do
     | the initialize now if the system has not been primed.
     */
-    void liadpred(name, func)
-    char *name; int (*func)();
+    void liadpred(char *name, int (*func)(char *))
     {
         if (!liprimed) { liprime(); liprimed = 1; }
-        funcinstall(FN_BUPRED, func, name, NULL);
+        funcinstall(FN_BUPRED, (struct conscell *(*)(struct conscell *))func, name, NULL);
     }
 
 #endif

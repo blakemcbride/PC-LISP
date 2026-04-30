@@ -10,8 +10,7 @@
 /***************************************************************************
  ** (command-line-args) Will return a list of the command line arguments. **
  ***************************************************************************/
-struct conscell *bucmdlna(form)
-struct conscell *form;
+struct conscell * bucmdlna(struct conscell *form)
 {      struct conscell *head, *n; int i;
        push(head);
        if (form != NULL) ierror("command-line-args");

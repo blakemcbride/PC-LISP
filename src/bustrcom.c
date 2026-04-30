@@ -12,8 +12,7 @@
  |  This function returns its argument string with all white spaced removed,
  |  ie tabs, new lines etc.
  */
-struct conscell *bustrcomp(form)
-   struct conscell *form;
+struct conscell * bustrcomp(struct conscell *form)
 {
    char *s,*t,work[MAXATOMSIZE];
    if ((form != NULL)&&(form->cdrp == NULL)) {

@@ -11,8 +11,7 @@
  ** bunth() Will return the nth element of a list. Just follow the cdr's**
  ** till I get to n. Then return the car of this cell.                  **
  *************************************************************************/
-struct conscell *bunth(form)
-struct conscell *form;
+struct conscell * bunth(struct conscell *form)
 {      long int n;
        if (form!=NULL)
        {   if (form->carp != NULL)

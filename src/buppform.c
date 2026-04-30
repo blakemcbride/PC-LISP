@@ -12,8 +12,7 @@
  ** expression to standard output, or to given port. Indenet will be 0  **
  ** or given indent.                                                    **
  *************************************************************************/
-struct  conscell *buppform(form)
-struct  conscell *form;
+struct  conscell * buppform(struct  conscell *form)
 {       struct conscell *expr; FILE *port; struct filecell *p; int offset;
         port = stdout; offset = 0;
         if (form != NULL) {

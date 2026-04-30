@@ -13,8 +13,7 @@
  ** bunexploden:built in atom explosion function. Will explode an atom  **
  ** into a sequence of ascii values, one for each character.            **
  *************************************************************************/
-struct conscell *bunexplode(form)
-struct conscell *form;
+struct conscell * bunexplode(struct conscell *form)
 {      char *s; struct conscell *f,*l;
        push(f); push(l);
        if  ((form!=NULL)&&(form->cdrp == NULL))

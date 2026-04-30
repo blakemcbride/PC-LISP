@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bufix: (fix number) Return a fix representation of number.          **
  *************************************************************************/
-struct conscell *bufix(form)
-struct conscell *form;
+struct conscell * bufix(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

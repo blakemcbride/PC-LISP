@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buevenp (evenp fixnum) Return t if fixnum is an even number.        **
  *************************************************************************/
-struct conscell *buevenp(form)
-struct conscell *form;
+struct conscell * buevenp(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

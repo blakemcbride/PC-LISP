@@ -15,8 +15,7 @@
  ** largest NEGATIVE integer that system will handle. If the user gives **
  ** a limit we set the counter to that value.                           **
  *************************************************************************/
-struct  conscell *buflatc(form)
-struct  conscell *form;
+struct  conscell * buflatc(struct  conscell *form)
 {       int counter = MAXNEGINT, limit = MAXNEGINT;
         struct conscell *expr;
         if (form != NULL)

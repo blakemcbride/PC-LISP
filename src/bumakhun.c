@@ -13,8 +13,7 @@
  ** function of inserthunk(n). If the parameter is a non nil list we    **
  ** call ListToHunk with the list parameter to convert it for us.       **
  *************************************************************************/
-struct conscell *bumakhunk(form)
-struct conscell *form;
+struct conscell * bumakhunk(struct conscell *form)
 {      long int size;
        if ((form != NULL)&&(form->carp != NULL)&&(form->cdrp == NULL))
        {    if (GetFix(form->carp,&size))

@@ -10,8 +10,7 @@
 /*************************************************************************
  ** (= number1 number2) Compare 2 numbers for 'equality' relation.      **
  *************************************************************************/
-struct conscell *buequals(form)
-struct conscell *form;
+struct conscell * buequals(struct conscell *form)
 {      struct conscell *op1,*op2; register int result;
        xpush(form);
        if (form != NULL)

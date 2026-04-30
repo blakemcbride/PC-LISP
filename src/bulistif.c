@@ -16,8 +16,7 @@
  ** the handling of &rest arguments they can be simply (listify N) and  **
  ** do not require any testing of (arg) for legal range.                **
  *************************************************************************/
-struct conscell *bulistify(form)
-struct conscell *form;
+struct conscell * bulistify(struct conscell *form)
 {      struct conscell *alist; long int n,pos,len;
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if ((blexprhold->valstack != NULL)&&(GetFix(form->carp,&n)))

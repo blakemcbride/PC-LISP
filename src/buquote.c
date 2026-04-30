@@ -15,8 +15,7 @@
  ** exception if the form is (quote nil) we return NULL. This is because**
  ** 'nil == nil == () == '().                                           **
  *************************************************************************/
-struct conscell *buquote(form)
-struct conscell *form;
+struct conscell * buquote(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
             return(form->carp);
        ierror("quote");  /*  doesn't return  */

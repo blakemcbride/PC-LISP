@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bustringp: (stringp expr) Return t if expr is of type string.       **
  *************************************************************************/
-struct conscell *bustringp(form)
-struct conscell *form;
+struct conscell * bustringp(struct conscell *form)
 {      if (form != NULL)
        {   if (form->cdrp == NULL)
            {    if (form->carp != NULL)

@@ -11,8 +11,7 @@
  ** busetplist: Will set the property list of its first parameter to the**
  ** value given in its second parameter. It returns this property list. **
  *************************************************************************/
-struct conscell *busetplist(form)
-struct conscell *form;
+struct conscell * busetplist(struct conscell *form)
 {      struct alphacell *at;
        struct conscell  *ex;
        if (form != NULL)

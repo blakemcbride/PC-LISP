@@ -12,8 +12,7 @@
  ** one character corresponding to the ascii value of the number. It    **
  ** will not check the range except that it must be 0..255.             **
  *************************************************************************/
-struct conscell *buascii(form)
-struct conscell *form;
+struct conscell * buascii(struct conscell *form)
 {      char work[2]; long int v; work[1] = '\0';
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if (GetFix(form->carp,&v))

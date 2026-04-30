@@ -12,8 +12,7 @@
  |  This function returns its argument string with all trailing white
  |  space removed, ie tabs, new lines etc.
  */
-struct conscell *bustrtrim(form)
-   struct conscell *form;
+struct conscell * bustrtrim(struct conscell *form)
 {
    char *s,*t,work[MAXATOMSIZE]; int n;
    if ((form != NULL)&&(form->cdrp == NULL)) {

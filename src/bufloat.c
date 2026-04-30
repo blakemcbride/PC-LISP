@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bufloat: (float number) Return a flonum representation of number.   **
  *************************************************************************/
-struct conscell *bufloat(form)
-struct conscell *form;
+struct conscell * bufloat(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

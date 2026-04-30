@@ -12,8 +12,7 @@
  ** embedded programming language version of the interpreter exit is not**
  ** permitted. Control must return to the application to exit.          **
  *************************************************************************/
-struct conscell *buexit(form)
-struct conscell *form;
+struct conscell * buexit(struct conscell *form)
 {      if (form == NULL)
 #         if !MACRO
              exit(0);

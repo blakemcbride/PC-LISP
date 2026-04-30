@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buoddp: (oddp fixnum) Return t if fixnum is an odd number.          **
  *************************************************************************/
-struct conscell *buoddp(form)
-struct conscell *form;
+struct conscell * buoddp(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

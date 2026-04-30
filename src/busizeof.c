@@ -14,8 +14,7 @@
  ** cons/file/real & fix cell is the maximum of all their sizes because **
  ** they are all stored in the same size block of storage.              **
  *************************************************************************/
-struct conscell *busizeof(form)
-struct conscell *form;
+struct conscell * busizeof(struct conscell *form)
 {      char *exp;
        if ((form!=NULL)&&(form->carp != NULL)&&(form->cdrp == NULL))
        {    if (GetString(form->carp,&exp))

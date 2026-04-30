@@ -31,7 +31,7 @@ buuntrac.c buwhile.c buzaplin.c buzerop.c liarrays.c libio.c liceval.c \
 lierror.c lieval.c liinst.c limain.c limkstak.c limman.c liscan.c \
 lithrow.c litrace.c liutils.c
 
-CFLAGS = -Wall -Wno-parentheses -O3
+CFLAGS = -Wall -O3
 
 OBJ = $(SRC:.c=.o)
 

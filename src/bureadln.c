@@ -16,8 +16,7 @@
  | scanner to get the desired effect because after reading S-expressions a
  | single \n will remain in the buffer causing all (readln)s to return "").
  */
-static int get_a_line(fp, work, n)
-   FILE *fp; char *work; int  n;
+static int get_a_line(FILE *fp, char *work, int n)
 {
    register int c;
    if (fp == stdin) fflush(stdin);                /* get rid of ungot \n */
@@ -44,8 +43,7 @@ static int get_a_line(fp, work, n)
  |  Note also that as soon as we establish the I/O port being used we
  |  assign it to "zapee" a global variable read by the (zapline) function.
  */
-struct conscell *bureadln(form)
-   struct conscell *form;
+struct conscell * bureadln(struct conscell *form)
 {
    struct conscell *rexp; char work[MAXATOMSIZE]; int rc = 0;
    struct filecell *p;

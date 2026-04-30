@@ -7,15 +7,12 @@
 #include <math.h>
 #include "lisp.h"
 
-extern void SetLongVar();
-
 /*************************************************************************
  ** bugc: Asks for garbage collection to occur right now please. Unlike **
  ** The mman it does not trigger allocation of new blocks if the percent**
  ** thresholds are not met.                                             **
  *************************************************************************/
-struct conscell *bugc(form)
-struct conscell *form;
+struct conscell * bugc(struct conscell *form)
 {      extern long gccount;
        if (form == NULL) {
           marking = 1;            /* tell stkovfl we are */

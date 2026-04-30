@@ -11,8 +11,7 @@
 /*************************************************************************
  ** bufloatp:Given a parameter return 't' if a double or 'nil otherwise.**
  *************************************************************************/
-struct conscell *bufloatp(form)
-struct conscell *form;
+struct conscell * bufloatp(struct conscell *form)
 {
        if ((form != NULL)&&(form->cdrp == NULL)) {
            if ((form->carp != NULL) && (form->carp->celltype == REALATOM))

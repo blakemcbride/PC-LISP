@@ -14,8 +14,7 @@
  ** EG (assoc 'IBM '( (GE.appliances) (IBM.computers))                  **
  ** is (IBM.computers)                                                  **
  *************************************************************************/
-struct conscell *buassoc(form)
-struct conscell *form;
+struct conscell * buassoc(struct conscell *form)
 {      struct conscell *var,*alist;
        xpush(form);
        if (form != NULL)

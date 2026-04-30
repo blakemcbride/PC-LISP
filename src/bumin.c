@@ -12,14 +12,13 @@
  ** (min -numbers-) Find the smallest in a list of FIXATOMS or REALATOMS**
  ** and return this element.                                            **
  *************************************************************************/
-struct conscell *bumin(form)
-struct conscell *form;
+struct conscell * bumin(struct conscell *form)
 {      struct conscell *minsofar,*op; int first = 1, result;
        if (form == NULL) return(newintop(0L));
        while (form != NULL)
        {      op = (struct conscell *) form->carp;
               if (first)
-              {   if ((op!=NULL)&&(op->celltype==FIXATOM)||(op->celltype==REALATOM))
+              {   if ((op!=NULL)&&((op->celltype==FIXATOM)||(op->celltype==REALATOM)))
                       minsofar = op;
                   else
                       ierror("min");

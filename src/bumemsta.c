@@ -13,8 +13,7 @@
  ** able. We call the memory manager to get this information. The call  **
  ** memorystatus(n) returns the appropriate info for 'n' = 0,1,2,3,4 & 5**
  *************************************************************************/
-struct conscell *bumemstat(form)
-struct conscell *form;
+struct conscell * bumemstat(struct conscell *form)
 {      struct conscell *t,*h;
        push(t); push(h);
        if (form==NULL)

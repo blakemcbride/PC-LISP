@@ -5,9 +5,8 @@
  */
 #include <stdio.h>
 #include <math.h>
+#include <unistd.h>
 #include "lisp.h"
-
-extern int close();
 
 /*************************************************************************
  ** bufclose: Close file whose file pointer is my parameter note that we**
@@ -23,8 +22,7 @@ extern int close();
  ** stay open even after the child has died so that the buffers remain  **
  ** intact for reading by the parent at its leisure.                    **
  *************************************************************************/
-struct conscell *bufclose(form)
-struct conscell *form;
+struct conscell * bufclose(struct conscell *form)
 {      FILE **p; char *s; int fd;
        if (form != NULL) {
           if (form->carp != NULL) {
@@ -34,7 +32,7 @@ struct conscell *form;
                   buresetlog(*p, 0);
                   if (fclose(*p) == EOF) ioerror(*p);
                   *p = NULL;                     /* now illegal FILE! */
-                  if (GetString(PORT(form->carp)->fname, &s)) {
+                  if (GetString(LIST(PORT(form->carp)->fname), &s)) {
                       if (sscanf(s,"%*s (%d*", &fd) == 1)
                           close(fd);
                   }

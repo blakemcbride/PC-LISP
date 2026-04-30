@@ -14,10 +14,9 @@
  ** mask out SIGCHLD signals otherwise the sigchld handler may cause the**
  ** wait to miss the child process and block forever.                   **
  *************************************************************************/
-struct conscell *buexec(form)
-struct conscell *form;
+struct conscell * buexec(struct conscell *form)
 {      char *str,buff[2048];
-       int mask, n = 0; struct conscell *r;
+       int n = 0; struct conscell *r;
        *buff = '\0';
        while(form != NULL) {
            if (!GetString(form->carp,&str)) ierror("exec");
@@ -29,18 +28,14 @@ struct conscell *form;
 #ifdef _MSC_VER
        r = newintop(((long)system(buff)));
 #else
-#if 1
-       mask = sigblock(sigmask(SIGCHLD));
-       r = newintop(((long)system(buff)));
-       sigsetmask(mask);
-#else   /*  need to update this but not sure how right now.  */
        {
-	   sigset_t mask, omast;
-           sigprocmask(SIG_BLOCK, mask, &omask);
+           sigset_t mask, omask;
+           sigemptyset(&mask);
+           sigaddset(&mask, SIGCHLD);
+           sigprocmask(SIG_BLOCK, &mask, &omask);
            r = newintop(((long)system(buff)));
-           sigprocmask(SIG_SETMASK, &omask, null);
+           sigprocmask(SIG_SETMASK, &omask, NULL);
        }
-#endif
 #endif
        return(r);
 }

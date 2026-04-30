@@ -11,8 +11,7 @@
  ** involving fixnum1 and fixnum2 according to op. This is straight from  **
  ** LISPcraft page 342.                                                   **
  ***************************************************************************/
-struct conscell *buboole(form)
-struct conscell *form;
+struct conscell * buboole(struct conscell *form)
 {
        long x = 0L, y = 0L, result, key;
 

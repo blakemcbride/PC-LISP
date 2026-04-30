@@ -14,8 +14,7 @@
  ** especially if the list were a recursive function body. To allow an  **
  ** exit from an infinite recursion the BREAK condition is tested.      **
  *************************************************************************/
-long memoryusage(l)
-struct conscell *l;
+long memoryusage(struct conscell *l)
 {      if (l == NULL) return(0L);
        TEST_BREAK();
        switch(l->celltype)
@@ -26,7 +25,7 @@ struct conscell *l;
               case FIXFIXATOM: return( (long) sizeof(struct fixfixcell));
               case REALATOM  : return( (long) sizeof(struct realcell));
               case FILECELL  : return( (long) sizeof(struct filecell)
-                             + memoryusage(PORT(l)->fname));
+                             + memoryusage(LIST(PORT(l)->fname)));
               case ALPHAATOM : return( (long) sizeof(struct alphacell)
                              + strlen(ALPHA(l)->atom) + 1);
               case STRINGATOM: return( (long) sizeof(struct stringcell)
@@ -49,8 +48,7 @@ struct conscell *l;
  ** and value stack bindings or function bodies. Heap overhead is also  **
  ** not counted.                                                        **
  *************************************************************************/
-struct conscell *bumemusage(form)
-struct conscell *form;
+struct conscell * bumemusage(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
             return(newintop(memoryusage(form->carp)));
        ierror("memusage");  /*  doesn't return  */

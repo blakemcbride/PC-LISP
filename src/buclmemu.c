@@ -11,8 +11,7 @@
  | and add to the given counters. This is an approximate calculation and does not count hunk or
  | array objects because they do not usually occur as clisp literals.
  */
-static void compute_memusage(l, cons_bytes, alpha_bytes, heap_bytes)
-       struct conscell *l; long *cons_bytes, *alpha_bytes, *heap_bytes;
+static void compute_memusage(struct conscell *l, long *cons_bytes, long *alpha_bytes, long *heap_bytes)
 {
        if (l == NULL) return;
        switch(l->celltype) {
@@ -38,8 +37,7 @@ static void compute_memusage(l, cons_bytes, alpha_bytes, heap_bytes)
  | a file so that the (memory-expand) call can be added to the head of the object file to speed
  | up loading by anticipating memory requirements.
  */
-struct conscell *buclmemusage(form)
-       struct conscell *form;
+struct conscell * buclmemusage(struct conscell *form)
 {
        register struct conscell **l;
        long cons_bytes, alpha_bytes, heap_bytes;

@@ -14,8 +14,7 @@
  ** this list because the top level is not stable, it may be destroyed  **
  ** by (remprop).                                                       **
  *************************************************************************/
-struct conscell *buplist(form)
-struct conscell *form;
+struct conscell * buplist(struct conscell *form)
 {      if (form != NULL)
        {  if (form->cdrp == NULL)
           {  form = form->carp;

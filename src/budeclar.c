@@ -10,7 +10,6 @@
 /*************************************************************************
  ** (declare .....) is just ignored by the interpreter.                 **
  *************************************************************************/
-struct conscell *budeclare(form)
-struct conscell *form;
+struct conscell * budeclare(struct conscell *form)
 {      return(LIST(thold));
 }

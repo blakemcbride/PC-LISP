@@ -10,8 +10,7 @@
 /*************************************************************************
  ** busqrt:Returns the square root of the single double parameter.      **
  *************************************************************************/
-struct conscell *busqrt(form)
-struct conscell *form;
+struct conscell * busqrt(struct conscell *form)
 {      double f;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f)) {

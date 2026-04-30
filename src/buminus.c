@@ -11,8 +11,7 @@
 /*************************************************************************
  ** (- i1 i2 .... in) Subtract a list of fixnums and return result.     **
  *************************************************************************/
-struct conscell *buminus(form)
-struct conscell *form;
+struct conscell * buminus(struct conscell *form)
 {      struct fixcell *op; long int sum = 0L; int first = 1;
        xpush(form);
        while (form != NULL)

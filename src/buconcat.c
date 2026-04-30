@@ -16,14 +16,13 @@
  ** copied to copy over the '\0'. Then when we are done we make sure that **
  ** string is null terminated and create or find an atom equivalent to it.**
  ***************************************************************************/
-struct conscell *buconcat(form)
-struct conscell *form;
+struct conscell * buconcat(struct conscell *form)
 {      char work[MAXATOMSIZE],*d,*s; int len = 0;
        if (form == NULL) return(NULL);
        for(d = work; form != NULL; form = form->cdrp)
        {   if (!GetNumberOrString(form->carp,&s)) goto ERR;
            if ((len += strlen(s)) >= MAXATOMSIZE) gerror("atom too big");
-           while(*d++ = *s++);
+           while((*d++ = *s++) != '\0');
            d--;
        };
        *(d+1) = '\0';

@@ -21,8 +21,7 @@
  ** thus make a circular list whose end will never be found by the two  **
  ** while loops in this routine. We want then to be able to break out.  **
  *************************************************************************/
-struct conscell *bunconc(form)
-struct conscell *form;
+struct conscell * bunconc(struct conscell *form)
 {      struct conscell *last,*save;
        while((form != NULL) && (form->carp == NULL))
        {   form = form->cdrp;

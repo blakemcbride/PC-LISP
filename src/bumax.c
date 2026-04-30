@@ -12,14 +12,13 @@
  ** (max -numbers-) Find the largest in a list of FIXATOMS or REALATOMS **
  ** and return this element.                                            **
  *************************************************************************/
-struct conscell *bumax(form)
-struct conscell *form;
+struct conscell * bumax(struct conscell *form)
 {      struct conscell *maxsofar,*op; int first = 1, result;
        if (form == NULL) return(newintop(0L));
        while (form != NULL)
        {      op = (struct conscell *) form->carp;
               if (first)
-              {   if ((op!=NULL)&&(op->celltype==FIXATOM)||(op->celltype==REALATOM))
+              {   if ((op!=NULL)&&((op->celltype==FIXATOM)||(op->celltype==REALATOM)))
                       maxsofar = op;
                   else
                       ierror("max");

@@ -10,8 +10,7 @@
 /*************************************************************************
  ** busin :Returns the sine  of the single double parameter.            **
  *************************************************************************/
-struct conscell *busin(form)
-struct conscell *form;
+struct conscell * busin(struct conscell *form)
 {      double f;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f))

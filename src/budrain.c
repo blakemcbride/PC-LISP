@@ -11,8 +11,7 @@
  ** (drain [port]) will flush the 'port' or the standard output port if **
  ** port is not given.                                                  **
  *************************************************************************/
-struct conscell *budrain(form)
-struct conscell *form;
+struct conscell * budrain(struct conscell *form)
 {      if (form == NULL)
            fflush(stdout);
        else

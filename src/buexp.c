@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buexp :Returns e to the power of the single double parameter.       **
  *************************************************************************/
-struct conscell *buexp(form)
-struct conscell *form;
+struct conscell * buexp(struct conscell *form)
 {      double f;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f))

@@ -12,8 +12,7 @@
  ** bulength() : Will count the length of the list at the top level and **
  ** return a new real cell containing this value.                       **
  *************************************************************************/
-struct conscell *bulength(form)
-struct conscell *form;
+struct conscell * bulength(struct conscell *form)
 {
        if (form!=NULL)
        {   if (form->carp == NULL)

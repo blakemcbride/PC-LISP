@@ -14,7 +14,9 @@
 #include <stdio.h>
 #include "lisp.h"
 
-static void bcierror();
+static void bcierror(char *msg, char *code, int recover);
+extern char *liuclnam(char *code);
+extern char *liuffnam(struct fixfixcell *ff);
 
 
 /*
@@ -30,7 +32,7 @@ static struct cl_stack_s {
               int guard;
             } clisp = { { NULL }, 1 };
 
-static struct conscell **tos = &clisp.stack[-1];
+static struct conscell **tos = clisp.stack - 1;
 
 /*
  | These functions permit the errset function to query/reset the BCI top of stack
@@ -40,8 +42,7 @@ struct conscell **getclisptos()
 {    return(tos);
 }
 
-void putclisptos(ntos)
-     struct conscell **ntos;
+void putclisptos(struct conscell **ntos)
 {    tos = ntos;
 }
 
@@ -60,9 +61,8 @@ void markclisp()
  | then prints an error message, dumps the stack and tries to figure out which
  | function went wrong.
  */
-static void bcierror(msg, code, recover)
-     char *msg; char *code;  int recover;
-{    struct conscell **s; char *nam, *liuclnam(); int i;
+static void bcierror(char *msg, char *code, int recover)
+{    struct conscell **s; char *nam; int i;
      printf("--- byte coded interpreter: error: %s ---\n", msg);
      nam = liuclnam(code);
      if (nam)
@@ -86,8 +86,7 @@ static void bcierror(msg, code, recover)
 /*
  | Similar to the above error function but for unbound atoms encountered during PUSHLV evaluations.
  */
-static void cliuberror(t, code)
-     struct conscell *t; char *code;
+static void cliuberror(struct conscell *t, char *code)
 {
      char work[MAXATOMSIZE+32];
      sprintf(work," unbound atom '%s'", ALPHA(t)->atom);
@@ -98,8 +97,7 @@ static void cliuberror(t, code)
  |  The is to run the byte code machine using code 'code' referencing literals
  | 'literals' and arguments 'form'.
  */
-struct conscell *evalclisp( code, literals, form )
-       char *code; struct conscell *form, **literals;
+struct conscell *evalclisp(char *code, struct conscell **literals, struct conscell *form)
 {
        register char *ip = code;
        register struct conscell **lits = literals;
@@ -235,13 +233,13 @@ struct conscell *evalclisp( code, literals, form )
          /*
           | Instruction CDR: will replace the top of stack with its cdr if non nil.
           */
-          case OP_CDR:        if (t = *tos) (*tos) = t->cdrp;
+          case OP_CDR:        if ((t = *tos) != NULL) (*tos) = t->cdrp;
                               goto next;
 
          /*
           | Instruction CDR: will replace the top of stack with its car if non nil.
           */
-          case OP_CAR:        if (t = *tos) (*tos) = t->carp;
+          case OP_CAR:        if ((t = *tos) != NULL) (*tos) = t->carp;
                               goto next;
 
          /*
@@ -437,7 +435,7 @@ struct conscell *evalclisp( code, literals, form )
           */
           case OP_PUTCLISP:   t = lits[XSHORT(ip)];
                               ip += 2;
-                              ALPHA(t)->func = ((struct conscell *(*)())( lits[XSHORT(ip)] ));
+                              ALPHA(t)->func = ((struct conscell *(*)(struct conscell *))( lits[XSHORT(ip)] ));
                               ALPHA(t)->fntype = FN_CLISP;
                               ip += 2;
                               goto next;

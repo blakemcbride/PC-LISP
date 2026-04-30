@@ -10,8 +10,7 @@
  ** busum: (sum -numbers-) Add up numbers as floating points, then if   **
  ** all numbers were fixnums return a fixnum otherwise return flonum.   **
  *************************************************************************/
-struct conscell *busum(form)
-struct conscell *form;
+struct conscell * busum(struct conscell *form)
 {      double sum = 0.0, op; int isflt = 0;
        while(form!=NULL) {
 	   if (!GetFloat(form->carp,&op)) ierror("sum|plus|add");

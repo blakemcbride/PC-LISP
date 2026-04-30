@@ -16,8 +16,7 @@
  ** NONE, this will allow the atom to be garbage collected later if it  **
  ** has no property of binding.                                         **
  *************************************************************************/
-struct conscell *buputd(form)
-struct conscell *form;
+struct conscell * buputd(struct conscell *form)
 {      struct conscell *body,*type;
        struct alphacell *atm;
        if (form == NULL) goto ERR;
@@ -32,17 +31,17 @@ struct conscell *form;
                      type = body->carp;
                      if ((type==LIST(lambdahold))||(type==LIST(nlambdahold))||
                          (type==LIST(lexprhold))) {
-                          funcinstall(FN_USEXPR,FUNCTION(body),NULL,atm);
+                          funcinstall(FN_USEXPR,FUNCTION(body),NULL,LIST(atm));
                           return(LIST(atm));
                      } else {
                           if (type == (struct conscell *)macrohold) {
-                             funcinstall(FN_USMACRO,FUNCTION(body),NULL,atm);
+                             funcinstall(FN_USMACRO,FUNCTION(body),NULL,LIST(atm));
                              return(LIST(atm));
                           }
                      }
                   } else {
                      if (body->celltype == CLISPCELL) {
-                         funcinstall(FN_CLISP,FUNCTION(body),NULL,atm);
+                         funcinstall(FN_CLISP,FUNCTION(body),NULL,LIST(atm));
                          return(LIST(atm));
                      }
                   }

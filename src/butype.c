@@ -13,8 +13,7 @@
  ** 'port, or 'other if we do not know what it is. Note that the null   **
  ** list is of type list. Note symbolp when tested by (type).           **
  *************************************************************************/
-struct conscell *butype(form)
-struct conscell *form;
+struct conscell * butype(struct conscell *form)
 {      struct alphacell *r;
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if (form->carp == NULL)                      /* empty list */

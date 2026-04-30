@@ -18,8 +18,7 @@
  ** assigned. These are then pushed destructively onto the valstacks of **
  ** the atoms in the PAR-setq parameter list.                           **
  *************************************************************************/
-struct conscell *buparsetq(form)
-struct conscell *form;
+struct conscell * buparsetq(struct conscell *form)
 {      struct conscell *save,*retval,*temp,*vlist,*last=NULL;  /*  NULL assignment to keep compiler happy  */
        push(vlist); push(temp);
        save = form; retval = NULL;

@@ -15,8 +15,7 @@
  ** car of this list. Then we just check the range of the parameter,    **
  ** loop to get to that elements cons cell, then substitute it's car.   **
  *************************************************************************/
-struct conscell *busetarg(form)
-struct conscell *form;
+struct conscell * busetarg(struct conscell *form)
 {      long int n,len;
        struct conscell *alist;
        if (blexprhold->valstack != NULL)

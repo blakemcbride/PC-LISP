@@ -14,8 +14,7 @@
  ** If the atom has no global binding this function return NIL, else it **
  ** unlinks the global value and returns T.                             **
  *************************************************************************/
-struct conscell *bumakunb(form)
-struct conscell *form;
+struct conscell * bumakunb(struct conscell *form)
 {      struct alphacell *r; struct conscell *t, **l;
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if (form->carp->celltype == ALPHAATOM)

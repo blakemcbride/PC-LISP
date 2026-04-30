@@ -18,8 +18,7 @@ FILE *zapee;
  ** (zapline) will read all characters up to and including a '\n' on the**
  ** last port that was used for input. This last port is kept in zapee. **
  *************************************************************************/
-struct conscell *buzapline(form)
-struct conscell *form;
+struct conscell * buzapline(struct conscell *form)
 {      if (form != NULL) ierror("zapline");
        while(getc(zapee)!='\n') TEST_BREAK();     /* zapee declared at top */
        return(NULL);

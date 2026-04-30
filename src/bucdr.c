@@ -14,8 +14,7 @@
  ** Note if (sstatus chainatom) is set then we allow the error of taking**
  ** the car of an object that is not a cons cell or a nil cell.         **
  *************************************************************************/
-struct conscell *bucdr(form)
-struct conscell *form;
+struct conscell * bucdr(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
        {   form = form->carp;
            if (form == NULL)

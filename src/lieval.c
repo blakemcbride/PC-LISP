@@ -52,8 +52,7 @@
 /*************************************************************************
  ** buueval: Users call to eval ie Lisp interpreter can call eval       **
  *************************************************************************/
-struct conscell *buueval(form)
-struct conscell *form;
+struct conscell * buueval(struct conscell *form)
 {      if (form != NULL)
           return(eval(form->carp));
        ierror("eval");  /*  doesn't return  */
@@ -64,8 +63,7 @@ struct conscell *form;
 /*************************************************************************
  ** buuapply:Users call to apply ie Lisp interpreter can call apply     **
  *************************************************************************/
-struct conscell *buuapply(form)
-struct conscell *form;
+struct conscell * buuapply(struct conscell *form)
 {      register struct conscell *fn, *largs;
        if (form != NULL) {
            fn = form->carp;
@@ -87,8 +85,7 @@ struct conscell *form;
  ** arg1 ... argN. This is quite simply done by calling apply with the  **
  ** first arg and the rest of the args as the arg list.                 **
  *************************************************************************/
-struct conscell *bufuncall(form)
-struct conscell *form;
+struct conscell * bufuncall(struct conscell *form)
 {      register struct conscell *func,*args;
        if (form != NULL) {
            func = form->carp;
@@ -109,11 +106,9 @@ struct conscell *form;
  ** the error indicating that the atom is unbound. We return the body   **
  ** of the atom if we manage to load the function.                      **
  *************************************************************************/
-static struct conscell *autoloadatom(at)
-struct alphacell *at;
+static struct conscell * autoloadatom(struct alphacell *at)
 {       extern struct alphacell *autoloadhold; char *str;
-        extern struct conscell *getprop();
-        register struct conscell *s = getprop(at, autoloadhold);
+        register struct conscell *s = getprop(LIST(at), LIST(autoloadhold));
         if ((s != NULL) && GetString(s, &str)) {
             if ( loadfile(str) ) {
                if ( FN_ISUS(at->fntype) || FN_ISCLISP(at->fntype) )      /* now has an fn expr ? */
@@ -132,8 +127,7 @@ struct alphacell *at;
  ** list of evaluated elements. We must create a new list to avoid doing**
  ** harm to constants like function bodys etc.                          **
  *************************************************************************/
-struct conscell *evlis(form)
-struct conscell *form;
+struct conscell * evlis(struct conscell *form)
 {      register struct conscell *t,*l;
        struct conscell *r;
        if (form == NULL) return(NULL);
@@ -162,8 +156,7 @@ struct conscell *form;
  ** than one body to eval, lest we introduce yet another function call  **
  ** to an already very deeply nested set of corecursive routines.       **
  *************************************************************************/
-struct conscell *evalallbodys(l)
-struct conscell *l;
+struct conscell * evalallbodys(struct conscell *l)
 {      xpush(l);                        /* save it on mark stack */
        while(l->cdrp != NULL) {         /* do until last one in list */
              eval(l->carp);             /* eval and throw away result */
@@ -190,8 +183,7 @@ struct conscell *l;
  ** with the the largs which will be used to compute the address in it. **
  ** arrayaccess() is located in module bufunc2.c with rest of array junk**
  *************************************************************************/
-struct conscell *apply(fn,largs)
-struct conscell *fn,*largs;
+struct conscell * apply(struct conscell *fn, struct conscell *largs)
 {      register struct conscell *temp, *temp2;
        xpush(fn); xpush(largs);
        if (fn == NULL) ierror("apply");
@@ -217,7 +209,7 @@ struct conscell *fn,*largs;
                     xret(bucadar(largs,ALPHA(fn)->atom),2);
                 if (FN_ISPRED(ALPHA(fn)->fntype)) {             /* binary predicate? */
                     if (largs != NULL) ierror(ALPHA(fn)->atom); /* must have no args */
-                    fret(((((*ALPHA(fn)->func)(ALPHA(fn)->atom)) == 0) ? NULL : LIST(thold)), 2);
+                    fret((((((int (*)(char *))ALPHA(fn)->func)(ALPHA(fn)->atom)) == 0) ? NULL : LIST(thold)), 2);
                 }
                 if (ALPHA(fn)->tracebit == TRACE_ON)
                 {   EnterTrace(fn,largs);
@@ -296,8 +288,7 @@ struct conscell *fn,*largs;
  ** decision is made by CopyCellIf, a function located in mman.c because**
  ** it needs to know physical cell size restrictions, not sizeof info.  **
  *************************************************************************/
-struct conscell *eval(form)
-struct conscell *form;
+struct conscell * eval(struct conscell *form)
 {      register struct conscell *temp,*fn,*largs;
        register struct alphacell *fnat;
        TEST_BREAK();                                                     /* exit on break */
@@ -310,7 +301,7 @@ struct conscell *form;
                      return(LIST(ALPHA(form)->func));
                if (FN_ISCLISP(ALPHA(form)->fntype))                      /* has clisp expr ? */
                      return(LIST(ALPHA(form)->func));
-               return(autoloadatom(form));                               /* try to autoload it */
+               return(autoloadatom(ALPHA(form)));                               /* try to autoload it */
           case CONSCELL  :
                expush(form);
                fnat = ALPHA(form->carp);
@@ -326,15 +317,15 @@ struct conscell *form;
                        fn = LIST(fnat->func);
                        if (fnat->tracebit == TRACE_ON) {
                            if (fn->carp == LIST(nlambdahold)) {
-                               EnterTrace(fnat,form->cdrp);
+                               EnterTrace(LIST(fnat),form->cdrp);
                                temp = apply(fn,form->cdrp);
-                               ExitTrace(fnat,temp);
+                               ExitTrace(LIST(fnat),temp);
                                efret(temp,1);
                            }
                            largs = evlis(form->cdrp);
-                           EnterTrace(fnat,largs);
+                           EnterTrace(LIST(fnat),largs);
                            temp = apply(fn,largs);
-                           ExitTrace(fnat,temp);
+                           ExitTrace(LIST(fnat),temp);
                            efret(temp,1);
                        }
                        if (fn->carp == LIST(nlambdahold))
@@ -347,7 +338,7 @@ struct conscell *form;
                    if (fnat->fntype == FN_USMACRO) {            /** MACRO ?**/
                         fn = LIST(fnat->func);
                         temp = apply(fn,form);
-                        CopyCellIfPossible(form,temp);          /* memcpy(form,temp,N) */
+                        CopyCellIfPossible((char *)form,(char *)temp);  /* memcpy(form,temp,N) */
                         exret(eval(temp),1);
                    }
                }

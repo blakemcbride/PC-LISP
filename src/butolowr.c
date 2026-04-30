@@ -16,8 +16,7 @@
  |  Obviously this function returns its argument string with all upper case
  |  characters converted to lower case.
  */
-struct conscell *butolower(form)
-   struct conscell *form;
+struct conscell * butolower(struct conscell *form)
 {
    char *s, *w, work[MAXATOMSIZE];
    if ((form != NULL)&&(form->cdrp == NULL)) {

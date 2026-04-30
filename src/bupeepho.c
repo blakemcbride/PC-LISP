@@ -21,8 +21,7 @@
  | TYPE#4    PUSHL   o POP                    => nil nil
  | TYPE#5    SETQ <N> o POP o PUSHLV <N>      => SETQ <n>      { (prog() (setq x 10) (fred x) .. }
  */
-struct conscell *buphoptimize(form)
-       struct conscell *form;
+struct conscell * buphoptimize(struct conscell *form)
 {
        register struct conscell *clisp, *literals, *instructions,*l;
        register int n_1234, n_5;

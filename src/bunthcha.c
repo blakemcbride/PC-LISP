@@ -12,8 +12,7 @@
  ** bunthchar: Will return the nth character from the print name of the **
  ** alpha atom which is the first parameter, nil if outside range.      **
  *************************************************************************/
-struct conscell *bunthchar(form)
-struct conscell *form;
+struct conscell * bunthchar(struct conscell *form)
 {      char *atparm; long int ixparm; char temp[2];
        if ((form != NULL)&&(GetString(form->carp,&atparm)))
        {  form = form->cdrp;

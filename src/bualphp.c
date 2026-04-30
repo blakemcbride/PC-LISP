@@ -12,8 +12,7 @@
  ** bualphp() Alpha less than predicate "alphalessp" will return 't' if **
  ** the first atom is < than the second atom. We use strcmp.            **
  *************************************************************************/
-struct conscell *bualphp(form)
-struct conscell *form;
+struct conscell * bualphp(struct conscell *form)
 {      char *e1, *e2;
        if ((form != NULL)&&(GetString(form->carp,&e1)))
        {    form = form->cdrp;

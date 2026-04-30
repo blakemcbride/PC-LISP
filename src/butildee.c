@@ -16,8 +16,7 @@
  |  This function expands the ~fred part of the path name string. If no tilde starts the
  |  string the input string is returned.
  */
-struct conscell *butildeexpand(form)
-   struct conscell *form;
+struct conscell * butildeexpand(struct conscell *form)
 {
 #ifndef _MSC_VER
    char *s, *t, head[MAXATOMSIZE], work[MAXATOMSIZE];
@@ -59,10 +58,11 @@ struct conscell *butildeexpand(form)
           | it.
           */
           if (strlen(pwent->pw_dir) + strlen(s) + 1 >= sizeof(work)) goto er;
-          if (*s != '\0')
-              sprintf(work,"%s/%s", pwent->pw_dir, s);
-          else
-              strcpy(work, pwent->pw_dir);
+          strcpy(work, pwent->pw_dir);
+          if (*s != '\0') {
+              strcat(work, "/");
+              strcat(work, s);
+          }
           return(LIST(insertstring(work)));
       }
    }

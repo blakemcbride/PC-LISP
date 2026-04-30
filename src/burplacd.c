@@ -11,8 +11,7 @@
  ** (rplacd list exp) Will actually alter the cdr pointer of list to exp**
  ** and then return list which will have been destructively altered.    **
  *************************************************************************/
-struct conscell *burplacd(form)
-struct conscell *form;
+struct conscell * burplacd(struct conscell *form)
 {      struct conscell *list,*exp;
        if ((form!=NULL)&&(form->cdrp != NULL))
        {   list = form->carp;

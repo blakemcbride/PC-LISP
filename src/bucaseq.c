@@ -14,8 +14,7 @@
  ** the same value and PC-LISP does not we must check to see if the args**
  ** are fixnums and test their contents for (=).                        **
  *************************************************************************/
-int eqforcaseq(key,exp)
-struct conscell *key,*exp;
+int eqforcaseq(struct conscell *key, struct conscell *exp)
 {     if ((exp == key)||(key == LIST(thold)))
           return(1);
       if ((exp != NULL)&&(key != NULL))
@@ -39,8 +38,7 @@ struct conscell *key,*exp;
  ** case. In either case we test for equality to thold the 't' atom ptr.**
  ** We use eqforcaseq(x,y) to test for a match. Fixnums must appear eq. **
  *************************************************************************/
-struct conscell *bucaseq(form)
-struct conscell *form;
+struct conscell * bucaseq(struct conscell *form)
 {      register struct conscell *exp,*mb,*mbk,*t;
        if (form == NULL)
            gerror("caseq : no match exp given");

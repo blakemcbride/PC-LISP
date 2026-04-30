@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bunumbp(numbp expr) Return t expr is a fixnum or flonum.            **
  *************************************************************************/
-struct conscell *bunumbp(form)
-struct conscell *form;
+struct conscell * bunumbp(struct conscell *form)
 {      if (form != NULL)
        {   if (form->cdrp == NULL)
            {    if (form->carp != NULL)

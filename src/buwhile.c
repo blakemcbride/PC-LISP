@@ -24,8 +24,7 @@
  | the bindings introduced by this code if a 'throw' or 'errset' is called
  | below or above us respectively.
  */
-struct conscell *buwhile(form)
-struct conscell *form;
+struct conscell * buwhile(struct conscell *form)
 {      register struct conscell *cond, *pp;
        struct conscell *lastval;
        int has_labels = 0;

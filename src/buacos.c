@@ -11,8 +11,7 @@
 /*************************************************************************
  ** buacos:Return the arc cosine of the single double parameter.        **
  *************************************************************************/
-struct conscell *buacos(form)
-struct conscell *form;
+struct conscell * buacos(struct conscell *form)
 {      double f;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f))

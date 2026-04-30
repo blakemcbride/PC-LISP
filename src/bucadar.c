@@ -15,8 +15,7 @@
  ** Note if (sstatus chainatom) is set then we allow the error of taking**
  ** the car or cdr of an object that is not a cons or nil cell.         **
  *************************************************************************/
-struct conscell *bucadar(form,s)
-struct conscell *form; char *s;
+struct conscell * bucadar(struct conscell *form, char *s)
 {      if ((form == NULL)||(form->cdrp!=NULL))
            ierror("c{a|d}+r");
        form = form->carp;

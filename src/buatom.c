@@ -14,8 +14,7 @@
  ** atom 'nil'. For example : (atom x) is 't' but (atom (x)) is 'nil'   **
  ** Also note that (atom ()) is 't because () is equivalent to 'nil.    **
  *************************************************************************/
-struct conscell *buatom(form)
-struct conscell *form;
+struct conscell * buatom(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
        {  if (form->carp != NULL)
           {   if ((form->carp->celltype == CONSCELL)||

@@ -13,8 +13,7 @@
  ** form (macroname .....). When it gets one it expands it. The actual  **
  ** expansion is done by 'macroexpand'. This procedure is just a driver.**
  *************************************************************************/
-struct conscell *bumacroexpand(form)
-struct conscell *form;
+struct conscell * bumacroexpand(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
            return(macroexpand(form->carp));
        ierror("macroexpand");  /*  doesn't return  */

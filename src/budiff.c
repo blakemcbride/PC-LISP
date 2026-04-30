@@ -10,8 +10,7 @@
  ** budiff (diff -numbers-) Subtract the numbers as floating points, if **
  ** all were fixnums then return a fixnum otherwise return a flonum.    **
  *************************************************************************/
-struct conscell *budiff(form)
-struct conscell *form;
+struct conscell * budiff(struct conscell *form)
 {      double diff,op; int isflt;
        if (form == NULL) return(newintop(0L));
        if (!GetFloat(form->carp,&diff)) goto ERR;

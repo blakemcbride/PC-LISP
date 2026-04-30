@@ -13,8 +13,7 @@
  ** and return it. If the flag is non nil, we set all the property,bind **
  ** and function info to be 'eq' to that of the copied atom 'at'.       **
  *************************************************************************/
-struct conscell *bucopysymbol(form)
-struct conscell *form;
+struct conscell * bucopysymbol(struct conscell *form)
 {      struct alphacell *at,*nat;
        if ((form != NULL)&&(form->carp!=NULL))
        {   at = ALPHA(form->carp);

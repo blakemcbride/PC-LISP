@@ -40,11 +40,11 @@
 #include <stdio.h>
 #include "lisp.h"
 
-static void UnZpush();
-static void UnProgBody();
-static void UnEval();
-static void UnwindShallowBindings();
-static void PutErrString();
+static void UnZpush(struct conscell **literal_p, struct fixfixcell *literal);
+static void UnProgBody(struct conscell *l);
+static void UnEval(struct conscell *l, int IsArg);
+static void UnwindShallowBindings(int f, int t);
+static void PutErrString(char *s);
 
 /**************************************************************************
  ** Push an expression on the stack of bindings associated with special  **
@@ -60,9 +60,7 @@ static void PutErrString();
  ** errset, the value of the second optional parameter to errset which   **
  ** controls the printing of the error message.                          **
  **************************************************************************/
-static void PushCatchStack(stack,x)
-struct alphacell *stack;
-struct conscell *x;
+static void PushCatchStack(struct alphacell *stack, struct conscell *x)
 {   struct conscell *temp;
     temp = new(CONSCELL);
     temp->carp = x;
@@ -74,8 +72,7 @@ struct conscell *x;
  ** Pop an expression off the stack of bindings associated with special  **
  ** atom 'stack'. Must return NULL if the stack is empty.                **
  **************************************************************************/
-static struct conscell *PopCatchStack(stack)
-struct alphacell *stack;
+static struct conscell * PopCatchStack(struct alphacell *stack)
 {   struct conscell *r;
     if ((r = stack->valstack) == NULL) return(NULL);
     stack->valstack = stack->valstack->cdrp;
@@ -109,8 +106,7 @@ static struct conscell *flung;
  ** function which will undo all the bindings that were done by the calls**
  ** to eval that are now never going to return.                          **
  **************************************************************************/
-struct conscell *buthrow(form)
-struct conscell *form;
+struct conscell * buthrow(struct conscell *form)
 {      struct conscell *tag,*elem;
        jmp_buf *receiver;
        int oldtop;
@@ -161,8 +157,7 @@ ERR:   ierror("throw");  /*  doesn't return  */
  ** a structure in which case we must use the & operator. Leaving out the**
  ** & is therefore not portable even though it shuts up the compiler.    **
  **************************************************************************/
-struct conscell *bucatch(form)
-struct conscell *form;
+struct conscell * bucatch(struct conscell *form)
 {      jmp_buf  state;
        int top1,top2;
        struct conscell *exp,*tag,*temp,**clisp_tos,**getclisptos();
@@ -214,8 +209,7 @@ ERR:   ierror("catch");  /*  doesn't return  */
  ** errsetstack. When we return we return the flung item. We put the     **
  ** pair (fixnum . exp | t) on the errstkhold atom. Where fixnum is &env.**
  **************************************************************************/
-struct conscell *buerrset(form)
-struct conscell *form;
+struct conscell * buerrset(struct conscell *form)
 {      jmp_buf  state;
        int top1,top2;
        struct conscell *exp,*tag,*temp,**clisp_tos,**getclisptos();
@@ -266,8 +260,7 @@ ERR:   ierror("errset");  /*  doesn't return  */
  ** its address. If not we call the normal error message routine with    **
  ** string 'user err'.                                                   **
  **************************************************************************/
-struct conscell *buerr(form)
-struct conscell *form;
+struct conscell * buerr(struct conscell *form)
 {      jmp_buf *receiver;
        int oldtop;
        struct conscell *elem;
@@ -295,8 +288,7 @@ struct conscell *form;
  ** set this value to NULL or not accordingly to indicate if it wants the**
  ** error to be printed or not.                                          **
  **************************************************************************/
-void ThrowError(s)
-char *s;
+void ThrowError(char *s)
 {      struct conscell *elem;
        jmp_buf *receiver;
        int oldtop;
@@ -349,8 +341,7 @@ char *s;
  ** evaled before they are called. However, macro,nlambda and progs are  **
  ** still unevaled because they do not eval their args before binding.   **
  **************************************************************************/
-static void UnwindShallowBindings(f,t)
-int f,t;
+static void UnwindShallowBindings(int f, int t)
 {   int i,IsArg;
     struct conscell *last,*curr,*temp;
     last = *mystack[f+1];               /* temp = (throw <exp>) */
@@ -376,7 +367,7 @@ int f,t;
                     break;
 
                case FIXFIXATOM:
-                    UnZpush(mystack[i], curr);
+                    UnZpush(mystack[i], FIXFIX(curr));
                     break;
 
                default:
@@ -411,8 +402,7 @@ er: fatalerror("UnwindShallowBindings");
  ** following of the binding chain may continue infinitely if something  **
  ** is wrong. To allow for this case a TEST_BREAK is placed in the loop. **
  **************************************************************************/
-static void UnEval(l,IsArg)
-struct conscell *l; int IsArg;
+static void UnEval(struct conscell *l, int IsArg)
 {    struct conscell *car,*cdr;
      car = l->carp;
      for(;;)
@@ -463,7 +453,7 @@ struct conscell *l; int IsArg;
          else
          if (!IsArg && (car == LIST(lexprhold)))      /* ((lexpr(n)......) */
          {   popvariables(cdr->carp);
-             unbindvar(blexprhold);                   /* the stack of args */
+             unbindvar(LIST(blexprhold));                   /* the stack of args */
          }
          return;
      }
@@ -476,8 +466,7 @@ struct conscell *l; int IsArg;
  ** so we unbind the symbol. If an element is not an ALPHAATOM it is an  **
  ** expression that was evaluated so we skip it.                         **
  **************************************************************************/
-static void UnProgBody(l)
-struct conscell *l;
+static void UnProgBody(struct conscell *l)
 {   while(l != NULL) {
          if ((l->carp != NULL)&&(l->carp->celltype == ALPHAATOM))
              unbindvar(l->carp);
@@ -494,8 +483,7 @@ struct conscell *l;
  ** decode forwards until we find something that is not a SPUSH* instr.  **
  ** each time we pop the SPUSH'ed <literal>'s atom's shallow stack by 1. **
  **************************************************************************/
-static void UnZpush(literal_p, literal)
-struct conscell **literal_p; struct fixfixcell *literal;
+static void UnZpush(struct conscell **literal_p, struct fixfixcell *literal)
 {
        register char *ip; register int tmp;
        register struct clispcell *clisp;
@@ -529,8 +517,7 @@ struct conscell **literal_p; struct fixfixcell *literal;
  ** is used to keep from putting too many blanks on the screen. This is  **
  ** just a question of personal taste.                                   **
  **************************************************************************/
-static void PutErrString(s)
-char *s;
+static void PutErrString(char *s)
 {    if (strcmp(s,INTERRUPT)==0) putchar('\n');
      printf("--- %s ---\n",s);
 }

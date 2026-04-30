@@ -21,8 +21,7 @@
  ** alist it will construct a list without &optional,&aux,&rest meta parms **
  ** and default settings. This is pretty simple traverse, extract & build. **
  ****************************************************************************/
-struct conscell *ConstructLetArgList(alist)
-struct conscell *alist;
+struct conscell * ConstructLetArgList(struct conscell *alist)
 {      struct conscell *nalist,*temp1,*temp2,*back=NULL;  /*  back=NULL only needed to keep compiler happy  */
        push(nalist);                               /* NOTE nalist = NULL now!*/
        for(;alist!=NULL;alist=alist->cdrp)
@@ -46,8 +45,7 @@ struct conscell *alist;
  ** alist it will return a copy of the list up to but not including the    **
  ** first &aux. This is used to define the parms of the outer lambda.      **
  ****************************************************************************/
-struct conscell *ConstructNonAuxFormals(alist)
-struct conscell *alist;
+struct conscell * ConstructNonAuxFormals(struct conscell *alist)
 {      struct conscell **l,*t,*r;
        for(l = &(alist); *l != NULL; l = &((*l)->cdrp))   /* set l to point to cdr field of cell before &aux */
            if ((*l)->carp == LIST(auxhold)) break;
@@ -65,8 +63,7 @@ struct conscell *alist;
 /****************************************************************************
  ** ConstructPair(a,b) Will make a list (a b) pretty simple stuff.         **
  ****************************************************************************/
-struct conscell *ConstructPair(a,b)
-struct conscell *a,*b;
+struct conscell * ConstructPair(struct conscell *a, struct conscell *b)
 {      struct conscell *r;
        xpush(a); xpush(b); push(r);
        r = new(CONSCELL);
@@ -87,15 +84,14 @@ struct conscell *a,*b;
  ** and &aux accordingly. Varnum is the number of this argument in the arg **
  ** list of the lexpr. It is counted by the driver of this routine.        **
  ****************************************************************************/
-struct conscell *BuildActualExpr(dcl,kind,varnum)
-struct conscell *dcl; int kind,varnum;
+struct conscell * BuildActualExpr(struct conscell *dcl, int kind, int varnum)
 {      struct conscell *t,*r;
        if (dcl == NULL) goto ERR;
        switch (kind)
-       {  case 0 :  return(ConstructPair(CreateInternedAtom("arg"),
+       {  case 0 :  return(ConstructPair(LIST(CreateInternedAtom("arg")),
                            newintop((long)varnum)));
           case 1 :  push(t);
-                    t = ConstructPair(CreateInternedAtom("arg?"),
+                    t = ConstructPair(LIST(CreateInternedAtom("arg?")),
                            newintop((long)varnum));
                     if (dcl->celltype == CONSCELL)
                         t->cdrp->cdrp = dcl->cdrp;
@@ -105,7 +101,7 @@ struct conscell *dcl; int kind,varnum;
                     };
                     xpop(1);
                     return(t);
-          case 2 :  return(ConstructPair(CreateInternedAtom("listify"),
+          case 2 :  return(ConstructPair(LIST(CreateInternedAtom("listify")),
                            newintop((long)varnum)));
           case 3  : if (dcl->celltype == CONSCELL)
                     {   if (dcl->cdrp == NULL) goto ERR;
@@ -128,8 +124,7 @@ struct conscell *dcl; int kind,varnum;
  ** we check that the sequence &optional, &rest, &aux is met and ierror if **
  ** it is not. As usual must be careful for garbage collection problems.   **
  ****************************************************************************/
-struct conscell *ConstructLetActuals(alist)
-struct conscell *alist;
+struct conscell * ConstructLetActuals(struct conscell *alist)
 {      struct conscell *nalist,*temp1,*temp2,*back=NULL;  /*  back=NULL to keep compiler happy  */
        int lastkind = -1, kind = 0, varnum = 0;
        push(nalist); push(temp1);                  /* NOTE nalist = NULL now!*/
@@ -197,8 +192,7 @@ struct conscell *alist;
  **             4                                                          **
  **            ))                                                          **
  ****************************************************************************/
-struct conscell *lexprify(form)
-struct conscell *form;
+struct conscell * lexprify(struct conscell *form)
 {      struct conscell *auxpos=NULL,*temp,*temp2,*hold,*l;  /*  auxpos=NULL to keep compiler happy  */
        int aux = 0, rest = 0, opt = 0;
        if (form == NULL) goto ERR;
@@ -246,12 +240,11 @@ ERR:   ierror("defun|def");  /*  doesn't return  */
  ** because of the long unsigned math but the distribution  is    **
  ** good which is more important for G/C compaction performance.  **
  *******************************************************************/
-int hash(s,n)
-char *s; int n;
+int hash(char *s, int n)
 {   unsigned long h = 0L, g;
     while(n-- > 0) {
         h = (h << 4) + (*s++);
-        if (g = h & 0xf0000000) {
+        if ((g = h & 0xf0000000) != 0) {
             h ^= (g >> 24);
             h ^= g;
         }
@@ -263,8 +256,7 @@ char *s; int n;
  ** iscadar(s) Will return true '1' or '0' false if the string 's' is   **
  ** a valid c{a|d}*r function name. Ie car cdr cadar caaaadr etc.       **
  *************************************************************************/
-int iscadar(s)
-char *s;
+int iscadar(char *s)
 {    if (*s++ != 'c') return(0);                  /* first a 'c' ? */
      if ((*s != 'd')&&(*s != 'a')) return(0);     /* second 'd' or 'a' ? */
      do s++; while((*s == 'd')||(*s == 'a'));     /* infinite 'd' or 'a' s */
@@ -276,8 +268,7 @@ char *s;
  ** GetFloat(l,where) Extract a double from cell 'l'. If it is a fix or real**
  ** cell we store the real in *where. If not a numberic type return(0).    **
  ****************************************************************************/
-int GetFloat(l,where)
-struct conscell *l; double *where;
+int GetFloat(struct conscell *l, double *where)
 {   if (l != NULL)
     {   if (l->celltype == FIXATOM)
         {   *where = (double) FIX(l)->atom;
@@ -295,8 +286,7 @@ struct conscell *l; double *where;
  ** GetFix(l,where) Extract a fixnum from cell 'l'. If it is a fix or real **
  ** cell we store the fix in *where. If not a numberic type return(0).     **
  ****************************************************************************/
-int GetFix(l,where)
-struct conscell *l; long int *where;
+int GetFix(struct conscell *l, long int *where)
 {   if (l != NULL)
     {   if (l->celltype == FIXATOM)
         {   *where = FIX(l)->atom;
@@ -315,8 +305,7 @@ struct conscell *l; long int *where;
  ** or alpha atom the char is the first in the print name. If l is a fixnum**
  ** in the range 0..255 the character is that with this ascii value.       **
  ****************************************************************************/
-int GetChar(l,where)
-struct conscell *l; char *where;
+int GetChar(struct conscell *l, char *where)
 {   if (l != NULL)
     {   switch(l->celltype)
         {   case FIXATOM:
@@ -343,8 +332,7 @@ struct conscell *l; char *where;
  ** at *where and return 1 if successful otherwise return 0 for failure.   **
  ** Note that if l is NULL pointer then the string assocaited is "nil".    **
  ****************************************************************************/
-int GetString(l,where)
-struct conscell *l; char **where;
+int GetString(struct conscell *l, char **where)
 {   if (l != NULL)
     {   if (l->celltype == ALPHAATOM)
         {   *where = ALPHA(l)->atom;       /* alters callers pointer */
@@ -366,8 +354,7 @@ struct conscell *l; char **where;
  ** it makes an arg list as far as the interpreter is concerned into a  **
  ** list of args as far as the user function is concerned.              **
  *************************************************************************/
-struct conscell *enlist(x)
-struct conscell *x;
+struct conscell * enlist(struct conscell *x)
 {      register struct conscell *t;
        t = new(CONSCELL);
        t->carp = x;
@@ -377,8 +364,7 @@ struct conscell *x;
 /*************************************************************************
  ** newintop: just returns a new cell with long int value it in .       **
  *************************************************************************/
-struct conscell *newintop(val)
-long int val;
+struct conscell * newintop(long int val)
 {      struct fixcell *t;
        t = (struct fixcell *)new(FIXATOM);
        t->atom = val;
@@ -388,8 +374,7 @@ long int val;
 /*************************************************************************
  ** newfixfixop: just returns a new fixfixcell with long values a & b   **
  *************************************************************************/
-struct conscell *newfixfixop(a,b)
-long int a, b;
+struct conscell * newfixfixop(long int a, long int b)
 {      struct fixfixcell *t;
        t = (struct fixfixcell *)new(FIXFIXATOM);
        t->atom1 = a;
@@ -400,8 +385,7 @@ long int a, b;
 /*************************************************************************
  ** newrealop: just returns a new real atom cell with value 'val'.      **
  *************************************************************************/
-struct conscell *newrealop(val)
-double val;
+struct conscell * newrealop(double val)
 {      struct realcell *t;
        t = (struct realcell *)new(REALATOM);
        t->atom = val;
@@ -413,8 +397,7 @@ double val;
  ** do this simply by traversing the list and creating new cons cells   **
  ** for the reversed list. We return a pointer to the last cons cell.   **
  *************************************************************************/
-struct conscell *reverse(l)
-struct conscell *l;
+struct conscell * reverse(struct conscell *l)
 {      struct conscell *lasts, *s;
        xpush(l); push(lasts);
        lasts = NULL;
@@ -433,8 +416,7 @@ struct conscell *l;
  ** nreverse(l) : will destructively reverse the list 'l' and return the**
  ** new head.                                                           **
  *************************************************************************/
-struct conscell *nreverse(l)
-struct conscell *l;
+struct conscell * nreverse(struct conscell *l)
 {      struct conscell *m,*n;
        if (l == NULL) return(NULL);
        m = l->cdrp;
@@ -454,8 +436,7 @@ ok:    return(l);
  ** copy(l) : Will return a copy of the list l using new cons cells for **
  ** all levels. We must be careful to properly handle dotted pairs!     **
  *************************************************************************/
-struct conscell *copy(l)
-struct conscell *l;
+struct conscell * copy(struct conscell *l)
 {      struct conscell *first,*last,*s;
        if ((l == NULL)||(l->celltype != CONSCELL)) return(l);
        xpush(l); push(first); push(s);
@@ -478,8 +459,7 @@ struct conscell *l;
  ** topcopy(l) : Will return a copy of the list l using new cons cells  **
  ** for the top level only. Ie we traverse cdrp's and make carps equal. **
  *************************************************************************/
-struct conscell *topcopy(l)
-struct conscell *l;
+struct conscell * topcopy(struct conscell *l)
 {      struct conscell *first,*last,*s;
        if (l == NULL) return(NULL);
        xpush(l); push(first);
@@ -504,8 +484,7 @@ struct conscell *l;
  ** the hunks and compare using the funcion 'equal' to compare each elem**
  ** ent. Note that 'equal' in bufunc.c will most likely be our caller.  **
  *************************************************************************/
-int hunkequal(h1,h2)
-struct hunkcell *h1,*h2;
+int hunkequal(struct hunkcell *h1, struct hunkcell *h2)
 {      register int n;
        if (h1 == h2) return(1);
        if ((h1 == NULL)||(h2 == NULL)) return(0);
@@ -527,8 +506,7 @@ struct hunkcell *h1,*h2;
  ** binary I/O routines libio.c have properly read/written the clisp    **
  ** this is why we check the self pointers for validity!                **
  *************************************************************************/
-int clispequal(c1, c2)
-struct clispcell *c1, *c2;
+int clispequal(struct clispcell *c1, struct clispcell *c2)
 {      struct conscell **l1, **l2; int n1, n2;
        l1 = c1->literal; l2 = c2->literal;
        n1 = *(((int *) l1 ) - 1);
@@ -552,8 +530,7 @@ struct clispcell *c1, *c2;
  ** iff they are the same object. Note that we treat fixnums with the   **
  ** same value as being the same object as per Franz.                   **
  *************************************************************************/
-int eq(e1,e2)
-struct conscell *e1, *e2;
+int eq(struct conscell *e1, struct conscell *e2)
 {      if (e1 == e2) return(1);
        if ((e1 == NULL) || (e2 == NULL)) return(0);
        if (e1->celltype != e2->celltype) return(0);
@@ -568,8 +545,7 @@ struct conscell *e1, *e2;
  ** atoms are the same if there file pointers are the same, finally the **
  ** cons cells are equal if their car and cdr pointers are equal.       **
  *************************************************************************/
-int equal(x,y)
-struct  conscell *x,*y;
+int equal(struct  conscell *x, struct  conscell *y)
 {       if (x == y) return(1);
         if ((x == NULL)||(y == NULL)) return(0);
         if (x->celltype != y->celltype) return(0);
@@ -588,12 +564,12 @@ struct  conscell *x,*y;
                 case FILECELL:
                         return(PORT(x)->atom == PORT(y)->atom);
                 case HUNKATOM:
-                        return(hunkequal(x,y));
+                        return(hunkequal(HUNK(x),HUNK(y)));
                 case ARRAYATOM:
                         return(equal(ARRAY(x)->info,ARRAY(y)->info) &&
                                hunkequal(ARRAY(x)->base,ARRAY(y)->base));
                 case CLISPCELL:
-                        return(clispequal(x,y));
+                        return(clispequal(CLISP(x),CLISP(y)));
                 case FIXFIXATOM:
                         return((FIXFIX(x)->atom1 == FIXFIX(y)->atom1) &&
                                (FIXFIX(x)->atom2 == FIXFIX(y)->atom2));
@@ -613,8 +589,7 @@ struct  conscell *x,*y;
  ** ie macroexpand does not work inside quote. Any other type of list is**
  ** made by calling macroexpand twice recursively for the car and cdr.  **
  *************************************************************************/
- struct conscell *macroexpand(l)
- struct conscell *l;
+ struct conscell * macroexpand(struct conscell *l)
  {      struct alphacell *fnat; struct conscell *fn;
         if ((l == NULL)||(l->celltype != CONSCELL)) return(l);
         fnat = ALPHA(l->carp);
@@ -641,10 +616,9 @@ struct  conscell *x,*y;
  ** we put put the prop directly into the list, otherwise we tack a new **
  ** pair onto the front of the property list.                           **
  *************************************************************************/
-struct conscell *putprop(atm,indic,prop)
-struct alphacell *atm; struct conscell *indic,*prop;
+struct conscell * putprop(struct conscell *atm, struct conscell *indic, struct conscell *prop)
 {      struct conscell *t1,*t2;
-       for(t1 = atm->proplist; t1 != NULL ; t1 = t1->cdrp)
+       for(t1 = ALPHA(atm)->proplist; t1 != NULL ; t1 = t1->cdrp)
        {   if (t1->carp != NULL)
            {  if (equal(t1->carp->carp, indic))
               {   t1->carp->cdrp = prop;
@@ -657,10 +631,10 @@ struct alphacell *atm; struct conscell *indic,*prop;
        t2 = new(CONSCELL);
        xpop(1);
        t1->carp = t2;
-       t1->cdrp = atm->proplist;
+       t1->cdrp = ALPHA(atm)->proplist;
        t2->carp = indic;
        t2->cdrp = prop;
-       atm->proplist = t1;
+       ALPHA(atm)->proplist = t1;
        return(prop);
 }
 
@@ -671,8 +645,7 @@ struct alphacell *atm; struct conscell *indic,*prop;
  ** just placing the indic,prop pair onto the front of the propertly    **
  ** NULL.                                                               **
  *************************************************************************/
-struct conscell *getprop(atm,indic)
-struct conscell *atm,*indic;
+struct conscell * getprop(struct conscell *atm, struct conscell *indic)
 {      register struct conscell *l, *t;
        l = ALPHA(atm)->proplist;
        while(l != NULL) {
@@ -688,10 +661,8 @@ struct conscell *atm,*indic;
  ** to 'var'. If none is found we return NULL. Call 'equal' to do a     **
  ** comparisson of the list structures for equality.                    **
  *************************************************************************/
-struct conscell *assoc(var,alist)
-struct conscell *var,*alist;
-{      extern int equal();
-       register struct conscell *t;
+struct conscell * assoc(struct conscell *var, struct conscell *alist)
+{      register struct conscell *t;
        for( ; alist && (alist->celltype == CONSCELL) ; alist = alist->cdrp ) {
              t = alist->carp;
              if (t &&(t->celltype == CONSCELL))
@@ -707,8 +678,7 @@ struct conscell *var,*alist;
  ** the vals list runs out we tack associate NULL with the corresponding**
  ** remaining atoms in the vars list.                                   **
  *************************************************************************/
-struct conscell *pairlis(vars,vals,alist)
-struct conscell *vars,*vals,*alist;
+struct conscell * pairlis(struct conscell *vars, struct conscell *vals, struct conscell *alist)
 {      struct conscell *r,*t,*l,*last=NULL;  /*  last=NULL to keep compiler happy  */
        xpush(vars); xpush(vals); xpush(alist);
        push(r);
@@ -741,8 +711,7 @@ struct conscell *vars,*vals,*alist;
  ** In order to speed things up the arg list has the length tacked onto **
  ** the front. This allows (arg) (listify) and (setarg) to run faster.  **
  *************************************************************************/
-void pushlexpr(at,args)
-struct conscell *at, *args;
+void pushlexpr(struct conscell *at, struct conscell *args)
 {      register int i;
        struct conscell *temp;
        push(temp);
@@ -751,7 +720,7 @@ struct conscell *at, *args;
        for(i=0; args != NULL; i++)
            args = args->cdrp;
        bindvar(at,temp->carp = newintop((long)i));
-       bindvar(blexprhold,temp);
+       bindvar(LIST(blexprhold),temp);
        xpop(1);
 }
 
@@ -760,9 +729,8 @@ struct conscell *at, *args;
  ** by simply unbinding the global (arg) function holding atom, and then**
  ** we unbind the single atom parameter to the lexpr body.              **
  *************************************************************************/
-void poplexpr(at)
-struct conscell *at;
-{      unbindvar(blexprhold);
+void poplexpr(struct conscell *at)
+{      unbindvar(LIST(blexprhold));
        unbindvar(at);
 }
 
@@ -773,8 +741,7 @@ struct conscell *at;
  ** one by one from the list using GetHunkIndex to get the address of   **
  ** the element pointer for each index.                                 **
  *************************************************************************/
-struct hunkcell *ListToHunk(l)
-struct conscell *l;
+struct hunkcell * ListToHunk(struct conscell *l)
 {      struct hunkcell *h; register int n,i;
        struct conscell *c;
        for(c=l,n=0;c!=NULL;n++,c=c->cdrp);      /* compute length of list */
@@ -789,8 +756,7 @@ struct conscell *l;
  ** HunkToList(h) Will construct a list from the elements of h. We do   **
  ** his backwards to avoid stacking too much stuff on the mark stack.   **
  *************************************************************************/
-struct conscell *HunkToList(h)
-struct hunkcell *h;
+struct conscell * HunkToList(struct hunkcell *h)
 {      struct conscell *l,*n; register int i;
        push(l);                                         /* l is visible */
        for(i = h->size-1,l = NULL; i >= 0; i--)
@@ -827,8 +793,7 @@ static int AutoResetOption  = AUTORESETDEFAULT;
 static int ChainAtomOption  = CHAINATOMDEFAULT;
 static int IgnoreEofOption  = IGNOREEOFDEFAULT;
                                                            /**/
-int GetOption(o)
-int o;
+int GetOption(int o)
 {   switch (o)
     {  case SMARTSLASH : return(SmartSlashOption); break;
        case AUTORESET  : return(AutoResetOption);  break;
@@ -839,8 +804,7 @@ int o;
     return 0;  /*  keep compiler happy  */
 }
                                                            /**/
-void SetOption(o,v)
-int o,v;
+void SetOption(int o, int v)
 {   switch (o)
     {  case SMARTSLASH : SmartSlashOption = v; break;
        case AUTORESET  : AutoResetOption = v;  break;
@@ -854,8 +818,7 @@ int o,v;
  | This function is a useful debugging aid, it allows us to dump an expression from
  | the debugger.
  */
-extern struct conscell   *liudump(e)
-       struct conscell *e;
+extern struct conscell   * liudump(struct conscell *e)
 {      struct conscell f;
        printf("DUMPING ...\n");
        f.celltype = CONSCELL; f.cdrp = NULL;
@@ -866,8 +829,7 @@ extern struct conscell   *liudump(e)
 /*
  | Return the length of a list.
  */
-int liulength(l)
-       struct conscell *l;
+int liulength(struct conscell *l)
 {
        register int n;
        for(n = 0; (l != NULL) && (l->celltype == CONSCELL); n++, l = l->cdrp);
@@ -881,23 +843,22 @@ int liulength(l)
  | expressions. Note that in the leaf cases we call the regular 'hash' used
  | by the oblist.
  */
-int liushash(e)
-       struct conscell *e;
+int liushash(struct conscell *e)
 {      int i,n;
        if (e == NULL) return(1);
        n = e->celltype;
        switch(n) {
 	  case ALPHAATOM : return(n+3  + hash(ALPHA(e)->atom,   strlen(ALPHA(e)->atom)));
-	  case REALATOM  : return(n+5  + hash(&(REAL(e)->atom), sizeof(REAL(e)->atom)));
-	  case FIXATOM   : return(n+7  + hash(&(FIX(e)->atom),  sizeof(FIX(e)->atom)));
-	  case FIXFIXATOM: return(n+19 + hash(&(FIXFIX(e)->atom1), sizeof(FIXFIX(e)->atom1)) +
-                                         hash(&(FIXFIX(e)->atom2), sizeof(FIXFIX(e)->atom2)));
+	  case REALATOM  : return(n+5  + hash((char *)&(REAL(e)->atom), sizeof(REAL(e)->atom)));
+	  case FIXATOM   : return(n+7  + hash((char *)&(FIX(e)->atom),  sizeof(FIX(e)->atom)));
+	  case FIXFIXATOM: return(n+19 + hash((char *)&(FIXFIX(e)->atom1), sizeof(FIXFIX(e)->atom1)) +
+                                         hash((char *)&(FIXFIX(e)->atom2), sizeof(FIXFIX(e)->atom2)));
 	  case STRINGATOM: return(n+9  + hash(STRING(e)->atom, strlen(STRING(e)->atom)));
-	  case FILECELL  : return(n+11 + liushash(PORT(e)->fname));
-	  case ARRAYATOM : return(n+13 + liushash(ARRAY(e)->base) + liushash(ARRAY(e)->info));
+	  case FILECELL  : return(n+11 + liushash(LIST(PORT(e)->fname)));
+	  case ARRAYATOM : return(n+13 + liushash(LIST(ARRAY(e)->base)) + liushash(ARRAY(e)->info));
 	  case HUNKATOM  : n += 15;
 			   for(i = HUNK(e)->size - 1; i >= 0; i--)
-			      n += liushash(*GetHunkIndex(e,i));
+			      n += liushash(*GetHunkIndex(HUNK(e),i));
 			   return(n+1);
 	  case CONSCELL  : for(n += 17;(e != NULL)&&(e->celltype == CONSCELL);e=e->cdrp)
 			      n += liushash(e->carp);
@@ -915,8 +876,7 @@ int liushash(e)
  | We do not really care about the cost here because this function is only
  | used in tracebacks involving CLISPs.
  */
-char *liuclnam(code)
-     char *code;
+char * liuclnam(char *code)
 {    struct conscell  *w;
      extern struct conscell *atomtable[];
      struct alphacell *a; int i;
@@ -937,8 +897,7 @@ char *liuclnam(code)
  | Given a FIXFIX cell found on a traceback, try to find the CLISP which uses
  | this FIXFIX and return the name of the atom on which it is bound.
  */
-char *liuffnam(ff)
-     struct fixfixcell *ff;
+char * liuffnam(struct fixfixcell *ff)
 {    struct conscell  *w;
      extern struct conscell *atomtable[];
      struct alphacell *a; int i;

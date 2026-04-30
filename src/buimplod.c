@@ -10,8 +10,7 @@
  ** buimplode:built in atom implosion function. Given a list of atoms   **
  ** it will compress the first character in all of them into one big at.**
  *************************************************************************/
-struct conscell *buimplode(form)
-struct conscell *form;
+struct conscell * buimplode(struct conscell *form)
 {      char work[MAXATOMSIZE],c,*d;
        int n = MAXATOMSIZE;
        d = work;

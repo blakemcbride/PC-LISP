@@ -19,8 +19,7 @@
  ** ation and return the return expression which will cause the the prog**
  ** etc. running above to process it.                                   **
  *************************************************************************/
-struct conscell *bucond(form)
-struct conscell *form;
+struct conscell * bucond(struct conscell *form)
 {      register struct conscell *w, *s, *r, *t;
        xpush(form);
        while (form != NULL) {

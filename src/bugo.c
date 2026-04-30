@@ -18,8 +18,7 @@
  ** Once constructed the (go . <location>) structure is returned and if **
  ** prog ever sees one it will jump to the given location.              **
  *************************************************************************/
-struct conscell *bugo(form)
-struct conscell *form;
+struct conscell * bugo(struct conscell *form)
 {      register struct conscell *f;
        if ((form == NULL)||(form->cdrp != NULL)) ierror("go/wrong # of args");
        form = form->carp;

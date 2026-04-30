@@ -11,8 +11,7 @@
  ** buequal() Will return 't' if the two parameters are 'equal' we call **
  ** the above routine to figure out if this is the case.                **
  *************************************************************************/
-struct conscell *buequal(form)
-struct conscell *form;
+struct conscell * buequal(struct conscell *form)
 {      struct conscell *e1, *e2;
        if (form != NULL)
        {   e1 = form->carp;

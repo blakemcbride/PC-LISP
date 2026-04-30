@@ -11,8 +11,7 @@
  ** bupatom: Extract the one list or atom parameter and call 'printlist'**
  ** in the main.c module to print the result. Print without delimiters. **
  *************************************************************************/
-struct conscell *bupatom(form)
-struct conscell *form;
+struct conscell * bupatom(struct conscell *form)
 {      struct conscell *l; struct filecell *p=NULL;  /*  NULL assigment to keep compiler happy  */
        if (form != NULL) {
           l = form->carp;
@@ -35,6 +34,6 @@ struct conscell *form;
           }
        }
        ierror("patom");
-IOERR: ioerror(p);  /*  doesn't return  */
+IOERR: ioerror(p ? p->atom : NULL);  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */
 }

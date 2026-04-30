@@ -24,8 +24,7 @@
  | the bindings introduced by this code if a 'throw' or 'errset' is called
  | below or above us respectively.
  */
-struct conscell *burepeat(form)
-struct conscell *form;
+struct conscell * burepeat(struct conscell *form)
 {      struct conscell *count, *pp, *lastval;
        int has_labels = 0;
        long n;

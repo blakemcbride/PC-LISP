@@ -28,7 +28,7 @@
 #include        <assert.h>
 #include        "lisp.h"
 
- static void AdjustCurrentHeap();
+ static void AdjustCurrentHeap(int n);
 
  struct conscell  *lifreecons;                        /* head of avail lists */
  static struct alphacell *freealpha;                  /* for cell and alpha */
@@ -65,7 +65,7 @@
  static int cellthresh = 25;                          /* percentage free cells */
  static int atomthresh = 25;                          /* percentage free atoms */
 
-static void CompactHeapBlock();
+static void CompactHeapBlock(struct HeapControl *b);
 
 /*************************************************************************
  ** figure out size of cell and size of block. The size of the cell is  **
@@ -248,8 +248,7 @@ void initmem()
  |  Try to expand memory by a alpha bytes, c cons bytes and h heap bytes.
  |  0 means all was ok. -1 means an error occured allocating the memory.
  */
-int liexpmem(a,c,h)
-    long int a,c,h;
+int liexpmem(long int a, long int c, long int h)
 {
     register int i, k; register char *m;
 
@@ -370,8 +369,7 @@ int liexpmem(a,c,h)
  ** On the other hand if less than mingather were found then we will    **
  ** allocate a new block anyway in anticipation of running out.         **
  *************************************************************************/
-struct conscell *newcons(t)
-int t;
+struct conscell * newcons(int t)
 {      register struct conscell *r;
        register char *m; long int n;
 
@@ -571,8 +569,7 @@ again:
  ** Data bytes. The pointer to this object is pointing to the first  **
  ** of the data bytes.                                               **
  **********************************************************************/
-char *heapget(n)
-int  n;
+char * heapget(int n)
 {    register char *r;
      n += 4;
      if (n >= blocksize) fatalerror("heapget");
@@ -605,8 +602,7 @@ int  n;
  ** which is responsible for this block. We the increment the free field  **
  ** for this Heap block by the size of the freed block. We are now done.  **
  ***************************************************************************/
-static void freeheapblock(b)
-unsigned char *b;
+static void freeheapblock(unsigned char *b)
 {    register int siz,blk;
      b -= 2;                                        /* backup to BLOCK field */
      blk = BLOCK(b);                                /* retrieve BLOCK field */
@@ -651,8 +647,7 @@ unsigned char *b;
  ** he owns. The length of the block as far as FindReferent is concerned  **
  ** does not include the header info so we subtract 2 from the size field.**
  ***************************************************************************/
-static void InformRelocating(f,t,s)
-char *f,*t; int s;
+static void InformRelocating(char *f, char *t, int s)
 {    register char **p;
      register int len;
      while((f < t)&&((*(f+2) & 0xff)!=255))
@@ -699,8 +694,7 @@ char *f,*t; int s;
  ** if possible so we always start at CurrentBlock+1. This will have the  **
  ** most free space in it since it was least recently the CurrentBlock.   **
  ***************************************************************************/
-static void AdjustCurrentHeap(n)
-int n;
+static void AdjustCurrentHeap(int n)
 {       register int i;
         register char *m=NULL;
 
@@ -819,8 +813,7 @@ gotit:  CurrentBlock = i;
  ** pointer to it that it is being relocated backward by 'z-y' bytes. The **
  ** only place where pointers to the heap occur is in the atom fields.    **
  ***************************************************************************/
-static void CompactHeapBlock(b)
- struct HeapControl *b;
+static void CompactHeapBlock(struct HeapControl *b)
  {      register char *x,*y,*z,*end;
         hccount += 1;
         end = b->next;
@@ -883,8 +876,7 @@ void unmark()
  ** we allocate another block right away in anticipation. This speeds up  **
  ** things a great deal.                                                  **
  ***************************************************************************/
-int gather(cgot,agot)
-      long int *cgot,*agot;
+int gather(long int *cgot, long int *agot)
 {     register char *r,*memend; register int i;
       register int gotcount;
       gccount++;
@@ -897,12 +889,12 @@ int gather(cgot,agot)
                 if (LIST(r)->markbit == CLEAR) {
                     switch(LIST(r)->celltype) {
                         case STRINGATOM:
-                             removestring(r);
-                             freeheapblock(STRING(r)->atom);
+                             removestring(LIST(r));
+                             freeheapblock((unsigned char *)STRING(r)->atom);
                              break;
                         case HUNKATOM:
-                             removehunk(r);
-                             freeheapblock(HUNK(r)->atom);
+                             removehunk(LIST(r));
+                             freeheapblock((unsigned char *)HUNK(r)->atom);
                              break;
                         case CLISPCELL:
                              free(CLISP(r)->code - sizeof(int));               /* not stored in hunk yet so free/calloc */
@@ -929,8 +921,8 @@ int gather(cgot,agot)
                 if (ALPHA(r)->markbit == CLEAR) {
                     if (ALPHA(r)->permbit == NOT_PERM) {
                         if (ALPHA(r)->atom != NULL) {
-                             removeatom(r);
-                             freeheapblock(ALPHA(r)->atom);
+                             removeatom(LIST(r));
+                             freeheapblock((unsigned char *)ALPHA(r)->atom);
                         }
                         ALPHA(r)->valstack = LIST(freealpha);
                         freealpha = ALPHA(r);
@@ -972,8 +964,7 @@ long int FreeConsCount()
  ** options 3, 4 and 5 cause it to return the total number of bytes of    **
  ** cell alpha and heap space currently in use.                           **
  ***************************************************************************/
-long int memorystatus(n)
-int n;
+long int memorystatus(int n)
 {    switch(n)
      {  case 0 : return((long)(((totalcells-FreeConsCount())*100L)/totalcells));
         case 1 : return((long)(((totalalpha-FreeAlphaCount())*100L)/totalalpha));
@@ -1017,8 +1008,7 @@ void printstats()
  ** copy the cell if the displace-macros variable is set non-nil, the def **
  ** ault is 0 (meaning if the variable is not present then assume it nil. **
  ***************************************************************************/
-int CopyCellIfPossible(d,s)
-char *d,*s;
+int CopyCellIfPossible(char *d, char *s)
 {   register int n;
     if ((d != NULL)&&(s != NULL))
     {   if (LIST(d)->celltype == CONSCELL)
@@ -1050,8 +1040,7 @@ char *d,*s;
  ** performance of the LISP interpreter. Note that this technique is also **
  ** used in popvariables to free up the shallow stack cons cells.         **
  ***************************************************************************/
-void lifreelist(l)
-struct conscell *l;
+void lifreelist(struct conscell *l)
 {   register struct conscell *f = lifreecons;
     while(l != NULL) {
         l->carp = f;

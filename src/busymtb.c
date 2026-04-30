@@ -51,10 +51,7 @@
  | Add 'e' = (k,d) to the symtab 'h' in bucket 'i'. If absent return 1 else return 0 to
  | indicate that a clash occured.
  */
-static int st_add_at(h,i,e)
-       struct hunkcell *h;
-       struct conscell *e;
-       int i;
+static int st_add_at(struct hunkcell *h, int i, struct conscell *e)
 {
        struct conscell **bp,*l;
        if (e == NULL) return(0);                                /* nil always present */
@@ -82,10 +79,7 @@ static int st_add_at(h,i,e)
 /*
  | Check for ('k',d) in the symtab 'h' at bucket 'i'. If present return (k e) else NULL.
  */
-static struct conscell *st_test_at(h,i,k)
-       struct hunkcell *h;
-       struct conscell *k;
-       int i;
+static struct conscell * st_test_at(struct hunkcell *h, int i, struct conscell *k)
 {
        struct conscell **bp,*l;
        bp = GetHunkIndex(h, i);                                 /* ptr to ptr to head of collisioin chain */
@@ -111,8 +105,7 @@ static struct conscell *st_test_at(h,i,k)
  | Given a list of (k.e) symbol table entries will create a hashed symbol table
  | of the data.
  */
-struct hunkcell *busymtcreate(form)
-       struct conscell *form;
+struct hunkcell * busymtcreate(struct conscell *form)
 {
        struct conscell *l;
        struct hunkcell *h;
@@ -143,8 +136,7 @@ er:    ierror("symtab-create");  /*  doesn't return  */
  | in the symbol table. We do this by walking through the hunk and building a list of all
  | the elements in each overflow bucket.
  */
-struct conscell *busymtlist(form)
-       struct conscell *form;
+struct conscell * busymtlist(struct conscell *form)
 {
        struct conscell *out,*n,*o;                              /* output list */
        struct hunkcell *h; int i;                               /* input symtab hunk */
@@ -173,8 +165,7 @@ er:    ierror("symtab-list");  /*  doesn't return  */
  | Given a symtab as an input parameter traverse and count the number of elements in it
  | and then return this count.
  */
-struct conscell *busymtsize(form)
-       struct conscell *form;
+struct conscell * busymtsize(struct conscell *form)
 {
        struct conscell *o;                                      /* output list */
        struct hunkcell *h; int i;                               /* input symtab hunk */
@@ -200,8 +191,7 @@ er:    ierror("symtab-size");  /*  doesn't return  */
  | Given a symbol table ST check for the presence of entry (k.*) in it and if found
  | return (k.e) otherwise return NULL.
  */
-struct conscell *busymtmember(form)
-       struct conscell *form;
+struct conscell * busymtmember(struct conscell *form)
 {
        struct conscell *k;
        struct hunkcell *h;
@@ -228,8 +218,7 @@ er:    ierror("symtab-member");  /*  doesn't return  */
  | the table destructively and return the symbol table or nil of the add caused a
  | clash.
  */
-struct hunkcell *busymtadd(form)
-       struct conscell *form;
+struct hunkcell * busymtadd(struct conscell *form)
 {
        struct conscell *k;
        struct conscell *e;
@@ -268,8 +257,7 @@ er:    ierror("symtab-add");  /*  doesn't return  */
  | return (k.e) and destructively remove (k.e) from the table, otherwise if not found
  | in the table then return NULL.
  */
-struct conscell *busymtremove(form)
-       struct conscell *form;
+struct conscell * busymtremove(struct conscell *form)
 {
        struct conscell *k;
        struct hunkcell *h;

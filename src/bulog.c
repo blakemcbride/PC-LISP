@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bulog :Returns the natural log of the single double parameter.      **
  *************************************************************************/
-struct conscell *bulog(form)
-struct conscell *form;
+struct conscell * bulog(struct conscell *form)
 {      double f;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f))

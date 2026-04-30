@@ -15,8 +15,7 @@
  ** the reference will be made global by setting the botvaris field to  **
  ** be GLOBALVAR.                                                       **
  *************************************************************************/
-struct conscell *buset(form)
-struct conscell *form;
+struct conscell * buset(struct conscell *form)
 {      struct conscell *var,*val;
        push(val);
        if ((form != NULL)&&(form->carp->celltype == ALPHAATOM))

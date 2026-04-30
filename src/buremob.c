@@ -15,8 +15,7 @@
  ** by looking at the beginlocal/endlocal definitions in LISPcraft(243) **
  ** as interned/remob'ed atoms take their property/values/func with them**
  *************************************************************************/
-struct conscell *buremob(form)
-struct conscell *form;
+struct conscell * buremob(struct conscell *form)
 {      struct alphacell *at;
        if ((form != NULL)&&(form->carp != NULL)&&(form->cdrp == NULL))
        {   at = ALPHA(form->carp);

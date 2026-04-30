@@ -15,8 +15,7 @@
  | just enable and disable forced scanning from a buffer rather than from
  | the requested input stream.
  */
-static int readstr(form, pad, result)
-struct conscell *form, **result; int pad;
+static int readstr(struct conscell *form, int pad, struct conscell **result)
 {      char work[2048], *s; struct conscell *p; int worklen, slen;
        work[0] = '\0'; worklen = 0;
 
@@ -75,8 +74,7 @@ er:    return(0);
  |    -->(readstr "'(a b" "c" ")")
  |    '(a b c)
  */
-struct conscell *bureadst(form)
-struct conscell *form;
+struct conscell * bureadst(struct conscell *form)
 {      struct conscell *result;
        if (form == NULL) return(NULL);
        if (readstr(form, 1, &result))
@@ -94,8 +92,7 @@ struct conscell *form;
  |    -->(readlist "'(a b" "c" ")")
  |    '(a b c)
  */
-struct conscell *bureadli(form)
-struct conscell *form;
+struct conscell * bureadli(struct conscell *form)
 {      struct conscell *result;
        if (form == NULL) return(NULL);
        if (form->cdrp != NULL) goto er;

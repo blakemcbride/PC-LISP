@@ -19,8 +19,8 @@
 #include <math.h>
 #include "lisp.h"
 
-extern void ThrowError();
-static void jumptodebug();
+extern void ThrowError(char *s);
+static void jumptodebug(void);
 
 /****************************************************************************
  ** These are the old signal handlers. When initerrors is called we store  **
@@ -29,10 +29,10 @@ static void jumptodebug();
  ** interpreter to trap errors that occur under its control and to let the **
  ** application take care of the rest.                                     **
  ****************************************************************************/
-static void (*old_sigsegv)() = NULL;
-static void (*old_sigint)()  = NULL;
-static void (*old_sigfpe)()  = NULL;
-static int  (*errh)()        = NULL;
+static void (*old_sigsegv)(int) = NULL;
+static void (*old_sigint)(int)  = NULL;
+static void (*old_sigfpe)(int)  = NULL;
+static int  (*errh)(char *, char *) = NULL;
 
 /****************************************************************************
  ** The general error message function. We throw the error to see if any   **
@@ -40,8 +40,7 @@ static int  (*errh)()        = NULL;
  ** string. We then copy the hold stack, reset the mark stacks and tracing **
  ** flush the input buffer and longjump to the break level handler in main.**
  ****************************************************************************/
- void gerror(s)
- char *s;
+ void gerror(char *s)
  {   if (errh) (*errh)(s,NULL);         /* (compile) uses override errhandler */
      HoldStackOperation(COPY_STACK);
      ThrowError(s);                     /* return to (errset) if one exists) */
@@ -56,8 +55,7 @@ static int  (*errh)()        = NULL;
  ** ierror(s) : interpreter error while evaluating function whose name is  **
  ** stored in 's'. format the message and call the general error routine.  **
  ****************************************************************************/
- void ierror(s)
- char *s;
+ void ierror(char *s)
  {    char buffer[256];
       sprintf(buffer,"error evaluating built in function [%s]",s);
       gerror(buffer);
@@ -72,8 +70,7 @@ static int  (*errh)()        = NULL;
  ** the file number in with it. If the errno is non zero and legal, we put **
  ** this message after the generic message. It may help the user.          **
  ****************************************************************************/
- void ioerror(p)
- FILE *p;
+ void ioerror(FILE *p)
  {    char buffer[256],*msg;
 #if 0 
       extern int sys_nerr,errno;        /* standard UNIX error message stuff */
@@ -95,8 +92,7 @@ static int  (*errh)()        = NULL;
  ** call gerror to do the work. Note that we do not force an exit, rather  **
  ** we return to the break level and request the user exit.                **
  ****************************************************************************/
- void fatalerror(s)
- char *s;
+ void fatalerror(char *s)
  {   char buffer[256];
      sprintf(buffer,"INTERNAL ERROR: in %s() (I suggest you quit)",s);
      gerror(buffer);
@@ -107,8 +103,7 @@ static int  (*errh)()        = NULL;
  ** is that a throw has been issued with a tag that has no catcher so we   **
  ** come off the top and issue the error.                                  **
  ****************************************************************************/
- void catcherror(s)
- char *s;
+ void catcherror(char *s)
  {   char buffer[300];
      sprintf(buffer,"no catch for this tag [%s]",s);
      gerror(buffer);
@@ -118,8 +113,7 @@ static int  (*errh)()        = NULL;
  ** bindingerror called by eval(). The atom with print name pointed to by  **
  ** s is unbound, generate the appropriate error message.                  **
  ****************************************************************************/
- void bindingerror(s)
- char *s;
+ void bindingerror(char *s)
  {   char buffer[300];
      sprintf(buffer,"unbound atom [%s]",s);
      gerror(buffer);
@@ -133,8 +127,7 @@ static int  (*errh)()        = NULL;
  ** to see if anyone will catch it, if not the ThrowError returns and we   **
  ** continue processing the error.                                         **
  ****************************************************************************/
- void serror(l,s1,s2,num2)
- struct conscell *l; char *s1,*s2; int num2;
+ void serror(struct conscell *l, char *s1, char *s2, int num2)
 {    char buffer[MAXATOMSIZE + 256]; char anum[32];
      HoldStackOperation(COPY_STACK);
      if (s1 == NULL) s1 = "";
@@ -178,8 +171,7 @@ static int  (*errh)()        = NULL;
  ** mark stack to a reasonable size, you can drop MSSIZE until they are   **
  ** both nearly full at same time.                                        **
  ***************************************************************************/
-void stkovfl(cause)
-    int cause;
+void stkovfl(int cause)
 {   extern int marking;
 #   if DEBUG
     printf("--- mark stack usage = %d ---\n",mytop + (MSSIZE-emytop));
@@ -196,12 +188,12 @@ void stkovfl(cause)
                  HoldStackOperation(COPY_STACK);
                  HoldStackOperation(DUMP_STACK);
                  ClearMarkStacks();
-                 marking = 2; unmark(); mark(); gather(); marking = 0;
+                 marking = 2; unmark(); mark(); gather(NULL, NULL); marking = 0;
                  break;
         case 2 : printf(" again! Removing non global bindings and retrying!");
                  ClearMarkStacks();
                  unwindscope();
-                 marking = 3; unmark(); mark(); gather(); marking = 0;
+                 marking = 3; unmark(); mark(); gather(NULL, NULL); marking = 0;
                  break;
         case 3:  printf(" again! MEMORY CORRUPT! YOU MUST QUIT RIGHT NOW!\n");
                  ClearMarkStacks();
@@ -224,8 +216,7 @@ void stkovfl(cause)
  ** machine/compiler allows trapping this. Only MSC4.0 allows it under    **
  ** MSDOS, most unix'es allow this though.                                **
  ***************************************************************************/
-static void fperr(n)
-int n;
+static void fperr(int n)
 {   signal(SIGFPE,fperr);
     gerror("floating point exception");
 }
@@ -269,8 +260,7 @@ void syserror()
  ** name as the built in function causing the exception. Ierror then does **
  ** the stack copying and longjmps out of the error to the break level.   **
  ***************************************************************************/
-int matherr(x)
-struct exception *x;
+int matherr(struct exception *x)
 {   char *s;
     switch(x->type)
     {   case DOMAIN   : s = "argument domain"; break;
@@ -279,7 +269,7 @@ struct exception *x;
         case UNDERFLOW: s = "underflow range"; break;
         case TLOSS    : s = "total loss of significance"; break;
         case PLOSS    : s = "partial loss of significance"; break;
-        default       : gerror("unknown math exception occured");
+        default       : s = "unknown math exception occured"; break;
     };
     gerror(s);
     return 0;  /*  keep compiler happy  */
@@ -290,8 +280,7 @@ struct exception *x;
  ** UpError(s) : Death on initialization because of reason 's'. Must back **
  ** up to overwrite the 'wait..' on the console. Emit \010 backspace.     **
  ***************************************************************************/
-void UpError(s)
-char *s;
+void UpError(char *s)
 {   printf("\010\010\010\010\010\010Abort: %s\n",s);
     exit(0);
 }
@@ -304,9 +293,9 @@ char *s;
  */
 static struct jb_s {
               jmp_buf env;                /* copy of jump buffer to be restored */
-              void (*segv)();             /* previous segmentation violation handler */
-              void (*fpe)();              /* previous floating point handler */
-              void (*intr)();             /* previous INTERRUPT handler */
+              void (*segv)(int);          /* previous segmentation violation handler */
+              void (*fpe)(int);           /* previous floating point handler */
+              void (*intr)(int);          /* previous INTERRUPT handler */
               struct jb_s *next;          /* pointer to next thing in the stack */
        } *jb_tos = NULL;
 
@@ -392,8 +381,9 @@ static int want_sigfpe   = 1;
 /* extern */ int bkhitcount;              /* else it is declared in extra.asm */
 #endif
 
-static void brktrap()                                     /* target of SIGINT interrupt */
+static void brktrap(int sig)                              /* target of SIGINT interrupt */
 {
+    (void)sig;
     if (want_sigint)                              /* if currently monitoring them */
        bkhitcount += 1;                           /* increment for later testing*/
     else {                                        /* else if there is a sigint handler */
@@ -476,8 +466,7 @@ static void jumptodebug()
 /*
  | This code will allow a specific error trap to be disabled.
  */
-void disableerrors(er, enable)
-    int er, enable;
+void disableerrors(int er, int enable)
 {
     if (er == 0) want_sigint  = enable;
     if (er == 1) want_sigsegv = enable;
@@ -489,8 +478,7 @@ void disableerrors(er, enable)
  | This function is used ONLY by the compiler and an abort MUST follow the error
  | since the shallow stacks are not rewound!
  */
-void lierrh(func)
-    int (*func)();
+void lierrh(int (*func)(char *, char *))
 {
     errh = func;
 }

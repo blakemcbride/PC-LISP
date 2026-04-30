@@ -11,8 +11,7 @@
  ** CharIndex(s,c) Return the index of 'c' in string 's'. The first char**
  ** in 's' is at index 1 etc. We return 0 if the char is not found.     **
  *************************************************************************/
-int CharIndex(s,c)
-char *s,c;
+int CharIndex(char *s, char c)
 {   register int n;
     for (n=1; *s != '\0'; s++,n++)
     {   if (*s == c)
@@ -27,8 +26,7 @@ char *s,c;
  ** parameter may be a fixnum ie (character-index str n) in which case  **
  ** n is interpreted as being the ascii representation of the character.**
  *************************************************************************/
-struct conscell *buchix(form)
-struct conscell *form;
+struct conscell * buchix(struct conscell *form)
 {      char *str,*ch; int n; long lc;
        if ((form != NULL)&&(GetString(form->carp,&str)))
        {   form = form->cdrp;

@@ -13,8 +13,7 @@
  ** given just called GetTraced to get a list of all traced atoms and   **
  ** unset each of these.                                                **
  *************************************************************************/
-struct  conscell *buuntrace(form)
-struct  conscell *form;
+struct  conscell * buuntrace(struct  conscell *form)
 {       struct alphacell *at; struct conscell *hold;
         if (form == NULL) form = GetTraced();
         hold = form;

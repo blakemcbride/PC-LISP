@@ -9,7 +9,7 @@ written in C, that is portable to 32 & 64 bit Linux, Mac, and Windows.
 
 The main home for this system is:  https://github.com/blakemcbride/PC-LISP
 
-Porting and updating done by Blake McBride (blake1024@gmail.com)
+Porting and updating done by Blake McBride (blake@mcbridemail.com)
 
 Currently tested on 64 bit Linux, Mac, and 32 & 64 bit Windows.
 

@@ -20,8 +20,7 @@
  | Given an input list create a flat copy of it which is then returned. The
  | tail of this returned list is also returned.
  */
-static struct conscell *flatcopy(l, ttail)
-       struct conscell *l, **ttail;
+static struct conscell * flatcopy(struct conscell *l, struct conscell **ttail)
 {
        struct conscell *tmp, *head, *tail, *ntail;
 
@@ -95,8 +94,7 @@ static struct conscell *flatcopy(l, ttail)
  | original last_tail->cdrp is then reset so that the original input list is
  | left intact.
  */
-static struct conscell *flatten(l)
-       struct conscell *l;
+static struct conscell * flatten(struct conscell *l)
 {
        struct conscell *last_tail, *tail;
        struct conscell *tmp, *prev;
@@ -131,8 +129,7 @@ static struct conscell *flatten(l)
  |  This function will return a copy of the input list flattened to the
  |  leaves.
  */
-struct conscell *buflatten(form)
-       struct conscell *form;
+struct conscell * buflatten(struct conscell *form)
 {
        if (form == NULL) goto er;
        if (form->cdrp != NULL) goto er;

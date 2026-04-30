@@ -48,8 +48,7 @@
  ** the work list and the constructed list of results must be stacked   **
  ** incase the garbage collection gets activated.                       **
  *************************************************************************/
-struct conscell *bumapcar(form)
-struct conscell *form;
+struct conscell * bumapcar(struct conscell *form)
 {      struct conscell *work,*func,*last,*temp,*largs,*t;
        if ((form!=NULL)&&(form->carp != NULL))
        {   func = form->carp;
@@ -115,8 +114,7 @@ struct conscell *form;
  ** the same thing all over again. We repeat this until there are no    **
  ** more args in the first list.                                        **
  *************************************************************************/
-struct conscell *bumapc(form)
-struct conscell *form;
+struct conscell * bumapc(struct conscell *form)
 {      struct conscell *work,*func,*temp,*largs,*ret;
        if ((form!=NULL)&&(form->carp != NULL))
        {   func = form->carp;
@@ -155,8 +153,7 @@ struct conscell *form;
  ** are taken of the arg lists rather than successive cars. There is a  **
  ** single change in the code of the above mapcar routine to do a cdr.  **
  *************************************************************************/
-struct conscell *bumaplist(form)
-struct conscell *form;
+struct conscell * bumaplist(struct conscell *form)
 {      struct conscell *func,*last,*temp,*scan,*t;
        if ((form!=NULL)&&(form->carp != NULL))
        {   func = form->carp;
@@ -189,8 +186,7 @@ struct conscell *form;
  ** Map - like mapc but it does cdr's down the list. Have a look at the **
  ** mapc code.                                                          **
  *************************************************************************/
-struct conscell *bumap(form)
-struct conscell *form;
+struct conscell * bumap(struct conscell *form)
 {      struct conscell *work,*func,*temp,*ret;
        if ((form!=NULL)&&(form->carp != NULL))
        {   func = form->carp;

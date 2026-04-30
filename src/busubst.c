@@ -14,8 +14,7 @@
 /*
  | Extract parms for (subst) and (dsubst).
  */
-static int getsubstparms(form, e1, e2, l)
-struct conscell *form, **e1,**e2, **l;
+static int getsubstparms(struct conscell *form, struct conscell **e1, struct conscell **e2, struct conscell **l)
 {      if (form == NULL) goto er;
        *e1 = form->carp;
        if ((form = form->cdrp) == NULL) goto er;
@@ -34,8 +33,7 @@ er:    return(0);
  | correctly handles CDR pointers that point to things other than CONS cells.
  | I.e it handles dotted pairs properly.
  */
-static void dsubst(e1,e2,l)
-struct conscell *e1, *e2, *l;
+static void dsubst(struct conscell *e1, struct conscell *e2, struct conscell *l)
 {      struct conscell *n;
        if ((l != NULL)&&(l->celltype == CONSCELL)) /* not a base case ? */
        {  for(;;) {                                /* loop accross list */
@@ -60,8 +58,7 @@ struct conscell *e1, *e2, *l;
  | This primitive will recursively replace all 'equal' occurrences of <exp1>
  | in <list> with <exp1>.
  */
-struct conscell *budsubst(form)
-struct conscell *form;
+struct conscell * budsubst(struct conscell *form)
 {      struct conscell *e1=NULL, *e2=NULL, *l=NULL;    /*  all =NULL to keep compiler happy  */
        if (!getsubstparms(form, &e1, &e2, &l)) ierror("dsubst");
        dsubst(e1, e2, l);
@@ -74,8 +71,7 @@ struct conscell *form;
  | This primitive will recursively replace all 'equal' occurrences of <exp1>
  | in a copy of <list> with <exp1>.
  */
-struct conscell *busubst(form)
-struct conscell *form;
+struct conscell * busubst(struct conscell *form)
 {      struct conscell *e1=NULL, *e2=NULL, *l=NULL;    /*  all =NULL to keep compiler happy  */
        if (!getsubstparms(form, &e1, &e2, &l)) ierror("subst");
        l = copy(l);

@@ -15,8 +15,7 @@
  ** (get 'lisp 'author     ) would return mcarthy          if the put   **
  ** above was executed prior to this get.                               **
  *************************************************************************/
-struct conscell *buget(form)
-struct conscell *form;
+struct conscell * buget(struct conscell *form)
 {      struct conscell *atm,*indic;
        if ((form != NULL) && (form->carp != NULL)) {
             atm = form->carp;

@@ -13,11 +13,10 @@
  ** fixnum seconds after creation. If fixnum is not provided then the   **
  ** current time string is returned.                                    **
  *************************************************************************/
-struct conscell *butimestring(form)
-struct conscell *form;
+struct conscell * butimestring(struct conscell *form)
 {
        time_t fix; int len;
-       char *s, *ctime();
+       char *s;
        fix = time(NULL);
        if (form != NULL)
           if ((form->cdrp != NULL)||(!GetFix(form->carp,&fix))) goto er;

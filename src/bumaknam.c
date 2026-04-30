@@ -14,8 +14,7 @@
  ** return nil (which is neither interned or not interned)  When we are **
  ** building up the new atom we must check for buffer overflow.         **
  *************************************************************************/
-struct conscell *bumaknam(form)
-struct conscell *form;
+struct conscell * bumaknam(struct conscell *form)
 {      char work[MAXATOMSIZE], *d, c; int n = MAXATOMSIZE;
        if ((form != NULL)&&(form->cdrp == NULL)) {
            form = form->carp;

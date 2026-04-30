@@ -15,8 +15,7 @@
  ** Note that atom 'nil expands to (n i l) and likewise a null car      **
  ** pointer will expand to (n i l).                                     **
  *************************************************************************/
-struct conscell *buexplode(form)
-struct conscell *form;
+struct conscell * buexplode(struct conscell *form)
 {      char work[2],*s; struct conscell *f,*l;
        work[1] = '\0';
        push(f); push(l);

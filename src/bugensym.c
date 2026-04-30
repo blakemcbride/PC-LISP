@@ -15,8 +15,7 @@
  ** will check however that no atom exists by this name, if one does we **
  ** try again until we get a good one. The default is atom 'g.          **
  *************************************************************************/
-struct conscell *bugensym(form)
-struct conscell *form;
+struct conscell * bugensym(struct conscell *form)
 {      char work[MAXATOMSIZE],*r;
        static long int NextNumber = 0L;
        if (form == NULL)                                        /* use 'g */

@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buflatsize: just like buflatc but with DELIM_ON  on the print call. **
  *************************************************************************/
-struct  conscell *buflatsize(form)
-struct  conscell *form;
+struct  conscell * buflatsize(struct  conscell *form)
 {       int counter = MAXNEGINT, limit = MAXNEGINT;
         struct conscell *expr;
         if (form != NULL)

@@ -11,8 +11,7 @@
  ** (truename port) Will return the atom associated with stream port.   **
  ** This is just the ascii name under which port was opened.            **
  *************************************************************************/
-struct conscell *butruename(form)
-struct conscell *form;
+struct conscell * butruename(struct conscell *form)
 {      if ((form != NULL)&&(form->carp != NULL)&&(form->cdrp == NULL))
        {    if (form->carp->celltype == FILECELL)
                 return(LIST(PORT(form->carp)->fname));

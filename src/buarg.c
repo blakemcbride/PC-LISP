@@ -16,8 +16,7 @@
  ** the list, not including the added length element. If the number is  **
  ** is bigger than the number of actual args given we ierror().         **
  *************************************************************************/
-struct conscell *buarg(form)
-struct conscell *form;
+struct conscell * buarg(struct conscell *form)
 {      long int n,len;
        struct conscell *alist;
        if (blexprhold->valstack != NULL)

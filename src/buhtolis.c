@@ -11,11 +11,10 @@
  ** buhtolis: (hunk-to-list H) Will make a list consisting of the elems **
  ** in the hunk H. Note we just call the HunkToList function to do this.**
  *************************************************************************/
-struct conscell *buhtolis(form)
-struct conscell *form;
+struct conscell * buhtolis(struct conscell *form)
 {      if ((form != NULL)&&(form->carp != NULL)&&(form->cdrp == NULL))
        {    if (form->carp->celltype == HUNKATOM)
-                return(HunkToList(form->carp));
+                return(HunkToList(HUNK(form->carp)));
        };
        ierror("hunk-to-list");  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */

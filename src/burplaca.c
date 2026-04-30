@@ -11,8 +11,7 @@
  ** (rplaca list exp) Will actually alter the car pointer of list to exp**
  ** and then return list which will have been destructively altered.    **
  *************************************************************************/
-struct conscell *burplaca(form)
-struct conscell *form;
+struct conscell * burplaca(struct conscell *form)
 {      struct conscell *list,*exp;
        if ((form!=NULL)&&(form->cdrp != NULL))
        {   list = form->carp;

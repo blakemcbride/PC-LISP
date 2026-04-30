@@ -11,8 +11,7 @@
 /*************************************************************************
  ** buor:  Logically or all the parameters we have. any t return t      **
  *************************************************************************/
-struct conscell *buor(form)
-struct conscell *form;
+struct conscell * buor(struct conscell *form)
 {      struct conscell *r;
        if (form != NULL)
        {   do

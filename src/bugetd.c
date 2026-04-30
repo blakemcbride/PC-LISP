@@ -12,8 +12,7 @@
  ** bugetd: (getd symbol) Will return the lambda body associated with   **
  ** the symbol 'symbol' or nil if none is found.                        **
  *************************************************************************/
-struct conscell *bugetd(form)
-struct conscell *form;
+struct conscell * bugetd(struct conscell *form)
 {      struct alphacell *atm;
        if (form == NULL) goto ERR;
        atm = (struct alphacell *)form->carp;

@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buminusp:(minusp number) Return t if number is less than zero.      **
  *************************************************************************/
-struct conscell *buminusp(form)
-struct conscell *form;
+struct conscell * buminusp(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

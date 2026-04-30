@@ -10,8 +10,7 @@
 /***************************************************************************
  ** bugpname(get_pname symbol) Return a string whose print name is symbol **
  ***************************************************************************/
-struct conscell *bugpname(form)
-struct conscell *form;
+struct conscell * bugpname(struct conscell *form)
 {      char *s; char work[MAXATOMSIZE];
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if (GetString(form->carp, &s)) {

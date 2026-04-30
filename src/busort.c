@@ -15,16 +15,16 @@
  ** function 'func' we apply it to the arg list (k1 k2) and if we get   **
  ** a non nil back we return '1' otherwise we return '0'.               **
  *************************************************************************/
-int TestFunction(f,flag,k1,k2)
-struct conscell *f,*k1,*k2;
-int flag;
+int TestFunction(struct conscell *f, int flag, struct conscell *k1, struct conscell *k2)
 {   char *s1,*s2;
-    struct conscell *n,*apply();
+    struct conscell *n;
     if (flag)
-    {   if (k1 != NULL)
+    {   if (k1 != NULL) {
            if (k1->celltype == CONSCELL) k1 = k1->carp; else goto ER;
-        if (k2 != NULL)
+        }
+        if (k2 != NULL) {
            if (k2->celltype == CONSCELL) k2 = k2->carp; else goto ER;
+        }
     };
     if (f == NULL)                                      /* simple case */
     {   if (GetString(k1,&s1) && GetString(k2,&s2))
@@ -54,9 +54,7 @@ ER: ierror("sort|sortcar");  /*  doesn't return  */
  ** sort in this case hence saving enourmouns amounts of time when there**
  ** are many duplicates in a list.                                      **
  *************************************************************************/
-static int partition(l1,mid,l2,l,f,flag)
-struct conscell **l1,**mid,**l2,*l,*f;
-int flag;
+static int partition(struct conscell **l1, struct conscell **mid, struct conscell **l2, struct conscell *l, struct conscell *f, int flag)
 {   struct conscell *key,*ol1,*ol2,*temp; int allEq = 1;
     if (l->cdrp == NULL) {                                      /* if trivial list just return now with mid point */
        *l1 = *l2 = NULL;
@@ -101,9 +99,7 @@ int flag;
  ** the performance goes very rapidly to n^2 so our partition call will **
  ** detect a partition which is completely equal.                       **
  *************************************************************************/
-struct conscell *sort(l,f,flag)
-struct conscell *l,*f;
-int flag;
+struct conscell * sort(struct conscell *l, struct conscell *f, int flag)
 {   struct conscell *l1,*l2,*mid;
     if ((l == NULL)||(l->cdrp == NULL)) return(l);      /* base case */
     if (l->celltype!=CONSCELL) ierror("sort|sortcar");
@@ -130,8 +126,7 @@ int flag;
  ** The sort routine takes a third parameter 0 or 1 which if 1 causes   **
  ** the sort to behave like sortcar ie it cars to get the keys.         **
  *************************************************************************/
-struct conscell *busort(form)
-struct conscell *form;
+struct conscell * busort(struct conscell *form)
 {     struct conscell *list,*func;
       if ((form != NULL)&&(form->cdrp != NULL))
       {   list = form->carp;
@@ -154,8 +149,7 @@ struct conscell *form;
  ** The sort routine takes a third parameter 0 or 1 which if 1 causes   **
  ** the sort to behave like sortcar ie it cars to get the keys.         **
  *************************************************************************/
-struct conscell *busortcar(form)
-struct conscell *form;
+struct conscell * busortcar(struct conscell *form)
 {     struct conscell *list,*func;
       if ((form != NULL)&&(form->cdrp != NULL))
       {   list = form->carp;

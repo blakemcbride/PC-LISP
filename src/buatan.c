@@ -11,8 +11,7 @@
 /*************************************************************************
  ** buatan:Returns the arc tangent of the double / double parameters.   **
  *************************************************************************/
-struct conscell *buatan(form)
-struct conscell *form;
+struct conscell * buatan(struct conscell *form)
 {      double op1, op2;
        if (form != NULL)
        {   if (GetFloat(form->carp,&op1))

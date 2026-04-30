@@ -10,8 +10,7 @@
  ** buquotient (quotient -numbers-) Divide the numbers as flonums, if   **
  ** all are fixnums then return as a fixnum otherwise return a flonum.  **
  *************************************************************************/
-struct conscell *buquotient(form)
-struct conscell *form;
+struct conscell * buquotient(struct conscell *form)
 {      double quot,op; int isflt;
        if (form == NULL) return(newintop(1L));
        if (!GetFloat(form->carp,&quot)) goto ERR;

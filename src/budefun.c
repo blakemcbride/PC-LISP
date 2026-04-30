@@ -16,8 +16,7 @@
  ** Note that we call lexprify(r) to process any &optional args and to  **
  ** convert the expression to an lexpr of the appropriate form.         **
  *************************************************************************/
-struct conscell *budefun(form)
-struct conscell *form;
+struct conscell * budefun(struct conscell *form)
 {      struct conscell *r,*s,*atm,*args,*type;
        xpush(form); push(r);push(s); push(args);
        if (form == NULL) fret(NULL,4);

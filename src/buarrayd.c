@@ -10,14 +10,13 @@
 /*************************************************************************
  ** (arraydims array) Returns the dimension list of the array 'array'   **
  *************************************************************************/
-struct conscell *buarraydims(form)
-struct conscell *form;
-{      struct conscell *n; struct arraycell *temp;
+struct conscell * buarraydims(struct conscell *form)
+{      struct conscell *n; struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if (ExtractArray(form->carp,&temp))
            {  n = new(CONSCELL);
               n->carp = LIST(thold);
-              n->cdrp = temp->info->cdrp;
+              n->cdrp = ARRAY(temp)->info->cdrp;
               return(n);
            };
        };

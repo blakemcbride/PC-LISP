@@ -12,8 +12,7 @@
  ** in the main.c module to print the result. Print without delimiters. **
  ** Identical to patom except that we return r instead of the list.     **
  *************************************************************************/
-struct conscell *buprinc(form)
-struct conscell *form;
+struct conscell * buprinc(struct conscell *form)
 {      struct conscell *l; struct filecell *p=NULL;  /*  NULL assignment to keep compiler happy  */
        if (form != NULL) {
           l = form->carp;
@@ -36,6 +35,6 @@ struct conscell *form;
           }
        }
        ierror("princ");
-IOERR: ioerror(p);  /*  doesn't return  */
+IOERR: ioerror(p ? p->atom : NULL);  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */
 }

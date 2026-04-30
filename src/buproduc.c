@@ -10,8 +10,7 @@
  ** buprod (product -numbers-) Multiply numbers as floating points, if  **
  ** all are fixnums then return a fixnum otherwise return a flonum.     **
  *************************************************************************/
-struct conscell *buproduct(form)
-struct conscell *form;
+struct conscell * buproduct(struct conscell *form)
 {      double prod = 1.0, op; int isflt = 0;
        while(form!=NULL) {
 	   if (!GetFloat(form->carp,&op)) ierror("times|product");

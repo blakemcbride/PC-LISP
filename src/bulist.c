@@ -12,7 +12,6 @@
  ** turn them into a list. This is really easy because we have already  **
  ** got a list of arguments mainly 'form'. We just return it.           **
  *************************************************************************/
-struct conscell *bulist(form)
-struct conscell *form;
+struct conscell * bulist(struct conscell *form)
 {      return(topcopy(form));
 }

@@ -15,8 +15,7 @@
  ** a property list. EG (putprop 'lisp 'mcarthy 'author)    will place  **
  ** (author . mcarthy) on the property list for atom 'lisp'.            **
  *************************************************************************/
-struct conscell *buput(form)
-struct conscell *form;
+struct conscell * buput(struct conscell *form)
 {      struct conscell *atm,*indic,*prop;
        xpush(form);
        if ((form != NULL)&&(form->carp->celltype == ALPHAATOM))

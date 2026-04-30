@@ -12,8 +12,7 @@
  ** new 'element'. If index is outside the range of Hunk it is an error.**
  ** Returns the hunk Hunk but it will have been destructively altered.  **
  *************************************************************************/
-struct conscell *burplacx(form)
-struct conscell *form;
+struct conscell * burplacx(struct conscell *form)
 {      long int index; struct hunkcell *h; struct conscell **e;
        if (form != NULL)
        {    if (GetFix(form->carp,&index))

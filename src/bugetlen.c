@@ -10,12 +10,11 @@
 /*************************************************************************
  ** (getlength array) Returns the length of the array 'array'           **
  *************************************************************************/
-struct conscell *bugetlength(form)
-struct conscell *form;
-{      struct arraycell *temp;
+struct conscell * bugetlength(struct conscell *form)
+{      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {   if (ExtractArray(form->carp,&temp))
-              return(temp->info->carp);
+              return(ARRAY(temp)->info->carp);
        };
        ierror("getlength");  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */

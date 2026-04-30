@@ -19,8 +19,7 @@
  ** ReadExpression is located in the module main.c because of its ties  **
  ** to the scanner (it must prime the scanner).                         **
  *************************************************************************/
-struct conscell *buread(form)
-struct conscell *form;
+struct conscell * buread(struct conscell *form)
 {      struct conscell *rexp; struct filecell *port;
        if (form == NULL)
        {  if ((rexp = macroporthold->valstack) == NULL)

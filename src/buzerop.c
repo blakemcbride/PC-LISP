@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buzerop:(zerip number) Return t if number is exactly zero.          **
  *************************************************************************/
-struct conscell *buzerop(form)
-struct conscell *form;
+struct conscell * buzerop(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
        {  if ((temp = form->carp) != NULL)

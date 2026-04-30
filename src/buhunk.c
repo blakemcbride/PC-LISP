@@ -11,8 +11,7 @@
  ** buhunk: (hunk e1 e2 ... eN) Turn the list (e1 ... eN) into a hunk of**
  ** N elements. Just call the ListToHunk function with the parm list.   **
  *************************************************************************/
-struct conscell *buhunk(form)
-struct conscell *form;
+struct conscell * buhunk(struct conscell *form)
 {      if (form != NULL)
            return(LIST(ListToHunk(form)));
        ierror("hunk");  /*  doesn't return  */

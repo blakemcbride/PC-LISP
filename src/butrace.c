@@ -12,8 +12,7 @@
  ** are all user defined functions or built in functions. If no         **
  ** args are given just return the list of atoms that are currently set.**
  *************************************************************************/
-struct  conscell *butrace(form)
-struct  conscell *form;
+struct  conscell * butrace(struct  conscell *form)
 {       struct alphacell *at; struct conscell *hold;
         if ((hold = form) == NULL) return(GetTraced());
         while(form != NULL)

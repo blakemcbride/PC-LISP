@@ -15,12 +15,17 @@
 #   include <sys/types.h>
 #   include <netinet/in.h>
 #else
-#   define htonl(x) x
-#   define ntohl(x) x
+#   ifndef htonl
+#       define htonl(x) x
+#   endif
+#   ifndef ntohl
+#       define ntohl(x) x
+#   endif
 #endif
 
-static void r_bwrite();
-static struct conscell *r_bread();
+struct sink_s;
+static void r_bwrite(struct conscell *e, struct sink_s *sink);
+static struct conscell *r_bread(struct sink_s *sink);
 
 
 /*
@@ -148,7 +153,7 @@ typedef struct sink_s {
           int      mytop;           /* what to restore mytop to after longjmp */
           unsigned timeout;         /* how long to wait w/o response before timeout */
           unsigned otimeout;        /* old alarm timer value before we clobbered it */
-          void    (*ofunc)();       /* old handler function before we clobbered SIGALRM */
+          void    (*ofunc)(int);    /* old handler function before we clobbered SIGALRM */
           int      count;           /* number of calls to r_bread or r_bwrite so far for alarm rearming */
           unsigned issocket:1;      /* TRUE if fp is a TCP/IP socket ie (socketopen)'ed */
       } SINK;
@@ -166,16 +171,17 @@ typedef struct sink_s {
 #define          REARMC  256     /* rearm timer every 256 calls to r_bread or r_bwrite */
 
 #if defined(SIGALRM)
-    static void s_alarm(op, sink)
-         int op; SINK *sink;
+    static void s_alarm(int op, SINK *sink);
+    static void s_alarm_handler(int sig) { (void)sig; s_alarm(SIGALRM, NULL); }
+    static void s_alarm(int op, SINK *sink)
     {
          static SINK *s_sink;
          extern int marking;            /* variable from limman > 0 if in GC */
-         extern unsigned alarm();       /* OS alarm function UNIX */
+         extern unsigned int alarm(unsigned int);  /* OS alarm function UNIX */
          switch(op) {
              case INIT:
                   s_sink = sink;
-                  s_sink->ofunc = signal(SIGALRM, s_alarm);
+                  s_sink->ofunc = signal(SIGALRM, s_alarm_handler);
                   s_sink->otimeout = alarm(s_sink->timeout);
                   break;
              case TERM:
@@ -188,7 +194,7 @@ typedef struct sink_s {
              case SIGALRM:
                   if (marking) {
                       alarm(s_sink->timeout);
-                      signal(SIGALRM, s_alarm);
+                      signal(SIGALRM, s_alarm_handler);
                       return;
                   }
                   longjmp(s_sink->erh, 1);
@@ -227,8 +233,7 @@ typedef struct sink_s {
  | were before doing the copy. We rearm the timout value (if it applies to
  | this sink) every 512 bytes.
  */
-static void putport(fp, sink)
-     FILE *fp; SINK *sink;
+static void putport(FILE *fp, SINK *sink)
 {    long opos, size;
      if (fp == NULL) goto er;                             /* if closed goto error */
      opos = ftell(fp);                                    /* opos = original file pointer */
@@ -253,8 +258,7 @@ er:  longjmp(sink->erh, 1);                               /* error so jump to th
  | clisps are written as C{L|N} <N> <lit1> ....<litN> <M> <byte1> ... <byteM>
  | We rearm the timout value (if it applies to this sink) periodically.
  */
-static void putclisp(clisp, sink)
-     struct clispcell *clisp; SINK *sink;
+static void putclisp(struct clispcell *clisp, SINK *sink)
 {
      struct conscell **l; char *code; int size;
      l = clisp->literal;
@@ -280,8 +284,7 @@ static void putclisp(clisp, sink)
 /*
  | Leaf read of a byte, on error longjump to error handler.
  */
-static int getbyte(sink)
-     SINK *sink;
+static int getbyte(SINK *sink)
 {    register int l;
      l = getc(sink->fp);
      return(l);
@@ -290,8 +293,7 @@ static int getbyte(sink)
 /*
  | Leaf read of a long, on error longjump to error handler.
  */
-static long getlong(sink)
-     SINK *sink;
+static long getlong(SINK *sink)
 {    long l;
      if (fread((char *)&(l), sizeof(long), 1, sink->fp) == 1)
          return((long)ntohl(l));
@@ -302,8 +304,7 @@ static long getlong(sink)
 /*
  | Leaf read of an int, on error longjump to error handler.
  */
-static int getint(sink)
-     SINK *sink;
+static int getint(SINK *sink)
 {    long l;
      if (fread((char *)&(l), sizeof(long), 1, sink->fp) == 1)
          return((int)ntohl(l));
@@ -314,8 +315,7 @@ static int getint(sink)
 /*
  | Leaf read of a double on error longjump to error hander.
  */
-static double getdouble(sink)
-     SINK *sink;
+static double getdouble(SINK *sink)
 {    double d;
      if (fread((char *)&(d), sizeof(double), 1, sink->fp) == 1)
          return(d);
@@ -328,12 +328,10 @@ static double getdouble(sink)
  | to error handler. -1 means read until \0 otherwise read exactly the given
  | number of bytes.
  */
-static char *getstring(sink,n)
-     SINK *sink;
-     int n;
+static char * getstring(SINK *sink, int n)
 {    static char s[MAXATOMSIZE]; register char *t = s; int m = MAXATOMSIZE-1;
      if (n != 0) {
-         while(*t++ = getc(sink->fp)) {
+         while((*t++ = getc(sink->fp)) != '\0') {
             if (--m == 0) goto er;
             if (--n == 0) { *t = '\0'; break; }
          }
@@ -351,8 +349,7 @@ er:  longjmp(sink->erh, 1);  /*  doesn't return  */
  | then rewound and the opened descriptor is returned. We rearm the timout value
  | (if it applies to this sink) every 512 bytes.
  */
-static struct conscell *getport(sink)
-     SINK *sink;
+static struct conscell * getport(SINK *sink)
 {    FILE *fd;
      char fname[20];
      int fn;
@@ -382,10 +379,9 @@ er:  longjmp(sink->erh, 1);  /*  doesn't return  */
  | clisps are written as C{L|N} <N> <lit1> ....<litN> <M> <byte1> ... <byteM>
  | We rearm the timout value (if it applies to this sink) periodically.
  */
-static struct clispcell *getclisp(sink)
-     SINK *sink;
+static struct clispcell * getclisp(SINK *sink)
 {    struct clispcell *clisp = NULL;
-     struct conscell *r_bread(), **t, **l;
+     struct conscell **t, **l;
      char *bc, *code = NULL; int size;
      size = getint(sink)+1;                                                /* read size of literals array in bytes convert to elements */
      l = (struct conscell **)calloc(size + 1, sizeof(struct conscell *));
@@ -432,9 +428,7 @@ er:  if (code) free(code);                                                 /* er
  | Recursively output the expression 'e' in binary format to the port or
  | socket fp, this is the exact inverse of the r_bread routine below.
  */
-static void r_bwrite(e, sink)
-     struct conscell *e;
-     SINK *sink;
+static void r_bwrite(struct conscell *e, SINK *sink)
 {
      int n;
 
@@ -537,7 +531,7 @@ static void r_bwrite(e, sink)
                            n = HUNK(e)->size;
                            putint(n, sink);
                            while(--n >= 0) {
-                               r_bwrite(*GetHunkIndex(e, n), sink);
+                               r_bwrite(*GetHunkIndex(HUNK(e), n), sink);
                            }
                            break;
 
@@ -547,7 +541,7 @@ static void r_bwrite(e, sink)
           */
           case ARRAYATOM : putbyte(AR, sink);
                            r_bwrite(ARRAY(e)->info, sink);
-                           r_bwrite(ARRAY(e)->base, sink);
+                           r_bwrite(LIST(ARRAY(e)->base), sink);
                            break;
 
          /*
@@ -568,7 +562,7 @@ static void r_bwrite(e, sink)
                            } else {
                                putbyte(CN, sink);
                            }
-                           putclisp(e, sink);
+                           putclisp(CLISP(e), sink);
                            break;
 
           default        : goto er;
@@ -586,8 +580,7 @@ static void r_bwrite(e, sink)
  | return it. This is the exact inverse of the function r_bwrite so look at
  | the comments above to figure out what I am doing here.
  */
-static struct conscell *r_bread(sink)
-     SINK *sink;                      /* where to get data and how to behave */
+static struct conscell *r_bread(SINK *sink)
 {    struct conscell **p, *f;
      int i, c;
 
@@ -656,7 +649,7 @@ static struct conscell *r_bread(sink)
                     f = LIST(inserthunk(i));
                     xpush(f);
                     while(--i >= 0) {
-                        (*GetHunkIndex(f, i)) = r_bread(sink);
+                        (*GetHunkIndex(HUNK(f), i)) = r_bread(sink);
                     }
                     xpop(1);
                     return(f);
@@ -717,8 +710,7 @@ static struct conscell *r_bread(sink)
  | 'port' without every having to wait more than 'timeout' seconds between bytes.
  | Otherwise it returns nil.
  */
-struct conscell *libwrite(e, port, timeout)
-     struct conscell *e; struct filecell *port; long timeout;
+struct conscell * libwrite(struct conscell *e, struct filecell *port, long timeout)
 {    SINK sink;
      struct conscell *r;
      sink.fp = port->atom;
@@ -742,8 +734,7 @@ struct conscell *libwrite(e, port, timeout)
  | 'port' without every having to wait more than 'timeout' seconds between bytes.
  | Otherwise it returns nil.
  */
-struct conscell *libread(port, timeout)
-     struct filecell *port; long timeout;
+struct conscell * libread(struct filecell *port, long timeout)
 {    SINK sink;
      struct conscell *r;
      sink.fp = port->atom;
@@ -766,8 +757,7 @@ struct conscell *libread(port, timeout)
  | The actual LISP primitive function (b-write expr port [timeout]) to binary print an
  | S-expression to the given port.
  */
-struct conscell *bubwrite(form)
-     struct conscell *form;
+struct conscell * bubwrite(struct conscell *form)
 {    struct conscell *expr;
      struct filecell *p;
      long timeout = 0;
@@ -795,8 +785,7 @@ er:  ierror("b-write");  /*  doesn't return  */
  | The actual LISP primitive function (b-read port [timeout]) to binary read an
  | S-expression from the given port.
  */
-struct conscell *bubread(form)
-     struct conscell *form;
+struct conscell * bubread(struct conscell *form)
 {    struct filecell *p;
      long timeout = 0;
      if (form != NULL) {

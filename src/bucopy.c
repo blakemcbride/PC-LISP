@@ -10,8 +10,7 @@
 /*************************************************************************
  ** (copy exp) returns a new object (equal) to exp with new cons cells  **
  *************************************************************************/
-struct conscell *bucopy(form)
-struct conscell *form;
+struct conscell * bucopy(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
           return(copy(form->carp));
        ierror("copy");  /*  doesn't return  */

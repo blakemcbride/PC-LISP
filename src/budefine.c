@@ -15,8 +15,7 @@
  ** call lexprify(r) to process any &optional stuff and turn the lambda **
  ** into into an lexpr if necessary.                                    **
  *************************************************************************/
-struct conscell *budefine(form)
-struct conscell *form;
+struct conscell * budefine(struct conscell *form)
 {      struct conscell *atm,*body,*type;
        if (form == NULL) return(NULL);
        atm = form->carp;

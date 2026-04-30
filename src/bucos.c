@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bucos :Returns the cosine  of the single double parameter.          **
  *************************************************************************/
-struct conscell *bucos(form)
-struct conscell *form;
+struct conscell * bucos(struct conscell *form)
 {      double f;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f))

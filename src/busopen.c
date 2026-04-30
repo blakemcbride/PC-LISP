@@ -83,8 +83,7 @@ static long fd_addr = INADDR_ANY;
  ** stream fd within sec/usec seconds. If sec is negative then this     **
  ** function blocks indefinitely until activity occurs on fd            **
  *************************************************************************/
-static int fdwait(fd, sec, usec)
-       int fd, sec, usec;
+static int fdwait(int fd, int sec, int usec)
 {      fd_set fdset;                                                      /* set up for select on socket or timeout */
        FD_ZERO(&fdset); FD_SET(fd,&fdset);                                /* this sets the fdset to have bit s1 on */
        if (sec < 0)
@@ -102,8 +101,7 @@ static int fdwait(fd, sec, usec)
  ** any forked children to inherit this file descriptor because that can**
  ** stop listens from working so we set the close-on-exec flag on the fd**
  *************************************************************************/
-static int fdasync(fd)
-       int fd;
+static int fdasync(int fd)
 {
        fcntl(fd, F_SETFL, FASYNC);
        fcntl(fd, F_SETOWN, getpid());
@@ -119,8 +117,7 @@ static int fdasync(fd)
  ** to do the dirty work of looking it up for us. A return value of 1   **
  ** indicates success and 0 means failure.                              **
  *************************************************************************/
-static int name2addr(name, addr)
-       char *name; long *addr;
+static int name2addr(char *name, long *addr)
 {
        if (strcmp(name, "*") != 0) {
           *addr = inet_addr(name);
@@ -140,8 +137,7 @@ static int name2addr(name, addr)
  ** passes the mask addr m_addr. If mask addr is INADDR_ANY then all    **
  ** client addresses pass otherwise only those that match exactly pass. **
  *************************************************************************/
-static int addrok(cl_addr, m_addr)
-       long cl_addr, m_addr;
+static int addrok(long cl_addr, long m_addr)
 {
        if (m_addr != INADDR_ANY) {
            Dprintf(("checking mask addr=%s\n", inet_ntoa(m_addr)));
@@ -161,8 +157,7 @@ static int addrok(cl_addr, m_addr)
  ** easily. Once the connect is made the client's address is stored in  **
  ** the caddr parameter.                                                **
  *************************************************************************/
-static FILE *sopen(addr, port, wait, caddr)
-       long addr, port, wait; char *caddr;
+static FILE * sopen(long addr, long port, long wait, char *caddr)
 {
        int len, on = 1, s1, s2 = -1; FILE *fp;
        struct sockaddr_in server, client;
@@ -222,8 +217,7 @@ er:                                                                            /
  ** A socket can be in one of three modes 0 => unknown. 1 => reading    **
  ** 2 => writing.                                                       **
  *************************************************************************/
-struct conscell *busopen(form)
-struct conscell *form;
+struct conscell * busopen(struct conscell *form)
 {      char *iaddr; FILE *fd;
        struct conscell *fcell;
        struct hostent *host;
@@ -261,8 +255,7 @@ struct conscell *form;
  ** callbacks. We return 0 for success or -1 on failure. Note that we must loop as long as there  **
  ** is data available to be read on the various file descriptors.                                 **
  ***************************************************************************************************/
-int    busopenP(op)
-       int op;
+int busopenP(int op)
 {
        static FILE *fd_listen = NULL, *fd_talk = NULL; static int old_mask;
 
@@ -442,8 +435,7 @@ int    busopenP(op)
  | name or number format of the machine(s) that are allowed to make the connection. Normally
  | anybody may connect (INADDR_ANY) but specifying this will allow us to restrict it more.
  */
-struct conscell *buREPsopen(form)
-       struct conscell *form;
+struct conscell * buREPsopen(struct conscell *form)
 {
        int  isdflt, last_fd_port = fd_port;
        long addr, last_fd_addr = fd_addr;
@@ -526,8 +518,8 @@ ret:   form = new(CONSCELL);
 
 #else  /* dummy out these routines on machines that do not support TCP/IP */
 
-    void busopen()     { printf("TCP/IP not supported on this platform\n"); exit(-1); }
-    void busopenP()    { busopen(); }
-    struct conscell *buREPsopen() { return NULL; }
+    struct conscell *busopen(struct conscell *form)  { (void)form; printf("TCP/IP not supported on this platform\n"); exit(-1); }
+    int    busopenP(int op)                          { (void)op; return -1; }
+    struct conscell *buREPsopen(struct conscell *form) { (void)form; return NULL; }
 
 #endif

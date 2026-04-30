@@ -10,8 +10,7 @@
 /*************************************************************************
  ** (< number1 number2) Compare 2 numbers for 'less than' relation.     **
  *************************************************************************/
-struct conscell *bulthan(form)
-struct conscell *form;
+struct conscell * bulthan(struct conscell *form)
 {      struct conscell *op1,*op2; register int result;
        xpush(form);
        if (form != NULL)

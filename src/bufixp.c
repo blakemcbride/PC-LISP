@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bufixp:(fixp expr) Return t expr is a fixnum, nil otherwise.        **
  *************************************************************************/
-struct conscell *bufixp(form)
-struct conscell *form;
+struct conscell * bufixp(struct conscell *form)
 {      if (form != NULL)
        {   if (form->cdrp == NULL)
            {    if ((form->carp != NULL)&&(form->carp->celltype == FIXATOM))

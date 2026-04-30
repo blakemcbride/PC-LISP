@@ -11,8 +11,7 @@
 /*************************************************************************
  ** buportp: Given a parameter return 't' if a port or 'nil otherwise.  **
  *************************************************************************/
-struct conscell *buportp(form)
-struct conscell *form;
+struct conscell * buportp(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL)) {
            if ((form->carp != NULL) && (form->carp->celltype == FILECELL))
                return(LIST(thold));

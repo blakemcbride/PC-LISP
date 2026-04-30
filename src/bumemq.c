@@ -11,8 +11,7 @@
  ** (memq   exp list) Will return the sublist of list beginning with exp**
  ** if that list is (eq) to exp. Otherwise it returns nil.              **
  *************************************************************************/
-struct conscell *bumemq(form)
-struct conscell *form;
+struct conscell * bumemq(struct conscell *form)
 {      struct conscell *list,*exp;
        if ((form!=NULL)&&(form->cdrp != NULL))
        {   exp = form->carp;

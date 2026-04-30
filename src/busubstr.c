@@ -14,8 +14,7 @@
  ** 'n' is negative the copy terminates when we hit the end of string '\0'**
  ** We return '1' if the substring is legal and 0 otherwise.              **
  ***************************************************************************/
-static int SubStringCopy(d,s,f,n)
-     char *d,*s; int f,n;
+static int SubStringCopy(char *d, char *s, int f, int n)
 {    register int slen = strlen(s);
      if (f < 0) f = (slen+f)+1;                 /* -1 -> f = slen */
      f--; s+= f;                                /* shift origin, set source */
@@ -33,8 +32,7 @@ static int SubStringCopy(d,s,f,n)
  ** length is to end of the string. We call the SubStringCopy function to **
  ** do the actual work for us, then we creat a new string cell and return.**
  ***************************************************************************/
-struct conscell *busubstring(form)
-struct conscell *form;
+struct conscell * busubstring(struct conscell *form)
 {      char *str;
        char work[MAXATOMSIZE];
        long int fr, ct;

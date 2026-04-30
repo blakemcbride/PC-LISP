@@ -17,8 +17,7 @@
  ** sleep period is less than 60 seconds then convert to microseconds   **
  ** and use the usleep function.                                        **
  *************************************************************************/
-struct conscell *busleep(form)
-struct conscell *form;
+struct conscell * busleep(struct conscell *form)
 {
 #ifndef _MSC_VER
        double f;

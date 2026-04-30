@@ -24,13 +24,12 @@
  ** (used for leaf case), it is no good for a root case of size 1 so we **
  ** do the size <= ARRAYM case manually rather than call AllocArrayTree.**
  *************************************************************************/
-struct conscell *buarray(form)
-struct conscell *form;
+struct conscell * buarray(struct conscell *form)
 {      long int size,temp;
        struct alphacell *name;
        struct conscell  *t;
        struct arraycell *ar;
-       struct hunkcell  *ArrayAllocTree();
+       struct hunkcell  *ArrayAllocTree(long int size);
        xpush(form); push(t); push(ar);
        if ((form!=NULL)&&(form->carp != NULL))
        {   name = ALPHA(form->carp);
@@ -57,7 +56,7 @@ struct conscell *form;
                    else
                        ar->base = ArrayAllocTree(size);
                    if (name->valstack == NULL)
-                   {   bindvar(name,ar);
+                   {   bindvar(LIST(name),LIST(ar));
                        name->botvaris = GLOBALVAR;
                    }
                    else

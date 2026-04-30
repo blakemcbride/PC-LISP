@@ -17,8 +17,7 @@ static int metrics = 1;     /* do we want metrics/auth to run ? */
 /*
  | Come here on exit. Just shut down the metrics gathering.
  */
-void doexit(n)
-     int n;
+void doexit(int n)
 {
      int  rc;
      char release[21];
@@ -49,8 +48,7 @@ static void sigio_catcher(sig)
  | Handle calls to the (exit) primitive it is allowed in the standalone interpreter
  | but is not allowed in embedded systems.
  */
-void buexit(form)
-     struct conscell *form;
+void buexit(struct conscell *form)
 {    long rc;
      if ((form != NULL) && GetFix(form->carp, &rc))
           doexit((int) rc);
@@ -66,10 +64,7 @@ static char mxl[4][8] = { "NOLIB", "", "", "" };
  | The mainline. just take first argument and use it as the name of the file to
  | be loaded.
  */
-void main(argc, argv)
-     int argc;
-     char *argv[];
-
+void main(int argc, char *argv[])
 {    int    rc;
      extern char *getenv();
      char   release[21];

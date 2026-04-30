@@ -14,8 +14,7 @@
  ** parameter and the tail of which is the second parameter. For example**
  ** (cons a (b c d)) is just (a b c d)                                  **
  *************************************************************************/
-struct conscell *bucons(form)
-struct conscell *form;
+struct conscell * bucons(struct conscell *form)
 {      struct conscell *temp1,*temp2;
        xpush(form);
        if (form != NULL)

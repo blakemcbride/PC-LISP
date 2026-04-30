@@ -11,8 +11,7 @@
 /*************************************************************************
  ** bufact:Returns the factorial of the single double parameter.        **
  *************************************************************************/
-struct conscell *bufact(form)
-struct conscell *form;
+struct conscell * bufact(struct conscell *form)
 {      long int val = 1;long int pump;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFix(form->carp,&pump))

@@ -11,15 +11,14 @@
  ** (listarray array [number]) takes 'number' elements from the array   **
  ** and returns as a list. Returns a list of entire array if no number. **
  *************************************************************************/
-struct conscell *bulistarray(form)
-struct conscell *form;
+struct conscell * bulistarray(struct conscell *form)
 {      struct conscell *n,*l;
-       struct arraycell *array;
+       struct conscell *array;
        long int size,number;
        if (form != NULL)
        {   if (ExtractArray(form->carp,&array))
            {  form = form->cdrp;
-              number = size = FIX(array->info->carp)->atom;
+              number = size = FIX(ARRAY(array)->info->carp)->atom;
               if (form != NULL)
               {   if ((form->cdrp != NULL)||(!GetFix(form->carp,&number)))
                       goto ERR;
@@ -28,7 +27,7 @@ struct conscell *form;
               l = n = NULL;
               while(number--)
               {    n = new(CONSCELL);
-                   n->carp = *GetArrayIndex(array->base,number,size);
+                   n->carp = *GetArrayIndex(ARRAY(array)->base,number,size);
                    n->cdrp = l;
                    l = n;
               };

@@ -12,9 +12,8 @@
  ** stream port, if num is not given the current file position is what  **
  ** we return, otherwise [num] is returned.                             **
  *************************************************************************/
-struct conscell *bufilepos(form)
-struct conscell *form;
-{      FILE *port; long offset; extern long ftell();
+struct conscell * bufilepos(struct conscell *form)
+{      FILE *port; long offset;
        if ((form == NULL)||(form->carp == NULL)) goto ERR;
        if (form->carp->celltype != FILECELL) goto ERR;
        port = ((struct filecell *)form->carp)->atom;

@@ -11,8 +11,7 @@
 /*************************************************************************
  ** butimes: Multiply the list of reals and return result.   (0 defualt)**
  *************************************************************************/
-struct conscell *butimes(form)
-struct conscell *form;
+struct conscell * butimes(struct conscell *form)
 {      struct fixcell *op; long int prod = 1L;
        xpush(form);
        while (form != NULL)

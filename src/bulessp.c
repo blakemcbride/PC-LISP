@@ -11,8 +11,7 @@
  ** bulessp (lessp -numbers-) Return t if the numbers are strictly in   **
  ** increasing order from left to right.                                **
  *************************************************************************/
-struct conscell *bulessp(form)
-struct conscell *form;
+struct conscell * bulessp(struct conscell *form)
 {      double val,op;
        if (form == NULL) return(LIST(thold));
        if (!GetFloat(form->carp,&val)) goto ERR;

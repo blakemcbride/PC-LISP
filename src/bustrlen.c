@@ -10,8 +10,7 @@
  |  ~~~~~~~~~~~~~~~~~~~~~~~~~
  |  Obviously this function returns its length of its argument string.
  */
-struct conscell *bustrlen(form)
-   struct conscell *form;
+struct conscell * bustrlen(struct conscell *form)
 {
    char *s;
    if ((form != NULL)&&(form->cdrp == NULL))

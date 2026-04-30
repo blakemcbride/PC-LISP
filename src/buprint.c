@@ -11,8 +11,7 @@
  ** buprint: Extract the one list or atom parameter and call 'printlist'**
  ** in the main.c module to print the result. We print with delimiters  **
  *************************************************************************/
-struct conscell *buprint(form)
-struct conscell *form;
+struct conscell * buprint(struct conscell *form)
 {      struct conscell *l; struct filecell *p=NULL;  /*  NULL assignment to keep compiler happy  */
        if (form != NULL) {
           l = form->carp;
@@ -35,6 +34,6 @@ struct conscell *form;
           }
        }
        ierror("print");
-IOERR: ioerror(p);  /*  doesn't return  */
+IOERR: ioerror(p ? p->atom : NULL);  /*  doesn't return  */
        return NULL;   /*  keep compiler happy  */
 }

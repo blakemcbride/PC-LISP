@@ -19,11 +19,11 @@ static regex_t pattern;
 static int reUsed = 0;
 #else
 #if RE_COMP
-    extern char *re_comp();
-    extern int   re_exec();
+    extern char *re_comp(char *);
+    extern int   re_exec(char *);
 #else
-    extern char *regcmp();
-    extern char *regex();
+    extern char *regcmp(char *, ...);
+    extern char *regex(char *, char *, ...);
     static char *pattern = NULL;
 #endif
 #endif
@@ -37,8 +37,7 @@ static int reUsed = 0;
  |  argument then we do NOT perform the substitution and just pass the expr raw to
  |  the expression matcher.
  */
-struct conscell *bustrsetpat(form)
-   struct conscell *form;
+struct conscell * bustrsetpat(struct conscell *form)
 {
 #ifndef _MSC_VER
    char *s,*p; char expr[MAXATOMSIZE + 4];
@@ -95,8 +94,7 @@ er:ierror("strsetpat");  /*  doesn't return  */
  |  Return True if the string matches the previously establish search
  |  pattern.
  */
-struct conscell *bustrfndpat(form)
-   struct conscell *form;
+struct conscell * bustrfndpat(struct conscell *form)
 {
 #ifndef _MSC_VER
    char *s;

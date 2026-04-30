@@ -13,8 +13,7 @@
  ** will return 'exp'. This is a NON FRANZ function that is used to help**
  ** implement effecient &optional parameters. See the lexprify() code.  **
  *************************************************************************/
-struct conscell *buargq(form)
-struct conscell *form;
+struct conscell * buargq(struct conscell *form)
 {      long int n,len;
        struct conscell *alist;
        if (blexprhold->valstack != NULL)

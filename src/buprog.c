@@ -51,8 +51,7 @@
  ** (return ....) we stop and return the appropriate value. If we ever  **
  ** hit a null statement we give an error message.                      **
  *************************************************************************/
-struct conscell *buprog(form)
-struct conscell *form;
+struct conscell * buprog(struct conscell *form)
 {      register struct conscell *value,*pp,*locals,*labels;
        int has_labels = 0;
        lillev += 1;                                           /* increment lexical level */

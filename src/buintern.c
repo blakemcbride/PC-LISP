@@ -15,8 +15,7 @@
  ** done by simply toggling its 'interned' bit so that it is INTERNED.  **
  ** This way any property etc goes along with the interned atom.        **
  *************************************************************************/
-struct conscell *buintern(form)
-struct conscell *form;
+struct conscell * buintern(struct conscell *form)
 {      struct alphacell *at;
        if ((form != NULL)&&(form->carp != NULL)&&(form->cdrp == NULL))
        {   at = ALPHA(form->carp);

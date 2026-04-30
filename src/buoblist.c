@@ -12,8 +12,7 @@
  ** buoblist() Will return a list of objects. We just call the function **
  ** CopyOblist() in main.c to get a copy of the atom hash table.        **
  *************************************************************************/
-struct conscell *buoblist(form)
-struct conscell *form;
+struct conscell * buoblist(struct conscell *form)
 {      if (form == NULL)                        /* check zero parameters */
            return(CopyOblist());
        ierror("oblist");                        /* more than zero parms */

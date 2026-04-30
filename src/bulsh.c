@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bulsh:(lsh fix1 fix2) Left shift fix1 by fix2 bits return result    **
  *************************************************************************/
-struct conscell *bulsh(form)
-struct conscell *form;
+struct conscell * bulsh(struct conscell *form)
 {      long fix1, fix2;
        if ((form != NULL)&&(GetFix(form->carp,&fix1)))
        {  form = form->cdrp;

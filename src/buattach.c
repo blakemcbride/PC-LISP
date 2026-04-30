@@ -11,8 +11,7 @@
  | head are copied to a new cons cell which is linked in as the second element
  | in the list thus effecting the required change.
  */
-struct conscell *buattach(form)
-struct conscell *form;
+struct conscell * buattach(struct conscell *form)
 {      struct conscell *n, *e, *l;
 
       /*

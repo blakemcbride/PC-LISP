@@ -10,8 +10,7 @@
 /*************************************************************************
  ** (mod i1 i2) return i1 % i2 (Remainder after i1 divided by i2).      **
  *************************************************************************/
-struct conscell *bumod(form)
-struct conscell *form;
+struct conscell * bumod(struct conscell *form)
 {      struct fixcell *op1,*op2;
        xpush(form);
        if (form != NULL) {

@@ -48,10 +48,7 @@
 /*
  | Add 'e' to the set 'h' in bucket 'i'. If absent return 1 else return 0.
  */
-static int st_add_at(h,i,e)
-       struct hunkcell *h;
-       struct conscell *e;
-       int i;
+static int st_add_at(struct hunkcell *h, int i, struct conscell *e)
 {
        struct conscell **bp,*l;
        if (e == NULL) return(0);                                /* nil always present */
@@ -71,9 +68,7 @@ static int st_add_at(h,i,e)
  | Add 'e' to the set 'h'. If absent return 1 else return 0. 'nil' not added.
  | Compute hash index of the element and call st_add_at.
  */
-static int st_add(h,e)
-       struct hunkcell *h;
-       struct conscell *e;
+static int st_add(struct hunkcell *h, struct conscell *e)
 {
        if (e == NULL) return(0);                                /* nil not added */
        return(st_add_at(h, liushash(e) % st_size, e));           /* st_add_at does work */
@@ -82,10 +77,7 @@ static int st_add(h,e)
 /*
  | Check for 'e' in the set 'h' at bucket 'i'. If present return 1 else return 0.
  */
-static int st_test_at(h,i,e)
-       struct hunkcell *h;
-       struct conscell *e;
-       int i;
+static int st_test_at(struct hunkcell *h, int i, struct conscell *e)
 {
        struct conscell **bp,*l;
        if (e == NULL) return(1);                                /* nil always present */
@@ -101,9 +93,7 @@ static int st_test_at(h,i,e)
  | Check for presense of 'e' in the hashed hunk set 'h'.
  | Compute hash index of the element and call st_test_at.
  */
-static int st_test(h,e)
-       struct hunkcell *h;
-       struct conscell *e;
+static int st_test(struct hunkcell *h, struct conscell *e)
 {
        if (e == NULL) return(1);                                /* nil always in a set */
        return(st_test_at(h, liushash(e) % st_size, e));         /* st_test_at does work */
@@ -113,8 +103,7 @@ static int st_test(h,e)
  | Make a set given that 'l' is the input set of elements to put in the set.
  | If the set ends up being empty then return nil.
  */
-static struct hunkcell *st_make(l)
-       struct conscell *l;
+static struct hunkcell * st_make(struct conscell *l)
 {
        struct hunkcell *h; int siz;
        if (l == NULL) return(NULL);                             /* (enset nil) -> nil */
@@ -136,8 +125,7 @@ er:    ierror("set-create");  /*  doesn't return  */
  | Given a list as an input parameter add all elements in the list to a new
  | set and return the new set. If no set is created we return NULL.
  */
-struct hunkcell *busetcreate(form)
-       struct conscell *form;
+struct hunkcell * busetcreate(struct conscell *form)
 {
        if ((form == NULL)||(form->cdrp != NULL)) goto er;
        return(st_make(form->carp));
@@ -153,8 +141,7 @@ er:    ierror("set-create");  /*  doesn't return  */
  | the elements in each overflow bucket.  WATCH OUT FOR GARBAGE COLLECTION IN THE
  | RECURSIVE CALL TO OURSELVES!!!
  */
-struct conscell *busetlist(form)
-       struct conscell *form;
+struct conscell * busetlist(struct conscell *form)
 {
        struct conscell *out,*n,*o;                              /* output list */
        struct hunkcell *h; int i;                               /* input set hunk */
@@ -186,8 +173,7 @@ er:    ierror("set-list");  /*  doesn't return  */
  | Given sets as input parameters, build a set which contains the union
  | of all of the input lists or sets.
  */
-struct hunkcell *busetor(form)
-       struct conscell *form;
+struct hunkcell * busetor(struct conscell *form)
 {
        struct conscell *in,*o;                                  /* input list & hunk overflow */
        struct hunkcell *h;                                      /* and pointer to build set */
@@ -206,7 +192,7 @@ struct hunkcell *busetor(form)
           } else {                                              /* input set not list */
              if (in->celltype != HUNKATOM) goto er;             /* so must be a hunk */
              for(i=0; i < st_size; i++) {                       /* for each bucket */
-                for(o = *GetHunkIndex(in,i);o!= NULL;o=o->cdrp) /* for each overflow */
+                for(o = *GetHunkIndex(HUNK(in),i);o!= NULL;o=o->cdrp) /* for each overflow */
                    siz += st_add_at(h, i, o->carp);             /* add to output set */
              }
           }
@@ -224,8 +210,7 @@ er:    ierror("set-or");  /*  doesn't return  */
  | of all of the input lists or sets. If nil is ever present in the list of input
  | sets we return nil immediately.
  */
-struct hunkcell *busetand(form)
-       struct conscell *form;
+struct hunkcell * busetand(struct conscell *form)
 {
        struct conscell *f,*o,*s;
        struct hunkcell *h,*r;
@@ -252,7 +237,7 @@ struct hunkcell *busetand(form)
        h = HUNK(form->carp);                                    /* h is set we will scan */
        form = form->cdrp;                                       /* advance to next argument */
        if (h->celltype == CONSCELL)                             /* if scan set not a set (ie is a list) */
-           h = st_make(h);                                      /* make a temporary set to work with */
+           h = st_make(LIST(h));                                /* make a temporary set to work with */
        if ((form == NULL)||(h == NULL)) fret(h,1);              /* if no more arguments or empty just return it */
 
       /*
@@ -267,7 +252,7 @@ struct hunkcell *busetand(form)
                pres = 1;
                for(f = form; f != NULL && pres; f = f->cdrp) {       /* for each remaining argument */
                    if (f->carp->celltype == HUNKATOM)                /* if arg is a true set */
-                       pres = st_test_at(f->carp, i, o->carp);       /* look only for element in bucket 'i' */
+                       pres = st_test_at(HUNK(f->carp), i, o->carp); /* look only for element in bucket 'i' */
                    else {                                            /* else arg is a set, must scan */
                        pres = 0;                                     /* scan entire list for o->carp */
                        for(s=f->carp; s!=NULL && !pres; s=s->cdrp) {
@@ -293,8 +278,7 @@ er:    ierror("set-and");  /*  doesn't return  */
  | ((s1 - s2) - s3) == s1 - (s2 U s3) so we proceed by taking the grand union of
  | s2... sN and then performing the difference of this set with s1.
  */
-struct hunkcell *busetdiff(form)
-       struct conscell *form;
+struct hunkcell * busetdiff(struct conscell *form)
 {
        struct conscell *f,*o;
        struct hunkcell *r,*h,*d;
@@ -321,7 +305,7 @@ struct hunkcell *busetdiff(form)
        r = HUNK(form->carp);                                    /* h is set we will scan */
        form = form->cdrp;                                       /* advance to next argument */
        if (r->celltype == CONSCELL)                             /* if scan set not a set (ie is a list) */
-           r = st_make(r);                                      /* make a temporary set to work with */
+           r = st_make(LIST(r));                                /* make a temporary set to work with */
        if (form == NULL) fret(r,1);                             /* if no more arguments just return scan set */
 
       /*
@@ -366,8 +350,7 @@ er:    ierror("set-diff");  /*  doesn't return  */
  | Given a set or a list return true or nil depending on if e is a member of the
  | the set s1 or the list l1.
  */
-struct conscell *busetmember(form)
-       struct conscell *form;
+struct conscell * busetmember(struct conscell *form)
 {
        struct conscell *s, *e;
 
@@ -392,7 +375,7 @@ struct conscell *busetmember(form)
        | routine to do the dirty work.
        */
        if (s->celltype == HUNKATOM) {
-           if (st_test(s,e)) return(LIST(thold));
+           if (st_test(HUNK(s),e)) return(LIST(thold));
            return(NULL);
        }
 

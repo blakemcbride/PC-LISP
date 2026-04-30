@@ -10,8 +10,7 @@
 /*************************************************************************
  ** bulog10 :Returns the base 10 log of the single double parameter.    **
  *************************************************************************/
-struct conscell *bulog10(form)
-struct conscell *form;
+struct conscell * bulog10(struct conscell *form)
 {      double f;
        if ((form != NULL)&&(form->cdrp == NULL))
           if (GetFloat(form->carp,&f))

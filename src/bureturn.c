@@ -13,8 +13,7 @@
  ** This will be used only by prog to detect when and what to return.   **
  ** If no arg is given we return (return . nil) i.e. (return).          **
  *************************************************************************/
-struct conscell *bureturn(form)
-struct conscell *form;
+struct conscell * bureturn(struct conscell *form)
 {      register struct conscell *f;
        if (form != NULL) {
            if (form->cdrp) ierror("return");

@@ -14,8 +14,7 @@
  ** so we either get the arraycell directly from list, or from the bind **
  ** ing of the atom 'list'.                                             **
  *************************************************************************/
-int ExtractArray(list,where)
-struct conscell *list,**where;
+int ExtractArray(struct conscell *list, struct conscell **where)
 {      if (list != NULL)
        {   if (list->celltype == ARRAYATOM)
            {   *where = list;
@@ -48,8 +47,7 @@ struct conscell *list,**where;
  ** must be careful to push the root so that it does not dissapear if   **
  ** GC occurs when linking in the subtrees.                             **
  *************************************************************************/
-struct hunkcell *ArrayAllocTree(size)
-long int size;
+struct hunkcell * ArrayAllocTree(long int size)
 {    int rem; int i;
      struct hunkcell *r,**e;
      if (size <= ARRAYM)
@@ -84,9 +82,7 @@ long int size;
  ** will reach a point where the size is less than ARRAYM in which case **
  ** we index into the hunk and that is the pointer that we return.      **
  *************************************************************************/
-struct conscell **GetArrayIndex(hunk,loc,size)
-struct hunkcell *hunk;
-long int loc,size;
+struct conscell ** GetArrayIndex(struct hunkcell *hunk, long int loc, long int size)
 {    int rem; int subix;
      long int subsize;
      struct hunkcell **e;
@@ -126,9 +122,7 @@ long int loc,size;
  ** the dlist agains the info dimensions list and store the element.    **
  ** Bounds and parameter checks are done to make sure all is ok.        **
  *************************************************************************/
-struct conscell *arrayaccess(info,base,dlist)
-struct conscell *info,*dlist;
-struct hunkcell *base;
+struct conscell * arrayaccess(struct conscell *info, struct hunkcell *base, struct conscell *dlist)
 {      long int size,loc,d,i; int IsStoreOperation;
        struct conscell **e,*element,*t1,*t2;
        size = FIX(info->carp)->atom;

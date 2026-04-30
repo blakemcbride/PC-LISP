@@ -10,8 +10,7 @@
 /*************************************************************************
  ** buoneplus: (1+ fixnum) Add number and 1 and return the result.      **
  *************************************************************************/
-struct conscell *buoneplus(form)
-struct conscell *form;
+struct conscell * buoneplus(struct conscell *form)
 {      struct conscell *temp;
        if ((form != NULL)&&(form->cdrp == NULL))
           if ((temp = form->carp) != NULL)

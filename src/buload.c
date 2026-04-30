@@ -12,8 +12,7 @@
  ** buload: Will load the file which is given as a parameter. We just   **
  ** open the file and call the function 'loadfile' in main.c            **
  *************************************************************************/
-struct conscell *buload(form)
-struct conscell *form;
+struct conscell * buload(struct conscell *form)
 {      char *fname;
        if ((form != NULL)&&(GetString(form->carp,&fname)))
        {   if (form->cdrp == NULL)

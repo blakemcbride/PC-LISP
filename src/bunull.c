@@ -15,8 +15,7 @@
  ** equivalent to the NULL list, so we take that into consideration in  **
  ** the testing of this predicate: EG (null nil) is 't'.                **
  *************************************************************************/
-struct conscell *bunull(form)
-struct conscell *form;
+struct conscell * bunull(struct conscell *form)
 {      if ((form != NULL)&&(form->cdrp == NULL))
        {  if (form->carp == NULL)
                return((struct conscell *)thold);

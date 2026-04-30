@@ -15,8 +15,7 @@
  ** we return t when (eq fixnum fixnum) is run. This is a kludge but it **
  ** makes less changes necessary to Franz code.                         **
  *************************************************************************/
-struct conscell *bueq(form)
-struct conscell *form;
+struct conscell * bueq(struct conscell *form)
 {      struct conscell *o1,*o2;
        if ((form != NULL)&&(form->cdrp != NULL))
        {    o1 = form->carp;

@@ -20,8 +20,7 @@
  | previous micro seconds then passing the carry. Finally the result is
  | returned as a float in seconds.
  */
-struct conscell *butimeev(form)
-struct conscell *form;
+struct conscell * butimeev(struct conscell *form)
 {
        double diff;
 #ifdef _MSC_VER

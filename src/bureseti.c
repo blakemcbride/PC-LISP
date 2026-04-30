@@ -5,13 +5,12 @@
  */
 #include <stdio.h>
 #include <assert.h>
+#include <unistd.h>
 #include "lisp.h"
 
 #if !defined(_NFILE)                         /* _NFILE usually defined in stdio.h but if not */
 #  define _NFILE 128                         /* set the value to something reasonably big */
 #endif
-
-extern int close();
 
 /*************************************************************************
  ** lisp_opened is an array of booleans which are '1' if the file was   **
@@ -31,8 +30,7 @@ static struct {
             int   asc_fd;                    /* another fd to be closed at same time if > 0 */
        } lisp_opened[_NFILE];                /* will be all 0's to begin with! */
 
-void buresetlog(fp, kind)
-FILE *fp; int kind;
+void buresetlog(FILE *fp, int kind)
 {   int i, fd;
     if (fp == NULL) {
         for(i = 0; i < _NFILE; i++) {
@@ -71,8 +69,7 @@ FILE *fp; int kind;
  ** and data file descriptors, only the data descriptors are stored here**
  ** the control descriptors are asc_fd associated.                      **
  *************************************************************************/
-void buresetasc(fp, asc_fd)
-FILE *fp; int asc_fd;
+void buresetasc(FILE *fp, int asc_fd)
 {     int fd;
       buresetlog(fp, 1);
       fd = fileno(fp);
@@ -84,8 +81,7 @@ FILE *fp; int asc_fd;
  ** and error. It is useful when too many (load's) result in errors. And**
  ** provides a way of allowing more (load's) after we run out of fd's.  **
  *************************************************************************/
-struct conscell *buresetio(form)
-struct conscell *form;
+struct conscell * buresetio(struct conscell *form)
 {
     int i, ok = 1;
     if (form != NULL) ierror("resetio");

@@ -9,8 +9,7 @@
  | of the evaluation stack by dong a HoldStackOperation(COPY_STACK) and then
  | requests a dump of the copy by doing a HoldStackOperation(DUMP_STACK).
  */
-struct conscell *bubaktrace(form)
-struct conscell *form;
+struct conscell * bubaktrace(struct conscell *form)
 {      if (form != NULL) ierror("baktrace");
        HoldStackOperation(COPY_STACK);
        HoldStackOperation(DUMP_STACK);

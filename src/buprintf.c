@@ -12,10 +12,7 @@
  | spec to be processed (done by next routine) or '\0' and *buff points to the
  | end of the buffer written (ie it has been advanced and null terminated).
  */
-static int emit_to_spec(left, buff, s)
-       int  *left;                          /* bytes left in buffer for our use */
-       char **buff;                         /* pointer to buffer pointer */
-       char **s;                            /* pointer to spec pointer */
+static int emit_to_spec(int *left, char **buff, char **s)
 {
        register char *t;
        register char *x = *buff;
@@ -53,11 +50,7 @@ static int emit_to_spec(left, buff, s)
  | and made sure it is reasonably valid and extracted the corresponding parameter
  | for it from 'form' we simply call fprintf with the spec and argument.
  */
-static int emit_next_spec(left, buff, s, form)
-       int  *left;                                  /* room left in buffer in bytes */
-       char **buff;                                 /* pointer to buffer sweep pointer */
-       char **s;                                    /* pointer to spec sweep pointer */
-       struct conscell **form;                      /* argument list */
+static int emit_next_spec(int *left, char **buff, char **s, struct conscell **form)
 {
        register char *t;                            /* 't' is what we sweep through spec */
        long   ival;                                 /* long value if %d ... */
@@ -178,10 +171,7 @@ static int emit_next_spec(left, buff, s, form)
  | given buffer. The first thing in the form is the format specifier as per normal
  | printf standards, the rest are the arguments to be formatted.
  */
-static int do_sprintf(left, buff, form)
-       int  *left;
-       char *buff;
-       struct conscell *form;
+static int do_sprintf(int *left, char *buff, struct conscell *form)
 {
        char *s;
        char *b;
@@ -206,8 +196,7 @@ static int do_sprintf(left, buff, form)
  |  t <- (printf spec [arg] [arg] ....)
  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-struct conscell *buprintf(form)
-       struct conscell *form;
+struct conscell * buprintf(struct conscell *form)
 {
        char buff[MAXATOMSIZE];
        int  left = sizeof(buff) - 1;
@@ -225,8 +214,7 @@ struct conscell *buprintf(form)
  |  If writing to a socket that we were previously reading from must rewind the
  |  socket and reset the isread so that we know we are now writing to it.
  */
-struct conscell *bufprintf(form)
-       struct conscell *form;
+struct conscell * bufprintf(struct conscell *form)
 {
        char buff[MAXATOMSIZE]; struct filecell *f;
        int  left = sizeof(buff) - 1;
@@ -247,8 +235,7 @@ er:    ierror("fprintf");  /*  doesn't return  */
  |  str <- (sprintf spec [arg] [arg] ....)
  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-struct conscell *busprintf(form)
-       struct conscell *form;
+struct conscell * busprintf(struct conscell *form)
 {
        char buff[MAXATOMSIZE];
        int  left = sizeof(buff) - 1;

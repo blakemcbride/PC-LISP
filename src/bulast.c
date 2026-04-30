@@ -10,9 +10,8 @@
 /*************************************************************************
  ** bulast(last list) Return the last cons cell in the single list parm.**
  *************************************************************************/
-struct conscell *bulast(form)
-struct conscell *form;
-{      struct conscell *l;
+struct conscell * bulast(struct conscell *form)
+{      struct conscell *l = NULL;
        if (form != NULL) {
            if (form->cdrp == NULL) {
               form = form->carp;

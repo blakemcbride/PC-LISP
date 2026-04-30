@@ -13,8 +13,7 @@
  ** creation. On UNIX this is Jan 1 GMT, on MS-DOS it is Jan 01 1980    **
  ** local time.                                                         **
  *************************************************************************/
-struct conscell *busystime(form)
-struct conscell *form;
+struct conscell * busystime(struct conscell *form)
 {      if (form == NULL)
            return(newintop(time(NULL)));
        ierror("sys:time");  /*  doesn't return  */

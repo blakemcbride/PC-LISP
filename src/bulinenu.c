@@ -14,8 +14,7 @@
  ** cell holds the last scanned line number so that the reader can be   **
  ** directed at any port and continue where it left off.                **
  *************************************************************************/
-struct conscell *bulinenum(form)
-struct conscell *form;
+struct conscell * bulinenum(struct conscell *form)
 {
        if (form != NULL) {
            if ((form->carp != NULL) && (form->cdrp == NULL)) {
