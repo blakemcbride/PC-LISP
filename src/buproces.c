@@ -119,7 +119,7 @@ found:
        | port is desired then the stdout and stderr are remapped to /dev/null and if no write port is
        | desired then the stdin comes from /dev/null.
        */
-       if ((pid = vfork()) == 0) {
+       if ((pid = fork()) == 0) {
 #ifdef __linux__
            struct termios ts;
            tcgetattr(tty2, &ts);
