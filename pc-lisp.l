@@ -297,3 +297,35 @@
 
 (defun mapcan macro(l) `(apply 'nconc (mapcar ,@(cdr l))))
 (defun mapcon macro(l) `(apply 'nconc (maplist ,@(cdr l))))
+
+;; Compile-File: (compile-file in out)
+;; ~~~~~~~~~~~~
+;;     Read each top-level S-expression from text file 'in and write the
+;; equivalent compiled form to binary file 'out. (defun ...) and (defmacro ...)
+;; forms are run through compile -> ph-optimize -> assemble and emitted as
+;; (putd '<name> '<clisp>) so loading 'out installs the compiled body. All
+;; other forms are passed through unchanged (binary copy) so any side-effecting
+;; setq, load, etc. fire when 'out is loaded just as they would have when 'in
+;; was loaded. The output file is itself loadable via the regular (load 'out);
+;; PC-LISP's loader auto-detects binary vs text per form.
+(defun compile-file(in out &aux fp ofp expr eof body)
+       (setq fp  (fileopen in  'r))
+       (setq ofp (fileopen out 'w))
+       (setq eof (gensym))
+       (while (not (eq (setq expr (read fp eof)) eof))
+              (cond ((and (dtpr expr)
+                          (or (eq (car expr) 'defun)
+                              (eq (car expr) 'defmacro)))
+                     (eval expr)
+                     (setq body (assemble
+                                  (car (ph-optimize
+                                         (compile (getd (cadr expr)))))))
+                     (b-write (list 'putd
+                                    (list 'quote (cadr expr))
+                                    (list 'quote body))
+                              ofp))
+                    (t (b-write expr ofp))))
+       (close fp)
+       (close ofp)
+       out)
+
